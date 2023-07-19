@@ -1,8 +1,8 @@
 import java.time.LocalTime;
 
-public class Comment {
+public class Comment extends taskHistory {
 
-    private LocalTime createdAt;
-    private User createdBy;
-    private String body;
+    public LocalTime createdAt;
+    public String createdBy;
+    public String body;
 }
