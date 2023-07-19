@@ -1,9 +1,12 @@
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 
 public class taskHistory {
 
-    private LocalTime timestamp;
-    private String old_status;
-    private String new_status;
-    private User moved_by;
+    public LocalDateTime timestamp;
+    public String old_status = null;
+    public String new_status = null;
+    public String moved_by;
+
+
 }
