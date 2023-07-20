@@ -1,13 +1,12 @@
-import java.time.LocalDateTime;
-import java.util.Scanner;
+package server.domain;
 
 public class Supervisor extends User {
     private static Supervisor instance;
 
-    Supervisor() {
-        username = "m.asif";
-        password = "Ts12";
-        userRole = "Supervisor";
+    public Supervisor() {
+        setUsername("m.asif");
+        setPassword("Ts12");
+        setUserRole("server.domain.Supervisor");
     }
 
     public static Supervisor getInstance() {
@@ -18,13 +17,19 @@ public class Supervisor extends User {
         return instance;
     }
 
-    // Method to verify credentials and return the Supervisor object if matched
+    // Method to verify credentials and return the server.domain.Supervisor object if matched
     public static Supervisor verifyCredentials(String providedUsername, String providedPassword) {
-        if (getInstance().username.equals(providedUsername) && getInstance().password.equals(providedPassword)) {
-            return getInstance(); // Return the current Supervisor object
+        if (getInstance().getUsername().equals(providedUsername) && getInstance().getPassword().equals(providedPassword)) {
+            return getInstance(); // Return the current server.domain.Supervisor object
         } else {
             return null; // If the credentials don't match, return null
         }
+    }
+
+    public static void createManager(String firstname, String lastname, String username, String password) {
+
+        Manager m = new Manager(firstname, lastname, username, password);
+        System.out.println("server.domain.Manager created successfully.");
     }
 
     void viewallTasks() {
@@ -89,7 +94,7 @@ public class Supervisor extends User {
 
         for (int i = 0; i < Employee.employees.size(); i++) {
 
-            System.out.printf("The name of Employee is %s %s and its assigned tasks with their status are:\n", Employee.employees.get(i).first_Name, Employee.employees.get(i).last_Name);
+            System.out.printf("The name of server.domain.Employee is %s %s and its assigned tasks with their status are:\n", Employee.employees.get(i).first_Name, Employee.employees.get(i).last_Name);
 
             for (int j = 0; j < Employee.allTasks.size(); j++) {
                 if (Employee.allTasks.get(j).assignee.equals(Employee.employees.get(i).first_Name + " " + Employee.employees.get(i).last_Name)) {
@@ -110,7 +115,7 @@ public class Supervisor extends User {
 
         for (int i = 0; i < Manager.managers.size(); i++) {
 
-            System.out.printf("The name of Manager is %s %s and its created tasks with their status are:\n", Manager.managers.get(i).first_Name, Manager.managers.get(i).last_Name);
+            System.out.printf("The name of server.domain.Manager is %s %s and its created tasks with their status are:\n", Manager.managers.get(i).first_Name, Manager.managers.get(i).last_Name);
 
             for (int j = 0; j < Employee.allTasks.size(); j++) {
                 if (Employee.allTasks.get(j).createdBy.equals(Manager.managers.get(i).first_Name + " " + Manager.managers.get(i).last_Name)) {
@@ -124,15 +129,6 @@ public class Supervisor extends User {
         }
 
 
-    }
-
-    private Task getTaskByTitle(String title) {
-        for (Task task : Employee.allTasks) {
-            if (task.title.equalsIgnoreCase(title)) {
-                return task;
-            }
-        }
-        return null; // Task not found
     }
 
     void archiveTask() {
@@ -155,7 +151,7 @@ public class Supervisor extends User {
         task.assigned = false;
         task.assignee = null;
         //status of task !!!!
-        //task.taskStatus= String.valueOf(Task.Status.CREATED);
+        //task.taskStatus= String.valueOf(server.domain.Task.Status.CREATED);
 
         System.out.println("The task has been archive successfully.");
     }
@@ -206,7 +202,7 @@ public class Supervisor extends User {
     }
 
     void viewallEmp() {
-        System.out.println("The Supervisor of the System is:");
+        System.out.println("The server.domain.Supervisor of the System is:");
 
         System.out.println(instance.first_Name + " " + instance.last_Name);
 
@@ -225,18 +221,12 @@ public class Supervisor extends User {
         }
     }
 
-    static void createEmployee(String firstname, String lastname, String username, String password) {
+    public static void createEmployee(String firstname, String lastname, String username, String password) {
 
         Employee e = new Employee(firstname, lastname, username, password);
-        System.out.println("Employee created successfully.");
+        System.out.println("server.domain.Employee created successfully.");
 
     }
 
-
-    static void createManager(String firstname, String lastname, String username, String password) {
-
-        Manager m = new Manager(firstname, lastname, username, password);
-        System.out.println("Manager created successfully.");
-    }
-
+    // You can add other getters and setters for remaining properties if needed
 }
