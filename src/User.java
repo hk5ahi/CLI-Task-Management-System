@@ -1,10 +1,9 @@
-import java.util.List;
-
 public class User {
-
-    public static List<Employee> employees;
-    public static List<Manager> managers;
-    public static List<Supervisor> supervisors;
+    protected String username;
+    protected String first_Name;
+    protected String last_Name;
+    public String userRole;
+    protected String password;
 
 
 }

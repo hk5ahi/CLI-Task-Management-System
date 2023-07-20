@@ -1,27 +1,30 @@
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.util.Scanner;
 
-public class Supervisor {
-    private String username;
-    private String password;
-    public String role;
-    public String name;
+public class Supervisor extends User {
+    private static Supervisor instance;
 
     Supervisor() {
-        username = "m.omer";
-        password = "Ts121200";
-        role = "Supervisor";
+        username = "m.asif";
+        password = "Ts12";
+        userRole = "Supervisor";
     }
 
-    boolean verifyCredentials(String u, String p) {
-
-        if (username.equals(u) && password.equals(p)) {
-            return true;
-        } else {
-            return false;
+    public static Supervisor getInstance() {
+        if (instance == null) {
+            // Create the instance if it's not already created
+            instance = new Supervisor();
         }
+        return instance;
+    }
 
+    // Method to verify credentials and return the Supervisor object if matched
+    public static Supervisor verifyCredentials(String providedUsername, String providedPassword) {
+        if (getInstance().username.equals(providedUsername) && getInstance().password.equals(providedPassword)) {
+            return getInstance(); // Return the current Supervisor object
+        } else {
+            return null; // If the credentials don't match, return null
+        }
     }
 
     void viewallTasks() {
@@ -84,12 +87,12 @@ public class Supervisor {
     void viewbyEmp() {
         System.out.println("The tasks are categorized employee-wise with their respective statuses.");
 
-        for (int i = 0; i < User.employees.size(); i++) {
+        for (int i = 0; i < Employee.employees.size(); i++) {
 
-            System.out.printf("The name of Employee is %s and its assigned tasks with their status are:\n", User.employees.get(i).name);
+            System.out.printf("The name of Employee is %s %s and its assigned tasks with their status are:\n", Employee.employees.get(i).first_Name, Employee.employees.get(i).last_Name);
 
             for (int j = 0; j < Employee.allTasks.size(); j++) {
-                if (Employee.allTasks.get(j).assignee.equals(User.employees.get(i).name)) {
+                if (Employee.allTasks.get(j).assignee.equals(Employee.employees.get(i).first_Name + " " + Employee.employees.get(i).last_Name)) {
 
                     System.out.printf("The title of task is %s with its description which is %s and its status is %s.", Employee.allTasks.get(j).title, Employee.allTasks.get(j).description, Employee.allTasks.get(j).taskStatus);
 
@@ -105,12 +108,12 @@ public class Supervisor {
     void viewbyManager() {
         System.out.println("The tasks are categorized manager-wise with their respective statuses.");
 
-        for (int i = 0; i < User.managers.size(); i++) {
+        for (int i = 0; i < Manager.managers.size(); i++) {
 
-            System.out.printf("The name of Manager is %s and its created tasks with their status are:\n", User.managers.get(i).name);
+            System.out.printf("The name of Manager is %s %s and its created tasks with their status are:\n", Manager.managers.get(i).first_Name, Manager.managers.get(i).last_Name);
 
             for (int j = 0; j < Employee.allTasks.size(); j++) {
-                if (Employee.allTasks.get(j).createdBy.equals(User.managers.get(i).name)) {
+                if (Employee.allTasks.get(j).createdBy.equals(Manager.managers.get(i).first_Name + " " + Manager.managers.get(i).last_Name)) {
 
                     System.out.printf("The title of task is %s with its description which is %s and its status is %s.", Employee.allTasks.get(j).title, Employee.allTasks.get(j).description, Employee.allTasks.get(j).taskStatus);
 
@@ -176,8 +179,8 @@ public class Supervisor {
 
         Comment c = new Comment();
         c.body = message;
-        c.createdAt = LocalTime.from(LocalDateTime.now());
-        c.createdBy = name;
+        c.createdAt = (LocalDateTime.now().toString());
+        c.createdBy = first_Name + " " + last_Name;
         task.comments.add(c);
 
     }
@@ -199,30 +202,41 @@ public class Supervisor {
             }
         } while (task == null);
 
-        System.out.printf("The old status of task is %s , its new status is %s, the movement occurred at date and time which is %s and its moved by %s", task.old_status, task.new_status, task.timestamp.toString(), task.moved_by);
+        System.out.printf("The old status of task is %s , its new status is %s, the movement occurred at date and time which is %s and its moved by %s", task.history.old_status, task.history.new_status, task.history.timestamp.toString(), task.history.moved_by);
     }
 
     void viewallEmp() {
         System.out.println("The Supervisor of the System is:");
 
-        for (int i = 0; i < User.supervisors.size(); i++) {
-            System.out.println(User.supervisors.get(i).name);
+        System.out.println(instance.first_Name + " " + instance.last_Name);
 
-        }
 
         System.out.println("The Managers of the System are:");
 
-        for (int i = 0; i < User.managers.size(); i++) {
-            System.out.println(User.managers.get(i).name);
+        for (int i = 0; i < Manager.managers.size(); i++) {
+            System.out.println(Manager.managers.get(i).first_Name + " " + Manager.managers.get(i).last_Name);
 
         }
         System.out.println("The Employees of the System are:");
 
-        for (int i = 0; i < User.employees.size(); i++) {
-            System.out.println(User.employees.get(i).name);
+        for (int i = 0; i < Employee.employees.size(); i++) {
+            System.out.println(Employee.employees.get(i).first_Name + " " + Employee.employees.get(i).last_Name);
 
         }
+    }
 
+    static void createEmployee(String firstname, String lastname, String username, String password) {
+
+        Employee e = new Employee(firstname, lastname, username, password);
+        System.out.println("Employee created successfully.");
 
     }
+
+
+    static void createManager(String firstname, String lastname, String username, String password) {
+
+        Manager m = new Manager(firstname, lastname, username, password);
+        System.out.println("Manager created successfully.");
+    }
+
 }
