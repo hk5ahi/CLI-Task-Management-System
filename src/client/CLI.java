@@ -6,14 +6,17 @@ import server.service.EmployeeService;
 import server.service.Implementation.EmployeeServiceImpl;
 import server.service.Implementation.ManagerServiceImpl;
 import server.service.Implementation.SupervisorServiceImpl;
+import server.service.Implementation.TaskServiceImpl;
 import server.service.ManagerService;
 import server.service.SupervisorService;
+import server.service.TaskService;
 
 import java.util.Scanner;
 
 public class CLI {
     public static void main(String[] args) throws InterruptedException {
         Scanner scanner = new Scanner(System.in);
+        EmployeeService employeeService = new EmployeeServiceImpl();
         System.out.println("Welcome to the CLI Task Management System!!!");
         System.out.println("Welcome to sSupervisor Login System");
         System.out.println("You have to create at-least one employee and manager user to access the employee and manager login system.");
@@ -23,7 +26,8 @@ public class CLI {
         // Variables to store username and password
         String u22;
         String p22;
-        SupervisorService sup = new SupervisorServiceImpl();
+        SupervisorService supervisorService = new SupervisorServiceImpl();
+
         Supervisor sup1 = null;
         // Loop until the credentials are verified
         do {
@@ -32,7 +36,7 @@ public class CLI {
             System.out.print("Password: ");
             p22 = scanner.nextLine();
 
-            sup1 = sup.verifyCredentials(u22, p22);
+            sup1 = supervisorService.verifyCredentials(u22, p22);
 
             if (sup1 != null) {
                 System.out.println("Credentials verified. Access granted!");
@@ -59,7 +63,8 @@ public class CLI {
                 String u = scanner.nextLine();
                 System.out.println("Please enter the password.");
                 String p = scanner.nextLine();
-                sup.createEmployee(f, l, u, p);
+
+                employeeService.createEmployee(f, l, u, p);
                 employeeCreated = true;
             } else if (n == 2) {
                 System.out.println("Please enter the First Name.");
@@ -70,7 +75,8 @@ public class CLI {
                 String u1 = scanner.nextLine();
                 System.out.println("Please enter the password.");
                 String p1 = scanner.nextLine();
-                sup.createManager(f1, l1, u1, p1);
+                ManagerService managerService = new ManagerServiceImpl();
+                managerService.createManager(f1, l1, u1, p1);
                 managerCreated = true;
             } else {
                 System.out.println("Invalid input. Please try again.");
@@ -118,8 +124,9 @@ public class CLI {
                     } while (true);
 
                     //working of employee here
-                    emp.viewAssignedTasks(authenticatedEmployee);
-                    emp.viewAllTasks();
+                    TaskService taskService = new TaskServiceImpl();
+                    taskService.viewAssignedTasks(authenticatedEmployee);
+                    taskService.viewAllTasks();
                     break;
                 case 2:
                     System.out.println("Hey Manager!!");
@@ -128,15 +135,15 @@ public class CLI {
                     // Variables to store username and password
                     String u1, p1;
                     Manager authenticatedManager;
-                    ManagerService man = new ManagerServiceImpl();
+
 
                     do {
                         System.out.print("Username: ");
                         u1 = scanner.nextLine();
                         System.out.print("Password: ");
                         p1 = scanner.nextLine();
-
-                        authenticatedManager = man.findManager(u1, p1);
+                        ManagerService managerService = new ManagerServiceImpl();
+                        authenticatedManager = managerService.findManager(u1, p1);
 
                         if (authenticatedManager != null) {
                             System.out.println("Credentials verified. Access granted!");
@@ -149,16 +156,17 @@ public class CLI {
                     //working of manager here
                     System.out.print("Please enter title for task to create.\n");
                     String t1 = scanner.nextLine();
-                    man.createTask(authenticatedManager, t1, "Understand the situation and code it", 2);
+                    TaskService anothertaskService = new TaskServiceImpl();
+                    anothertaskService.createTask(authenticatedManager, t1, "Understand the situation and code it", 2);
                     System.out.print("Please enter title for task to create.\n");
                     String t2 = scanner.nextLine();
-                    man.createTask(authenticatedManager, t2, "Debug the errors and remove it", 2);
-                    man.assignTask();
+                    anothertaskService.createTask(authenticatedManager, t2, "Debug the errors and remove it", 2);
+                    anothertaskService.assignTask();
                     //authenticatedManager.addComments("Improve work!!");
                     //authenticatedManager.viewallTasksbyEmp();
                     //authenticatedManager.viewallTasksbyStat();
                     //authenticatedManager.viewallTasks();
-                    man.viewAllTasksByEmployeeAndStatus(authenticatedManager);
+                    anothertaskService.viewAllTasksByEmployeeAndStatusCreatedBySingleManager(authenticatedManager);
                     break;
                 case 3:
                     System.out.println("Hey Supervisor!!");
@@ -176,7 +184,7 @@ public class CLI {
                         System.out.print("Password: ");
                         p2 = scanner.nextLine();
 
-                        supervisor = sup.verifyCredentials(u2, p2);
+                        supervisor = supervisorService.verifyCredentials(u2, p2);
 
                         if (supervisor != null) {
                             System.out.println("Credentials verified. Access granted!");

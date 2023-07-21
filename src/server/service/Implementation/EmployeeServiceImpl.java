@@ -1,9 +1,10 @@
 package server.service.Implementation;
 
-import server.domain.Comment;
 import server.domain.Employee;
+import server.domain.Manager;
 import server.domain.Task;
 import server.service.EmployeeService;
+import server.service.TaskService;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -11,11 +12,13 @@ import java.util.Scanner;
 
 import static server.domain.Employee.getAllTasks;
 import static server.domain.Employee.getEmployees;
+import static server.domain.Manager.getManagers;
 
 public class EmployeeServiceImpl implements EmployeeService {
 
+
     @Override
-    public void empCheck() {
+    public void employeeCheck() {
         if (getEmployees().size() == 0) {
             System.out.println("Please first create Employee user from Supervisor.");
         }
@@ -42,6 +45,7 @@ public class EmployeeServiceImpl implements EmployeeService {
     public void createdToInProgress(Employee employee) {
 
         Task task = null;
+        TaskService taskService = new TaskServiceImpl();
         System.out.println("The Tasks are:");
         for (Task t : getAllTasks()) {
             System.out.println(t.getTitle());
@@ -51,7 +55,7 @@ public class EmployeeServiceImpl implements EmployeeService {
             System.out.println("Enter the title of task whose status you want to change.");
             Scanner scan = new Scanner(System.in);
             String title = scan.nextLine();
-            task = getTaskByTitle(title);
+            task = taskService.getTaskByTitle(title);
             if (task == null) {
                 System.out.println("Wrong title entered");
             }
@@ -75,6 +79,7 @@ public class EmployeeServiceImpl implements EmployeeService {
     @Override
     public void inProgressToInReview(Employee employee) {
         Task task = null;
+        TaskService taskService = new TaskServiceImpl();
         System.out.println("The Tasks are:");
         for (Task t : getAllTasks()) {
             System.out.println(t.getTitle());
@@ -84,7 +89,7 @@ public class EmployeeServiceImpl implements EmployeeService {
             System.out.println("Enter the title of task whose status you want to change.");
             Scanner scan = new Scanner(System.in);
             String title = scan.nextLine();
-            task = getTaskByTitle(title);
+            task = taskService.getTaskByTitle(title);
             if (task == null) {
                 System.out.println("Wrong title entered");
             }
@@ -111,57 +116,41 @@ public class EmployeeServiceImpl implements EmployeeService {
     }
 
     @Override
-    public Task getTaskByTitle(String title) {
-        for (Task task : getAllTasks()) {
-            if (task.getTitle().equalsIgnoreCase(title)) {
-                return task;
+    public void createEmployee(String firstname, String lastname, String username, String password) {
+        Employee e = new Employee(firstname, lastname, username, password);
+        System.out.println("Employee created successfully.");
+
+    }
+
+    @Override
+    public String getEmployeeByName(String name) {
+
+        for (Manager manager : getManagers()) {
+            String name0 = manager.getFirstName() + " " + manager.getLastName();
+            if (name0.equalsIgnoreCase(name)) {
+
+                return " ";
             }
         }
-        return null; // Task not found
-    }
 
-    @Override
-    public void addComments(String message, Employee employee) {
-        Task task = null;
-        System.out.println("The Tasks are:");
-        for (Task t : getAllTasks()) {
-            System.out.println(t.getTitle());
-        }
-
-        do {
-            System.out.println("Enter the title of task that you want to comment.");
-            Scanner scan = new Scanner(System.in);
-            String title = scan.nextLine();
-            task = getTaskByTitle(title);
-            if (task == null) {
-                System.out.println("Wrong title entered");
+        for (Employee employee : getEmployees()) {
+            String name0 = employee.getFirstName() + " " + employee.getLastName();
+            if (name0.equalsIgnoreCase(name)) {
+                return employee.getFirstName() + " " + employee.getLastName();
             }
-        } while (task == null);
-
-        Comment c = new Comment();
-        c.setBody(message);
-        c.setCreatedAt((LocalDateTime.now().toString()));
-        c.setCreatedBy(employee.getFirstName() + " " + employee.getLastName());
-
-        task.addComment(c);
-        System.out.printf("The comment has been added successfully by %s.\n", employee.getFirstName() + " " + employee.getLastName());
+        }
+        return null; // Employee not found
     }
 
     @Override
-    public void viewAssignedTasks(Employee employee) {
-        System.out.print("The assigned tasks for the employee are:\n");
-        for (int i = 0; i < employee.getAssignedTasks().size(); i++) {
-            System.out.print(employee.getAssignedTasks().get(i).getDescription());
-        }
-    }
+    public void viewAllEmployees() {
+        System.out.println("The Employees of the System are:");
 
-    @Override
-    public void viewAllTasks() {
-        System.out.println("The all tasks with Status are:");
-        for (int i = 0; i < getAllTasks().size(); i++) {
-            System.out.printf("The title of task is %s with its description which is %s and its status is %s", getAllTasks().get(i).getTitle(), getAllTasks().get(i).getDescription(), getAllTasks().get(i).getTaskStatus());
+        for (int i = 0; i < getEmployees().size(); i++) {
+            System.out.println(getEmployees().get(i).getFirstName() + " " + getEmployees().get(i).getLastName());
 
         }
+
     }
 
 

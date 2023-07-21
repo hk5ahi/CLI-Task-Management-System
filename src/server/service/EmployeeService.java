@@ -1,27 +1,20 @@
 package server.service;
-
 import server.domain.Employee;
-import server.domain.Task;
-
 public interface EmployeeService {
 
 
-    void empCheck();
+    void employeeCheck();
 
     Employee findEmployee(String providedUsername, String providedPassword);
 
+    String getEmployeeByName(String name);
+
+    void viewAllEmployees();
 
     void createdToInProgress(Employee employee);
 
     void inProgressToInReview(Employee employee);
 
-    Task getTaskByTitle(String title);
+    void createEmployee(String firstname, String lastname, String username, String password);
 
-    void addComments(String message, Employee employee);
-
-    void viewAssignedTasks(Employee employee);
-
-    void viewAllTasks();
-
-    // Other methods if needed
 }
