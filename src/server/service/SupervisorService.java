@@ -23,9 +23,7 @@ public interface SupervisorService {
     void addComments(String message);
 
     void viewTaskHistory();
-
     void viewSupervisor();
-
     void viewAllEmployees();
 
     void viewAllManagers();

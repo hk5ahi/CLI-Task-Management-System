@@ -167,7 +167,6 @@ public class SupervisorServiceImpl implements SupervisorService {
         System.out.println("The task has been archive successfully.");
 
     }
-
     @Override
     public void addComments(String message) {
         Scanner scan = new Scanner(System.in);

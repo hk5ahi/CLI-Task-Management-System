@@ -14,10 +14,10 @@ import java.util.Scanner;
 public class CLI {
     public static void main(String[] args) throws InterruptedException {
         Scanner scanner = new Scanner(System.in);
-        System.out.println("Welcome to the CLI server.domain.Task Management System!!!");
-        System.out.println("Welcome to server.domain.Supervisor Login System");
+        System.out.println("Welcome to the CLI Task Management System!!!");
+        System.out.println("Welcome to sSupervisor Login System");
         System.out.println("You have to create at-least one employee and manager user to access the employee and manager login system.");
-        System.out.println("Hey server.domain.Supervisor!!");
+        System.out.println("Hey Supervisor!!");
         System.out.println("Please Enter the Credentials:");
 
         // Variables to store username and password
@@ -82,9 +82,9 @@ public class CLI {
 
         while (true) {
             System.out.println("\nChoose a role:");
-            System.out.println("1. server.domain.Employee");
-            System.out.println("2. server.domain.Manager");
-            System.out.println("3. server.domain.Supervisor");
+            System.out.println("1. Employee");
+            System.out.println("2. Manager");
+            System.out.println("3. Supervisor");
             System.out.println("4. Exit");
             input = Integer.parseInt(scanner.nextLine());
 
