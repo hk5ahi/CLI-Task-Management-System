@@ -1,29 +1,30 @@
-import java.util.List;
+package server.service;
+
+import server.domain.Manager;
+import server.domain.Task;
 
 public interface ManagerService {
 
     Manager findManager(String username, String password);
 
-    boolean addManager(Manager manager);
-
-    void deleteManager(String username);
-
-    List<Manager> getAllManagers();
-
-    void createTask(String title, String description, int total_time);
+    void createTask(Manager activeManager, String title, String description, int total_time);
 
     void assignTask();
 
-    void inReviewToCompleted();
+    Task getTaskByTitle(String title);
 
-    void addComments(String message);
+    String getEmployeeByName(String name);
 
-    void viewAllTasks();
+    void inReviewToCompleted(Manager activeManager);
 
-    void viewAllTasksByEmployee();
+    void addComments(String message, Manager activeManager);
 
-    void viewAllTasksByStatus();
+    void viewAllTasks(Manager activeManager);
 
-    void viewAllTasksByEmployeeAndStatus();
+    void viewAllTasksByEmployee(Manager activeManager);
+
+    void viewAllTasksByStatus(Manager activeManager);
+
+    void viewAllTasksByEmployeeAndStatus(Manager activeManager);
 
 }

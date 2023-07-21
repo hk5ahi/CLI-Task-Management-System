@@ -9,7 +9,7 @@ public class Employee extends User {
     private List<Task> assignedTasks = new ArrayList<>();
     private static List<Employee> employees = new ArrayList<>();
     private static List<Task> allTasks = new ArrayList<>();
-    private LocalDateTime startTime;
+
 
     public Employee(String firstname, String lastname, String username, String password) {
         this.setUsername(username);
@@ -23,32 +23,25 @@ public class Employee extends User {
         return assignedTasks;
     }
 
-    public static void setAllTasks(List<Task> allTasks) {
-        Employee.allTasks = allTasks;
+    public static void addTask(Task allTasks) {
+        Employee.allTasks.add(allTasks);
     }
 
     public static List<Task> getAllTasks() {
         return allTasks;
     }
 
-    public void setAssignedTasks(List<Task> assignedTasks) {
-        this.assignedTasks = assignedTasks;
+    public void setAssignedTasks(Task assignedTask) {
+        this.assignedTasks.add(assignedTask);
     }
 
     public static List<Employee> getEmployees() {
         return employees;
     }
 
-    public static void setEmployees(List<Employee> employees) {
-        Employee.employees = employees;
+    public static void setEmployees(Employee employee) {
+        Employee.employees.add(employee);
     }
 
-    public LocalDateTime getStartTime() {
-        return startTime;
-    }
-
-    public void setStartTime(LocalDateTime startTime) {
-        this.startTime = startTime;
-    }
 
 }

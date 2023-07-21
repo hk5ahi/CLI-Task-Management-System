@@ -7,12 +7,7 @@ public class User {
     private String userRole;
     private String password;
 
-    // Constructors
-    public User() {
 
-    }
-
-    // Getters and Setters
     public String getUsername() {
         return username;
     }

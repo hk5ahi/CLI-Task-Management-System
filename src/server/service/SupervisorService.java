@@ -1,38 +1,34 @@
 package server.service;
-
 import server.domain.Supervisor;
+import server.domain.Task;
 
-import java.util.List;
 
 public interface SupervisorService {
 
-    static Supervisor getInstance() {
-        if (instance == null) {
-            // Create the instance if it's not already created
-            instance = new Supervisor();
-        }
-        return instance;
-    }
 
     Supervisor verifyCredentials(String username, String password);
 
-    List<Task> viewAllTasks();
+    void viewAllTasks();
 
-    List<Task> viewTasksByStatus(Task.Status status);
+    void viewTasksByStatus();
 
-    List<Task> viewTasksByEmployee(String employeeName);
+    void viewTasksByEmployee();
 
-    List<Task> viewTasksByManager(String managerName);
+    void viewTasksByManager();
 
-    void archiveTask(String title);
+    Task getTaskByTitle(String title);
 
-    void addComments(String title, String message);
+    void archiveTask();
 
-    void viewTaskHistory(String title);
+    void addComments(String message);
 
-    List<Employee> viewAllEmployees();
+    void viewTaskHistory();
 
-    List<Manager> viewAllManagers();
+    void viewSupervisor();
+
+    void viewAllEmployees();
+
+    void viewAllManagers();
 
     void createEmployee(String firstname, String lastname, String username, String password);
 

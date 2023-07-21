@@ -1,107 +1,112 @@
 package client;
-
 import server.domain.Employee;
 import server.domain.Manager;
 import server.domain.Supervisor;
-import server.service.CommentService;
-import server.service.Implementation.CommentServiceImpl;
+import server.service.EmployeeService;
+import server.service.Implementation.EmployeeServiceImpl;
+import server.service.Implementation.ManagerServiceImpl;
+import server.service.Implementation.SupervisorServiceImpl;
+import server.service.ManagerService;
+import server.service.SupervisorService;
 
 import java.util.Scanner;
 
-public class ClientApp {
-    CommentService commentService = new CommentServiceImpl();
-
+public class CLI {
     public static void main(String[] args) throws InterruptedException {
         Scanner scanner = new Scanner(System.in);
-        System.out.println("Welcome to the CLI Task Management System!!!");
-
-        // Supervisor login
-        System.out.println("Welcome to Supervisor Login System");
-        System.out.println("Hey Supervisor!!");
+        System.out.println("Welcome to the CLI server.domain.Task Management System!!!");
+        System.out.println("Welcome to server.domain.Supervisor Login System");
+        System.out.println("You have to create at-least one employee and manager user to access the employee and manager login system.");
+        System.out.println("Hey server.domain.Supervisor!!");
         System.out.println("Please Enter the Credentials:");
 
-        // Variables to store supervisor username and password
-        String supervisorUsername, supervisorPassword;
-        Supervisor supervisor;
-
-        // Loop until the supervisor credentials are verified
+        // Variables to store username and password
+        String u22;
+        String p22;
+        SupervisorService sup = new SupervisorServiceImpl();
+        Supervisor sup1 = null;
+        // Loop until the credentials are verified
         do {
             System.out.print("Username: ");
-            supervisorUsername = scanner.nextLine();
+            u22 = scanner.nextLine();
             System.out.print("Password: ");
-            supervisorPassword = scanner.nextLine();
+            p22 = scanner.nextLine();
 
-            supervisor = Supervisor.verifyCredentials(supervisorUsername, supervisorPassword);
+            sup1 = sup.verifyCredentials(u22, p22);
 
-            if (supervisor != null) {
+            if (sup1 != null) {
                 System.out.println("Credentials verified. Access granted!");
+                // Perform actions for authenticatedEmployee here
                 break;
             } else {
                 System.out.println("Invalid credentials. Please try again.");
             }
         } while (true);
-
         boolean employeeCreated = false;
         boolean managerCreated = false;
 
         do {
             System.out.println("Press 1 to create an employee user");
             System.out.println("Press 2 to create a manager user");
-            int choice = Integer.parseInt(scanner.nextLine());
+            int n = Integer.parseInt(scanner.nextLine());
 
-            if (choice == 1) {
+            if (n == 1) {
                 System.out.println("Please enter the First Name.");
-                String firstName = scanner.nextLine();
+                String f = scanner.nextLine();
                 System.out.println("Please enter the Last Name.");
-                String lastName = scanner.nextLine();
+                String l = scanner.nextLine();
                 System.out.println("Please enter the username.");
-                String username = scanner.nextLine();
+                String u = scanner.nextLine();
                 System.out.println("Please enter the password.");
-                String password = scanner.nextLine();
-                Supervisor.createEmployee(firstName, lastName, username, password);
+                String p = scanner.nextLine();
+                sup.createEmployee(f, l, u, p);
                 employeeCreated = true;
-            } else if (choice == 2) {
+            } else if (n == 2) {
                 System.out.println("Please enter the First Name.");
-                String firstName = scanner.nextLine();
+                String f1 = scanner.nextLine();
                 System.out.println("Please enter the Last Name.");
-                String lastName = scanner.nextLine();
+                String l1 = scanner.nextLine();
                 System.out.println("Please enter the username.");
-                String username = scanner.nextLine();
+                String u1 = scanner.nextLine();
                 System.out.println("Please enter the password.");
-                String password = scanner.nextLine();
-                Supervisor.createManager(firstName, lastName, username, password);
+                String p1 = scanner.nextLine();
+                sup.createManager(f1, l1, u1, p1);
                 managerCreated = true;
             } else {
                 System.out.println("Invalid input. Please try again.");
             }
         } while (!employeeCreated || !managerCreated);
 
+
         int input;
 
         while (true) {
             System.out.println("\nChoose a role:");
-            System.out.println("1. Employee");
-            System.out.println("2. Manager");
-            System.out.println("3. Exit");
+            System.out.println("1. server.domain.Employee");
+            System.out.println("2. server.domain.Manager");
+            System.out.println("3. server.domain.Supervisor");
+            System.out.println("4. Exit");
             input = Integer.parseInt(scanner.nextLine());
+
 
             switch (input) {
                 case 1:
+
                     System.out.println("Hey Employee!!");
                     System.out.println("Please Enter the Credentials:");
 
-                    // Variables to store employee username and password
-                    String empUsername, empPassword;
-                    Employee authenticatedEmployee;
 
-                    // Loop until the employee credentials are verified
+                    String u, p;
+                    Employee authenticatedEmployee;
+                    EmployeeService emp = new EmployeeServiceImpl();
+
                     do {
                         System.out.print("Username: ");
-                        empUsername = scanner.nextLine();
+                        u = scanner.nextLine();
                         System.out.print("Password: ");
-                        empPassword = scanner.nextLine();
+                        p = scanner.nextLine();
 
-                        authenticatedEmployee = Employee.findEmployee(empUsername, empPassword);
+                        authenticatedEmployee = emp.findEmployee(u, p);
 
                         if (authenticatedEmployee != null) {
                             System.out.println("Credentials verified. Access granted!");
@@ -112,56 +117,87 @@ public class ClientApp {
                         }
                     } while (true);
 
-                    // Working of employee here
-                    authenticatedEmployee.viewAssignedtasks();
-                    authenticatedEmployee.allTasks();
+                    //working of employee here
+                    emp.viewAssignedTasks(authenticatedEmployee);
+                    emp.viewAllTasks();
                     break;
-
                 case 2:
                     System.out.println("Hey Manager!!");
                     System.out.println("Please Enter the Credentials:");
 
-                    // Variables to store manager username and password
-                    String mgrUsername, mgrPassword;
+                    // Variables to store username and password
+                    String u1, p1;
                     Manager authenticatedManager;
+                    ManagerService man = new ManagerServiceImpl();
 
-                    // Loop until the manager credentials are verified
                     do {
                         System.out.print("Username: ");
-                        mgrUsername = scanner.nextLine();
+                        u1 = scanner.nextLine();
                         System.out.print("Password: ");
-                        mgrPassword = scanner.nextLine();
+                        p1 = scanner.nextLine();
 
-                        authenticatedManager = Manager.findManager(mgrUsername, mgrPassword);
+                        authenticatedManager = man.findManager(u1, p1);
 
                         if (authenticatedManager != null) {
                             System.out.println("Credentials verified. Access granted!");
-                            // Perform actions for authenticatedManager here
+                            // Perform actions for authenticatedEmployee here
                             break;
                         } else {
                             System.out.println("Invalid credentials. Please try again.");
                         }
                     } while (true);
-
-                    // Working of manager here
+                    //working of manager here
                     System.out.print("Please enter title for task to create.\n");
-                    String taskTitle = scanner.nextLine();
-                    authenticatedManager.createTask(taskTitle, "Understand the situation and code it", 2);
+                    String t1 = scanner.nextLine();
+                    man.createTask(authenticatedManager, t1, "Understand the situation and code it", 2);
                     System.out.print("Please enter title for task to create.\n");
-                    String taskTitle2 = scanner.nextLine();
-                    authenticatedManager.createTask(taskTitle2, "Debug the errors and remove it", 2);
-                    authenticatedManager.assignTask();
-                    authenticatedManager.viewallTasksbyEmpandStat();
+                    String t2 = scanner.nextLine();
+                    man.createTask(authenticatedManager, t2, "Debug the errors and remove it", 2);
+                    man.assignTask();
+                    //authenticatedManager.addComments("Improve work!!");
+                    //authenticatedManager.viewallTasksbyEmp();
+                    //authenticatedManager.viewallTasksbyStat();
+                    //authenticatedManager.viewallTasks();
+                    man.viewAllTasksByEmployeeAndStatus(authenticatedManager);
                     break;
-
                 case 3:
+                    System.out.println("Hey Supervisor!!");
+                    System.out.println("Please Enter the Credentials:");
+
+                    // Variables to store username and password
+                    String u2;
+                    String p2;
+                    Supervisor supervisor = null;
+
+                    // Loop until the credentials are verified
+                    do {
+                        System.out.print("Username: ");
+                        u2 = scanner.nextLine();
+                        System.out.print("Password: ");
+                        p2 = scanner.nextLine();
+
+                        supervisor = sup.verifyCredentials(u2, p2);
+
+                        if (supervisor != null) {
+                            System.out.println("Credentials verified. Access granted!");
+                            // Perform actions for authenticatedEmployee here
+                            break;
+                        } else {
+                            System.out.println("Invalid credentials. Please try again.");
+                        }
+                    } while (true);
+                    // working of supervisor
+                    break;
+                case 4:
                     System.out.println("Exiting...");
                     scanner.close();
                     return;
-
                 default:
                     System.out.println("Invalid input");
             }
         }
+
+
     }
 }
+

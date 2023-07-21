@@ -1,7 +1,5 @@
 package server.domain;
 
-import java.time.LocalDateTime;
-
 public class TaskHistory {
 
     private String timestamp;
@@ -9,16 +7,7 @@ public class TaskHistory {
     private String newStatus;
     private String movedBy;
 
-    public TaskHistory() {
-        // Default constructor
-    }
 
-    public TaskHistory(LocalDateTime timestamp, String oldStatus, String newStatus, String movedBy) {
-        this.timestamp = timestamp.toString();
-        this.oldStatus = oldStatus;
-        this.newStatus = newStatus;
-        this.movedBy = movedBy;
-    }
 
     // Getters and Setters for the properties
     public String getTimestamp() {

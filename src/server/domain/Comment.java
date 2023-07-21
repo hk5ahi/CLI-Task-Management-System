@@ -8,14 +8,9 @@ public class Comment {
 
     // Constructors
     public Comment() {
-        // Default constructor
+
     }
 
-    public Comment(String createdAt, String createdBy, String body) {
-        this.createdAt = createdAt;
-        this.createdBy = createdBy;
-        this.body = body;
-    }
 
     // Getters and Setters
     public String getCreatedAt() {

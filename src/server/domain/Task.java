@@ -1,10 +1,9 @@
 package server.domain;
-
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
 public class Task {
-
 
     public enum Status {
         CREATED,
@@ -14,22 +13,24 @@ public class Task {
     }
 
     private String taskStatus;
-    private taskHistory history;
+    private TaskHistory history;
     private String title;
     private String description;
     private String createdAt;
     private String createdBy;
-    private static int total_time;
+    private int total_time;
     private String assignee;
     private List<Comment> comments = new ArrayList<>();
     private boolean assigned;
 
+    private LocalDateTime startTime;
+
     public Task(String title, String description, int total_time) {
-        taskStatus = String.valueOf(Status.CREATED);
-        assigned = false;
-        this.title = title;
-        this.description = description;
-        Task.total_time = total_time;
+        this.setTaskStatus(String.valueOf(Status.CREATED));
+        this.setAssigned(false);
+        this.setTitle(title);
+        this.setDescription(description);
+        this.setTotal_time(total_time);
     }
 
     // Getters and Setters for the properties
@@ -41,11 +42,11 @@ public class Task {
         this.taskStatus = taskStatus;
     }
 
-    public taskHistory getHistory() {
+    public TaskHistory getHistory() {
         return history;
     }
 
-    public void setHistory(taskHistory history) {
+    public void setHistory(TaskHistory history) {
         this.history = history;
     }
 
@@ -81,12 +82,12 @@ public class Task {
         this.createdBy = createdBy;
     }
 
-    public static int getTotal_time() {
+    public int getTotal_time() {
         return total_time;
     }
 
-    public static void setTotal_time(int total_time) {
-        Task.total_time = total_time;
+    public void setTotal_time(int total_time) {
+        this.total_time = total_time;
     }
 
     public String getAssignee() {
@@ -101,8 +102,8 @@ public class Task {
         return comments;
     }
 
-    public void setComments(List<Comment> comments) {
-        this.comments = comments;
+    public void addComment(Comment comment) {
+        this.comments.add(comment);
     }
 
     public boolean isAssigned() {
@@ -111,5 +112,13 @@ public class Task {
 
     public void setAssigned(boolean assigned) {
         this.assigned = assigned;
+    }
+
+    public LocalDateTime getStartTime() {
+        return startTime;
+    }
+
+    public void setStartTime(LocalDateTime startTime) {
+        this.startTime = startTime;
     }
 }
