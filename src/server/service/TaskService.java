@@ -6,7 +6,6 @@ import server.domain.Task;
 
 public interface TaskService {
 
-    void createTask(Manager activeManager, String title, String description, int total_time);
 
     void assignTask();
 

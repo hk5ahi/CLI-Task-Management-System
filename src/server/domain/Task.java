@@ -98,8 +98,8 @@ public class Task {
         this.assignee = assignee;
     }
 
-    public List<Comment> getComments() {
-        return comments;
+    public List<Comment> getComments(Task task) {
+        return task.comments;
     }
 
     public void addComment(Comment comment) {

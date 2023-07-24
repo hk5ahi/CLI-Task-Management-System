@@ -1,15 +1,16 @@
 package server.service.Implementation;
+
+import server.dao.EmployeeDao;
+import server.dao.ManagerDao;
+import server.dao.implementation.EmployeeDaoImpl;
+import server.dao.implementation.ManagerDaoImpl;
 import server.domain.Employee;
 import server.domain.Manager;
 import server.domain.Task;
 import server.service.EmployeeService;
 import server.service.TaskService;
 
-import java.time.LocalTime;
 import java.util.Scanner;
-
-import static server.domain.Employee.*;
-import static server.domain.Manager.getManagers;
 
 public class TaskServiceImpl implements TaskService {
 
@@ -17,10 +18,10 @@ public class TaskServiceImpl implements TaskService {
 
     @Override
     public void viewAllTasks() {
+        EmployeeDao employeeDao = new EmployeeDaoImpl();
+        for (int i = 0; i < employeeDao.getAllTasks().size(); i++) {
 
-        for (int i = 0; i < getAllTasks().size(); i++) {
-
-            System.out.printf("The title of task is %s with its description which is %s whose employee is %s and  its status is %s.It is created by %s", getAllTasks().get(i).getTitle(), getAllTasks().get(i).getDescription(), getAllTasks().get(i).getAssignee(), getAllTasks().get(i).getTaskStatus(), getAllTasks().get(i).getCreatedBy());
+            System.out.printf("The title of task is %s with its description which is %s whose employee is %s and  its status is %s.It is created by %s", employeeDao.getAllTasks().get(i).getTitle(), employeeDao.getAllTasks().get(i).getDescription(), employeeDao.getAllTasks().get(i).getAssignee(), employeeDao.getAllTasks().get(i).getTaskStatus(), employeeDao.getAllTasks().get(i).getCreatedBy());
 
 
         }
@@ -29,10 +30,11 @@ public class TaskServiceImpl implements TaskService {
 
     @Override
     public void viewAllTasksByStatusCreatedBySingleManager(Manager activeManager) {
-        for (int i = 0; i < getAllTasks().size(); i++) {
-            if (getAllTasks().get(i).getCreatedBy().equals(activeManager.getFirstName() + " " + activeManager.getLastName())) {
+        EmployeeDao employeeDao = new EmployeeDaoImpl();
+        for (int i = 0; i < employeeDao.getAllTasks().size(); i++) {
+            if (employeeDao.getAllTasks().get(i).getCreatedBy().equals(activeManager.getFirstName() + " " + activeManager.getLastName())) {
 
-                System.out.printf("The title of task is %s with its description which is %s and its status is %s.\n", getAllTasks().get(i).getTitle(), getAllTasks().get(i).getDescription(), getAllTasks().get(i).getTaskStatus());
+                System.out.printf("The title of task is %s with its description which is %s and its status is %s.\n", employeeDao.getAllTasks().get(i).getTitle(), employeeDao.getAllTasks().get(i).getDescription(), employeeDao.getAllTasks().get(i).getTaskStatus());
             }
 
         }
@@ -40,10 +42,11 @@ public class TaskServiceImpl implements TaskService {
 
     @Override
     public void viewAllTasksByEmployeeAndStatusCreatedBySingleManager(Manager activeManager) {
-        for (int i = 0; i < getAllTasks().size(); i++) {
-            if (getAllTasks().get(i).getCreatedBy().equals(activeManager.getFirstName() + " " + activeManager.getLastName())) {
+        EmployeeDao employeeDao = new EmployeeDaoImpl();
+        for (int i = 0; i < employeeDao.getAllTasks().size(); i++) {
+            if (employeeDao.getAllTasks().get(i).getCreatedBy().equals(activeManager.getFirstName() + " " + activeManager.getLastName())) {
 
-                System.out.printf("The title of task is %s with its description which is %s whose employee is %s and  its status is %s.\n", getAllTasks().get(i).getTitle(), getAllTasks().get(i).getDescription(), getAllTasks().get(i).getAssignee(), getAllTasks().get(i).getTaskStatus());
+                System.out.printf("The title of task is %s with its description which is %s whose employee is %s and  its status is %s.\n", employeeDao.getAllTasks().get(i).getTitle(), employeeDao.getAllTasks().get(i).getDescription(), employeeDao.getAllTasks().get(i).getAssignee(), employeeDao.getAllTasks().get(i).getTaskStatus());
             }
 
         }
@@ -51,44 +54,45 @@ public class TaskServiceImpl implements TaskService {
 
     @Override
     public void viewTasksByStatus() {
+        EmployeeDao employeeDao = new EmployeeDaoImpl();
 
-        for (int i = 0; i < getAllTasks().size(); i++) {
+        for (int i = 0; i < employeeDao.getAllTasks().size(); i++) {
 
             System.out.println("The tasks whose status are CREATED are:");
-            if (getAllTasks().get(i).getTaskStatus().equals("CREATED")) {
+            if (employeeDao.getAllTasks().get(i).getTaskStatus().equals("CREATED")) {
 
-                System.out.printf("The title of task is %s with its description which is %s.", getAllTasks().get(i).getTitle(), getAllTasks().get(i).getDescription());
+                System.out.printf("The title of task is %s with its description which is %s.", employeeDao.getAllTasks().get(i).getTitle(), employeeDao.getAllTasks().get(i).getDescription());
             }
 
         }
         System.out.println(" ");
 
-        for (int i = 0; i < getAllTasks().size(); i++) {
+        for (int i = 0; i < employeeDao.getAllTasks().size(); i++) {
 
             System.out.println("The tasks whose status are In Progress are:");
-            if (getAllTasks().get(i).getTaskStatus().equals("IN_PROGRESS")) {
+            if (employeeDao.getAllTasks().get(i).getTaskStatus().equals("IN_PROGRESS")) {
 
-                System.out.printf("The title of task is %s with its description which is %s.", getAllTasks().get(i).getTitle(), getAllTasks().get(i).getDescription());
+                System.out.printf("The title of task is %s with its description which is %s.", employeeDao.getAllTasks().get(i).getTitle(), employeeDao.getAllTasks().get(i).getDescription());
             }
 
         }
         System.out.println(" ");
-        for (int i = 0; i < getAllTasks().size(); i++) {
+        for (int i = 0; i < employeeDao.getAllTasks().size(); i++) {
 
             System.out.println("The tasks whose status are In Review are:");
-            if (getAllTasks().get(i).getTaskStatus().equals("IN_REVIEW")) {
+            if (employeeDao.getAllTasks().get(i).getTaskStatus().equals("IN_REVIEW")) {
 
-                System.out.printf("The title of task is %s with its description which is %s.", getAllTasks().get(i).getTitle(), getAllTasks().get(i).getDescription());
+                System.out.printf("The title of task is %s with its description which is %s.", employeeDao.getAllTasks().get(i).getTitle(), employeeDao.getAllTasks().get(i).getDescription());
             }
 
         }
         System.out.println(" ");
-        for (int i = 0; i < getAllTasks().size(); i++) {
+        for (int i = 0; i < employeeDao.getAllTasks().size(); i++) {
 
             System.out.println("The tasks whose status are COMPLETED are:");
-            if (getAllTasks().get(i).getTaskStatus().equals("COMPLETED")) {
+            if (employeeDao.getAllTasks().get(i).getTaskStatus().equals("COMPLETED")) {
 
-                System.out.printf("The title of task is %s with its description which is %s.", getAllTasks().get(i).getTitle(), getAllTasks().get(i).getDescription());
+                System.out.printf("The title of task is %s with its description which is %s.", employeeDao.getAllTasks().get(i).getTitle(), employeeDao.getAllTasks().get(i).getDescription());
             }
 
         }
@@ -102,9 +106,9 @@ public class TaskServiceImpl implements TaskService {
         String name11 = null;
         Task task = null;
         Scanner scan = new Scanner(System.in);
-
+        EmployeeDao employeeDao = new EmployeeDaoImpl();
         System.out.println("The Tasks are:");
-        for (Task t : getAllTasks()) {
+        for (Task t : employeeDao.getAllTasks()) {
             System.out.println(t.getTitle());
         }
 
@@ -121,7 +125,7 @@ public class TaskServiceImpl implements TaskService {
         title1 = task.getTitle();
 
         System.out.println("The Employees are:");
-        for (Employee employee : getEmployees()) {
+        for (Employee employee : employeeDao.getEmployees()) {
             System.out.println(employee.getFirstName() + " " + employee.getLastName());
         }
 
@@ -154,10 +158,10 @@ public class TaskServiceImpl implements TaskService {
                 task.setAssigned(true);
                 System.out.printf("The Task titled %s is assigned to %s.\n", title1, name11);
                 // Add the task to the assigned tasks list of the selected employee
-                for (Employee employee : getEmployees()) {
+                for (Employee employee : employeeDao.getEmployees()) {
                     String name = employee.getFirstName() + " " + employee.getLastName();
                     if (name.equalsIgnoreCase(name11)) {
-                        employee.setAssignedTasks(task);
+                        employee.setAssignedTasks(task, employee);
                         break;
                     }
                 }
@@ -168,15 +172,15 @@ public class TaskServiceImpl implements TaskService {
     @Override
     public void viewTasksByEmployee() {
         System.out.println("The tasks are categorized employee-wise with their respective statuses.");
+        EmployeeDao employeeDao = new EmployeeDaoImpl();
+        for (int i = 0; i < employeeDao.getEmployees().size(); i++) {
 
-        for (int i = 0; i < getEmployees().size(); i++) {
+            System.out.printf("The name of Employee is %s %s and its assigned tasks with their status are:\n", employeeDao.getEmployees().get(i).getFirstName(), employeeDao.getEmployees().get(i).getLastName());
 
-            System.out.printf("The name of Employee is %s %s and its assigned tasks with their status are:\n", getEmployees().get(i).getFirstName(), getEmployees().get(i).getLastName());
+            for (int j = 0; j < employeeDao.getAllTasks().size(); j++) {
+                if (employeeDao.getAllTasks().get(j).getAssignee().equals(employeeDao.getEmployees().get(i).getFirstName() + " " + employeeDao.getEmployees().get(i).getLastName())) {
 
-            for (int j = 0; j < getAllTasks().size(); j++) {
-                if (getAllTasks().get(j).getAssignee().equals(getEmployees().get(i).getFirstName() + " " + getEmployees().get(i).getLastName())) {
-
-                    System.out.printf("The title of task is %s with its description which is %s and its status is %s and is created by %s.", getAllTasks().get(j).getTitle(), getAllTasks().get(j).getDescription(), getAllTasks().get(j).getTaskStatus(), getAllTasks().get(i).getCreatedBy());
+                    System.out.printf("The title of task is %s with its description which is %s and its status is %s and is created by %s.", employeeDao.getAllTasks().get(j).getTitle(), employeeDao.getAllTasks().get(j).getDescription(), employeeDao.getAllTasks().get(j).getTaskStatus(), employeeDao.getAllTasks().get(i).getCreatedBy());
 
                 }
 
@@ -189,16 +193,18 @@ public class TaskServiceImpl implements TaskService {
 
     @Override
     public void viewTasksByManager() {
+        ManagerDao managerDao = new ManagerDaoImpl();
+        EmployeeDao employeeDao = new EmployeeDaoImpl();
         System.out.println("The tasks are categorized manager-wise with their respective statuses.");
 
-        for (int i = 0; i < getManagers().size(); i++) {
+        for (int i = 0; i < managerDao.getManagers().size(); i++) {
 
-            System.out.printf("The name of Manager is %s %s and its created tasks with their status are:\n", getManagers().get(i).getFirstName(), getManagers().get(i).getLastName());
+            System.out.printf("The name of Manager is %s %s and its created tasks with their status are:\n", managerDao.getManagers().get(i).getFirstName(), managerDao.getManagers().get(i).getLastName());
 
-            for (int j = 0; j < getAllTasks().size(); j++) {
-                if (getAllTasks().get(j).getCreatedBy().equals(getManagers().get(i).getFirstName() + " " + getManagers().get(i).getLastName())) {
+            for (int j = 0; j < employeeDao.getAllTasks().size(); j++) {
+                if (employeeDao.getAllTasks().get(j).getCreatedBy().equals(managerDao.getManagers().get(i).getFirstName() + " " + managerDao.getManagers().get(i).getLastName())) {
 
-                    System.out.printf("The title of task is %s with its description which is %s and its status is %s.", getAllTasks().get(j).getTitle(), getAllTasks().get(j).getDescription(), getAllTasks().get(j).getTaskStatus());
+                    System.out.printf("The title of task is %s with its description which is %s and its status is %s.", employeeDao.getAllTasks().get(j).getTitle(), employeeDao.getAllTasks().get(j).getDescription(), employeeDao.getAllTasks().get(j).getTaskStatus());
 
                 }
 
@@ -211,15 +217,24 @@ public class TaskServiceImpl implements TaskService {
 
     @Override
     public void viewAssignedTasks(Employee employee) {
-        System.out.print("The assigned tasks for the employee are:\n");
-        for (int i = 0; i < employee.getAssignedTasks().size(); i++) {
-            System.out.print(employee.getAssignedTasks().get(i).getDescription());
+        EmployeeDao employeeDao = new EmployeeDaoImpl();
+        if (employeeDao.getAssignedTasks(employee).size() != 0) {
+
+
+            System.out.print("The assigned tasks for the employee are:\n");
+            for (int i = 0; i < employeeDao.getAssignedTasks(employee).size(); i++) {
+                System.out.print(employeeDao.getAssignedTasks(employee).get(i).getDescription());
+            }
+        } else {
+
+            System.out.println("No Tasks.");
         }
     }
 
     @Override
     public Task getTaskByTitle(String title) {
-        for (Task task : getAllTasks()) {
+        EmployeeDao employeeDao = new EmployeeDaoImpl();
+        for (Task task : employeeDao.getAllTasks()) {
             if (task.getTitle().equalsIgnoreCase(title)) {
                 return task;
             }
@@ -228,22 +243,16 @@ public class TaskServiceImpl implements TaskService {
 
     }
 
-    @Override
-    public void createTask(Manager activeManager, String title, String description, int total_time) {
-        Task t = new Task(title, description, total_time);
-        t.setCreatedBy(activeManager.getFirstName() + " " + activeManager.getLastName());
 
-        t.setCreatedAt(LocalTime.now().toString());
-        addTask(t);
-    }
 
     @Override
 
     public void archiveTask() {
         Scanner scan = new Scanner(System.in);
         Task task = null;
+        EmployeeDao employeeDao = new EmployeeDaoImpl();
         System.out.println("The Tasks are:");
-        for (Task t : getAllTasks()) {
+        for (Task t : employeeDao.getAllTasks()) {
             System.out.println(t.getTitle());
         }
 

@@ -1,5 +1,9 @@
 package server.service.Implementation;
 
+import server.dao.EmployeeDao;
+import server.dao.ManagerDao;
+import server.dao.implementation.EmployeeDaoImpl;
+import server.dao.implementation.ManagerDaoImpl;
 import server.domain.Employee;
 import server.domain.Manager;
 import server.domain.Task;
@@ -10,16 +14,14 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Scanner;
 
-import static server.domain.Employee.getAllTasks;
-import static server.domain.Employee.getEmployees;
-import static server.domain.Manager.getManagers;
-
 public class EmployeeServiceImpl implements EmployeeService {
 
 
     @Override
     public void employeeCheck() {
-        if (getEmployees().size() == 0) {
+
+        EmployeeDao employeeDao = new EmployeeDaoImpl();
+        if (employeeDao.getEmployees().size() == 0) {
             System.out.println("Please first create Employee user from Supervisor.");
         }
 
@@ -28,8 +30,9 @@ public class EmployeeServiceImpl implements EmployeeService {
     @Override
     public Employee findEmployee(String providedUsername, String providedPassword) {
 
-        if (getEmployees().size() != 0) {
-            for (Employee employee : getEmployees()) {
+        EmployeeDao employeeDao = new EmployeeDaoImpl();
+        if (employeeDao.getEmployees().size() != 0) {
+            for (Employee employee : employeeDao.getEmployees()) {
 
                 if (employee.getUsername().equals(providedUsername) && employee.getPassword().equals(providedPassword)) {
                     return employee; // Return the matched Employee object
@@ -47,7 +50,8 @@ public class EmployeeServiceImpl implements EmployeeService {
         Task task = null;
         TaskService taskService = new TaskServiceImpl();
         System.out.println("The Tasks are:");
-        for (Task t : getAllTasks()) {
+        EmployeeDao employeeDao = new EmployeeDaoImpl();
+        for (Task t : employeeDao.getAllTasks()) {
             System.out.println(t.getTitle());
         }
 
@@ -77,11 +81,25 @@ public class EmployeeServiceImpl implements EmployeeService {
     }
 
     @Override
+    public void initializeEmployee(Employee employee) {
+
+        employee.setFirstName("Muhammad");
+        employee.setLastName("Hanan");
+        employee.setUsername("m.hanan");
+        employee.setPassword("Ts12");
+        employee.setUserRole("Employee");
+        EmployeeDao employeeDao = new EmployeeDaoImpl();
+        employeeDao.setEmployees(employee);
+
+    }
+
+    @Override
     public void inProgressToInReview(Employee employee) {
         Task task = null;
+        EmployeeDao employeeDao = new EmployeeDaoImpl();
         TaskService taskService = new TaskServiceImpl();
         System.out.println("The Tasks are:");
-        for (Task t : getAllTasks()) {
+        for (Task t : employeeDao.getAllTasks()) {
             System.out.println(t.getTitle());
         }
 
@@ -115,17 +133,14 @@ public class EmployeeServiceImpl implements EmployeeService {
         }
     }
 
-    @Override
-    public void createEmployee(String firstname, String lastname, String username, String password) {
-        Employee e = new Employee(firstname, lastname, username, password);
-        System.out.println("Employee created successfully.");
 
-    }
 
     @Override
     public String getEmployeeByName(String name) {
 
-        for (Manager manager : getManagers()) {
+        ManagerDao managerDao = new ManagerDaoImpl();
+        EmployeeDao employeeDao = new EmployeeDaoImpl();
+        for (Manager manager : managerDao.getManagers()) {
             String name0 = manager.getFirstName() + " " + manager.getLastName();
             if (name0.equalsIgnoreCase(name)) {
 
@@ -133,7 +148,7 @@ public class EmployeeServiceImpl implements EmployeeService {
             }
         }
 
-        for (Employee employee : getEmployees()) {
+        for (Employee employee : employeeDao.getEmployees()) {
             String name0 = employee.getFirstName() + " " + employee.getLastName();
             if (name0.equalsIgnoreCase(name)) {
                 return employee.getFirstName() + " " + employee.getLastName();
@@ -145,9 +160,9 @@ public class EmployeeServiceImpl implements EmployeeService {
     @Override
     public void viewAllEmployees() {
         System.out.println("The Employees of the System are:");
-
-        for (int i = 0; i < getEmployees().size(); i++) {
-            System.out.println(getEmployees().get(i).getFirstName() + " " + getEmployees().get(i).getLastName());
+        EmployeeDao employeeDao = new EmployeeDaoImpl();
+        for (int i = 0; i < employeeDao.getEmployees().size(); i++) {
+            System.out.println(employeeDao.getEmployees().get(i).getFirstName() + " " + employeeDao.getEmployees().get(i).getLastName());
 
         }
 

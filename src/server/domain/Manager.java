@@ -1,4 +1,6 @@
 package server.domain;
+import server.dao.ManagerDao;
+import server.dao.implementation.ManagerDaoImpl;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,7 +14,12 @@ public class Manager extends User {
         this.setPassword(password);
         this.setFirstName(firstname);
         this.setLastName(lastname);
-        this.addManager(this);
+        ManagerDao managerDao = new ManagerDaoImpl();
+        managerDao.addManager(this);
+    }
+
+    public Manager() {
+
     }
 
     public static List<Manager> getManagers() {

@@ -1,11 +1,11 @@
 package server.service.Implementation;
 
+import server.dao.EmployeeDao;
+import server.dao.implementation.EmployeeDaoImpl;
 import server.domain.Task;
 import server.service.TaskHistoryService;
 
 import java.util.Scanner;
-
-import static server.domain.Employee.getAllTasks;
 
 public class TaskHistoryServiceImpl implements TaskHistoryService {
 
@@ -16,7 +16,8 @@ public class TaskHistoryServiceImpl implements TaskHistoryService {
         Scanner scan = new Scanner(System.in);
         Task task = null;
         System.out.println("The Tasks are:");
-        for (Task t : getAllTasks()) {
+        EmployeeDao employeeDao = new EmployeeDaoImpl();
+        for (Task t : employeeDao.getAllTasks()) {
             System.out.println(t.getTitle());
         }
 

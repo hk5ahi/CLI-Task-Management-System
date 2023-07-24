@@ -1,5 +1,9 @@
 package server.service.Implementation;
 
+import server.dao.EmployeeDao;
+import server.dao.TaskDao;
+import server.dao.implementation.EmployeeDaoImpl;
+import server.dao.implementation.TaskDaoImpl;
 import server.domain.Comment;
 import server.domain.Task;
 import server.domain.User;
@@ -7,8 +11,6 @@ import server.service.CommentService;
 
 import java.time.LocalDateTime;
 import java.util.Scanner;
-
-import static server.domain.Employee.getAllTasks;
 
 public class CommentServiceImpl implements CommentService {
 
@@ -19,7 +21,8 @@ public class CommentServiceImpl implements CommentService {
         Scanner scan = new Scanner(System.in);
         Task task = null;
         System.out.println("The Tasks are:");
-        for (Task t : getAllTasks()) {
+        EmployeeDao employeeDao = new EmployeeDaoImpl();
+        for (Task t : employeeDao.getAllTasks()) {
             System.out.println(t.getTitle());
         }
 
@@ -36,7 +39,8 @@ public class CommentServiceImpl implements CommentService {
         c.setBody(message);
         c.setCreatedAt(LocalDateTime.now().toString());
         c.setCreatedBy(person.getFirstName() + " " + person.getLastName());
-        task.addComment(c);
+        TaskDao taskDao = new TaskDaoImpl();
+        taskDao.addComment(c, task);
         System.out.printf("The comment has been added successfully by %s.\n", person.getFirstName() + " " + person.getLastName());
 
     }

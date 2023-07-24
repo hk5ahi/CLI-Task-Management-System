@@ -1,9 +1,13 @@
 package server.service;
+
 import server.domain.Employee;
+
 public interface EmployeeService {
 
 
     void employeeCheck();
+
+    void initializeEmployee(Employee employee);
 
     Employee findEmployee(String providedUsername, String providedPassword);
 
@@ -15,6 +19,5 @@ public interface EmployeeService {
 
     void inProgressToInReview(Employee employee);
 
-    void createEmployee(String firstname, String lastname, String username, String password);
 
 }

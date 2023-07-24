@@ -1,6 +1,4 @@
 package server.domain;
-
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -19,8 +17,12 @@ public class Employee extends User {
         employees.add(this);
     }
 
-    public List<Task> getAssignedTasks() {
-        return assignedTasks;
+    public Employee() {
+
+    }
+
+    public List<Task> getAssignedTasks(Employee employee) {
+        return employee.assignedTasks;
     }
 
     public static void addTask(Task allTasks) {
@@ -31,8 +33,8 @@ public class Employee extends User {
         return allTasks;
     }
 
-    public void setAssignedTasks(Task assignedTask) {
-        this.assignedTasks.add(assignedTask);
+    public void setAssignedTasks(Task assignedTask, Employee employee) {
+        employee.assignedTasks.add(assignedTask);
     }
 
     public static List<Employee> getEmployees() {

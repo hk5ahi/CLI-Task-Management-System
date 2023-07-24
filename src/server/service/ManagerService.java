@@ -6,7 +6,7 @@ public interface ManagerService {
 
     Manager findManager(String username, String password);
 
-    void createManager(String firstname, String lastname, String username, String password);
+    void initializeManager(Manager manager);
 
     void viewAllManagers();
 

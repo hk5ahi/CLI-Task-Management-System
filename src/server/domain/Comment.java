@@ -6,11 +6,6 @@ public class Comment {
     private String createdBy;
     private String body;
 
-    // Constructors
-    public Comment() {
-
-    }
-
 
     // Getters and Setters
     public String getCreatedAt() {

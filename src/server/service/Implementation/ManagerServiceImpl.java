@@ -1,5 +1,9 @@
 package server.service.Implementation;
 
+import server.dao.EmployeeDao;
+import server.dao.ManagerDao;
+import server.dao.implementation.EmployeeDaoImpl;
+import server.dao.implementation.ManagerDaoImpl;
 import server.domain.Manager;
 import server.domain.Task;
 import server.service.ManagerService;
@@ -8,15 +12,13 @@ import server.service.TaskService;
 import java.time.LocalDateTime;
 import java.util.Scanner;
 
-import static server.domain.Employee.getAllTasks;
-import static server.domain.Manager.getManagers;
-
 public class ManagerServiceImpl implements ManagerService {
 
     TaskService taskService = new TaskServiceImpl();
     @Override
     public Manager findManager(String providedUsername, String providedPassword) {
-        for (Manager manager : getManagers()) {
+        ManagerDao managerDao = new ManagerDaoImpl();
+        for (Manager manager : managerDao.getManagers()) {
             if (manager.getUsername().equals(providedUsername) && manager.getPassword().equals(providedPassword)) {
                 return manager; // Return the matched Employee object
             }
@@ -24,8 +26,17 @@ public class ManagerServiceImpl implements ManagerService {
         return null; // If no match found, return null
     }
 
+    @Override
+    public void initializeManager(Manager manager) {
+        manager.setFirstName("Muhammad");
+        manager.setLastName("Ubaid");
+        manager.setUsername("m.ubaid");
+        manager.setPassword("Ts12");
+        manager.setUserRole("Manager");
+        ManagerDao managerDao = new ManagerDaoImpl();
+        managerDao.addManager(manager);
 
-
+    }
 
 
     @Override
@@ -34,7 +45,8 @@ public class ManagerServiceImpl implements ManagerService {
         Scanner scan = new Scanner(System.in);
         Task task = null;
         System.out.println("The Tasks are:");
-        for (Task t : getAllTasks()) {
+        EmployeeDao employeeDao = new EmployeeDaoImpl();
+        for (Task t : employeeDao.getAllTasks()) {
             System.out.println(t.getTitle());
         }
 
@@ -65,10 +77,11 @@ public class ManagerServiceImpl implements ManagerService {
 
     @Override
     public void viewAllTasksCreatedByManager(Manager activeManager) {
+        EmployeeDao employeeDao = new EmployeeDaoImpl();
         System.out.println("The tasks which are created by Manager himself are: ");
-        for (int i = 0; i < getAllTasks().size(); i++) {
-            if (getAllTasks().get(i).getCreatedBy().equals(activeManager.getFirstName() + " " + activeManager.getLastName())) {
-                System.out.printf("The title of task is %s with its description which is %s and its employee is %s.\n", getAllTasks().get(i).getTitle(), getAllTasks().get(i).getDescription(), getAllTasks().get(i).getAssignee());
+        for (int i = 0; i < employeeDao.getAllTasks().size(); i++) {
+            if (employeeDao.getAllTasks().get(i).getCreatedBy().equals(activeManager.getFirstName() + " " + activeManager.getLastName())) {
+                System.out.printf("The title of task is %s with its description which is %s and its employee is %s.\n", employeeDao.getAllTasks().get(i).getTitle(), employeeDao.getAllTasks().get(i).getDescription(), employeeDao.getAllTasks().get(i).getAssignee());
             }
 
         }
@@ -77,19 +90,13 @@ public class ManagerServiceImpl implements ManagerService {
     }
 
     @Override
-    public void createManager(String firstname, String lastname, String username, String password) {
-
-        Manager m = new Manager(firstname, lastname, username, password);
-        System.out.println("Manager created successfully.");
-    }
-
-    @Override
     public void viewAllManagers() {
 
+        ManagerDao managerDao = new ManagerDaoImpl();
         System.out.println("The Managers of the System are:");
 
-        for (int i = 0; i < getManagers().size(); i++) {
-            System.out.println(getManagers().get(i).getFirstName() + " " + getManagers().get(i).getLastName());
+        for (int i = 0; i < managerDao.getManagers().size(); i++) {
+            System.out.println(managerDao.getManagers().get(i).getFirstName() + " " + managerDao.getManagers().get(i).getLastName());
 
         }
 

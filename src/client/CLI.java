@@ -1,4 +1,7 @@
 package client;
+
+import server.dao.TaskDao;
+import server.dao.implementation.TaskDaoImpl;
 import server.domain.Employee;
 import server.domain.Manager;
 import server.domain.Supervisor;
@@ -16,74 +19,12 @@ import java.util.Scanner;
 public class CLI {
     public static void main(String[] args) throws InterruptedException {
         Scanner scanner = new Scanner(System.in);
+        Employee employee = new Employee();
+        Manager manager = new Manager();
         EmployeeService employeeService = new EmployeeServiceImpl();
         System.out.println("Welcome to the CLI Task Management System!!!");
-        System.out.println("Welcome to sSupervisor Login System");
-        System.out.println("You have to create at-least one employee and manager user to access the employee and manager login system.");
-        System.out.println("Hey Supervisor!!");
-        System.out.println("Please Enter the Credentials:");
-
-        // Variables to store username and password
-        String u22;
-        String p22;
         SupervisorService supervisorService = new SupervisorServiceImpl();
-
-        Supervisor sup1 = null;
-        // Loop until the credentials are verified
-        do {
-            System.out.print("Username: ");
-            u22 = scanner.nextLine();
-            System.out.print("Password: ");
-            p22 = scanner.nextLine();
-
-            sup1 = supervisorService.verifyCredentials(u22, p22);
-
-            if (sup1 != null) {
-                System.out.println("Credentials verified. Access granted!");
-                // Perform actions for authenticatedEmployee here
-                break;
-            } else {
-                System.out.println("Invalid credentials. Please try again.");
-            }
-        } while (true);
-        boolean employeeCreated = false;
-        boolean managerCreated = false;
-
-        do {
-            System.out.println("Press 1 to create an employee user");
-            System.out.println("Press 2 to create a manager user");
-            int n = Integer.parseInt(scanner.nextLine());
-
-            if (n == 1) {
-                System.out.println("Please enter the First Name.");
-                String f = scanner.nextLine();
-                System.out.println("Please enter the Last Name.");
-                String l = scanner.nextLine();
-                System.out.println("Please enter the username.");
-                String u = scanner.nextLine();
-                System.out.println("Please enter the password.");
-                String p = scanner.nextLine();
-
-                employeeService.createEmployee(f, l, u, p);
-                employeeCreated = true;
-            } else if (n == 2) {
-                System.out.println("Please enter the First Name.");
-                String f1 = scanner.nextLine();
-                System.out.println("Please enter the Last Name.");
-                String l1 = scanner.nextLine();
-                System.out.println("Please enter the username.");
-                String u1 = scanner.nextLine();
-                System.out.println("Please enter the password.");
-                String p1 = scanner.nextLine();
-                ManagerService managerService = new ManagerServiceImpl();
-                managerService.createManager(f1, l1, u1, p1);
-                managerCreated = true;
-            } else {
-                System.out.println("Invalid input. Please try again.");
-            }
-        } while (!employeeCreated || !managerCreated);
-
-
+        ManagerService managerService = new ManagerServiceImpl();
         int input;
 
         while (true) {
@@ -100,7 +41,7 @@ public class CLI {
 
                     System.out.println("Hey Employee!!");
                     System.out.println("Please Enter the Credentials:");
-
+                    employeeService.initializeEmployee(employee);
 
                     String u, p;
                     Employee authenticatedEmployee;
@@ -131,19 +72,20 @@ public class CLI {
                 case 2:
                     System.out.println("Hey Manager!!");
                     System.out.println("Please Enter the Credentials:");
-
+                    managerService.initializeManager(manager);
                     // Variables to store username and password
-                    String u1, p1;
+
+                    String manager_username;
+                    String manager_password;
                     Manager authenticatedManager;
 
 
                     do {
                         System.out.print("Username: ");
-                        u1 = scanner.nextLine();
+                        manager_username = scanner.nextLine();
                         System.out.print("Password: ");
-                        p1 = scanner.nextLine();
-                        ManagerService managerService = new ManagerServiceImpl();
-                        authenticatedManager = managerService.findManager(u1, p1);
+                        manager_password = scanner.nextLine();
+                        authenticatedManager = managerService.findManager(manager_username, manager_password);
 
                         if (authenticatedManager != null) {
                             System.out.println("Credentials verified. Access granted!");
@@ -156,37 +98,38 @@ public class CLI {
                     //working of manager here
                     System.out.print("Please enter title for task to create.\n");
                     String t1 = scanner.nextLine();
-                    TaskService anothertaskService = new TaskServiceImpl();
+                    TaskDao anothertaskService = new TaskDaoImpl();
+                    TaskService taskService1 = new TaskServiceImpl();
                     anothertaskService.createTask(authenticatedManager, t1, "Understand the situation and code it", 2);
                     System.out.print("Please enter title for task to create.\n");
                     String t2 = scanner.nextLine();
                     anothertaskService.createTask(authenticatedManager, t2, "Debug the errors and remove it", 2);
-                    anothertaskService.assignTask();
+                    taskService1.assignTask();
                     //authenticatedManager.addComments("Improve work!!");
                     //authenticatedManager.viewallTasksbyEmp();
                     //authenticatedManager.viewallTasksbyStat();
                     //authenticatedManager.viewallTasks();
-                    anothertaskService.viewAllTasksByEmployeeAndStatusCreatedBySingleManager(authenticatedManager);
+                    taskService1.viewAllTasksByEmployeeAndStatusCreatedBySingleManager(authenticatedManager);
                     break;
                 case 3:
                     System.out.println("Hey Supervisor!!");
                     System.out.println("Please Enter the Credentials:");
 
                     // Variables to store username and password
-                    String u2;
-                    String p2;
-                    Supervisor supervisor = null;
+                    String supervisor_username;
+                    String supervisor_password;
+                    Supervisor innersupervisor = null;
 
                     // Loop until the credentials are verified
                     do {
                         System.out.print("Username: ");
-                        u2 = scanner.nextLine();
+                        supervisor_username = scanner.nextLine();
                         System.out.print("Password: ");
-                        p2 = scanner.nextLine();
+                        supervisor_password = scanner.nextLine();
 
-                        supervisor = supervisorService.verifyCredentials(u2, p2);
+                        innersupervisor = supervisorService.verifyCredentials(supervisor_username, supervisor_password);
 
-                        if (supervisor != null) {
+                        if (innersupervisor != null) {
                             System.out.println("Credentials verified. Access granted!");
                             // Perform actions for authenticatedEmployee here
                             break;
