@@ -1,277 +1,291 @@
 package server.service.Implementation;
 
-import server.dao.EmployeeDao;
-import server.dao.ManagerDao;
 import server.dao.implementation.EmployeeDaoImpl;
 import server.dao.implementation.ManagerDaoImpl;
+import server.dao.implementation.TaskDaoImpl;
 import server.domain.Employee;
 import server.domain.Manager;
 import server.domain.Task;
+import server.domain.User;
 import server.service.EmployeeService;
+import server.service.ManagerService;
 import server.service.TaskService;
+import server.utilities.Taskbytitle;
 
-import java.util.Scanner;
+import java.time.Duration;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.util.List;
 
 public class TaskServiceImpl implements TaskService {
 
     EmployeeService employeeService = new EmployeeServiceImpl();
+    private TaskDaoImpl taskDao = TaskDaoImpl.getInstance();
+    private Taskbytitle taskbytitle = new Taskbytitle();
+
+    ManagerService managerService = new ManagerServiceImpl();
+    private EmployeeDaoImpl employeeDao = EmployeeDaoImpl.getInstance();
+
+    private ManagerDaoImpl managerDao = ManagerDaoImpl.getInstance();
 
     @Override
     public void viewAllTasks() {
-        EmployeeDao employeeDao = new EmployeeDaoImpl();
-        for (int i = 0; i < employeeDao.getAllTasks().size(); i++) {
+        for (Task task : taskDao.getAllTasksbyEmployee()) {
+            String assigneeName = task.getAssignee().getFirstName() + " " + task.getAssignee().getLastName();
+            String creatorName = task.getCreatedBy().getFirstName() + " " + task.getCreatedBy().getLastName();
 
-            System.out.printf("The title of task is %s with its description which is %s whose employee is %s and  its status is %s.It is created by %s", employeeDao.getAllTasks().get(i).getTitle(), employeeDao.getAllTasks().get(i).getDescription(), employeeDao.getAllTasks().get(i).getAssignee(), employeeDao.getAllTasks().get(i).getTaskStatus(), employeeDao.getAllTasks().get(i).getCreatedBy());
+            System.out.printf("The title of task is %s with its description which is %s whose employee is %s and its status is %s. It is created by %s.%n",
+                    task.getTitle(), task.getDescription(), assigneeName, task.getTaskStatus(), creatorName);
+        }
+    }
 
+    @Override
+    public void createTask(Manager activeManager, String title, String description, int total_time) {
+        Task task = new Task(title, description, total_time);
+        task.setCreatedBy(activeManager);
+        task.setCreatedAt(Instant.now().toString());
+        taskDao.addTask(task);
+    }
 
+    @Override
+    public void changeTaskStatus(Task task, Task.Status status, User person) {
+        String currentStatus = task.getTaskStatus();
+        boolean isValidChange = false;
+
+        switch (person.getUserRole()) {
+            case "Employee":
+                if (status == Task.Status.IN_REVIEW) {
+                    if (currentStatus.equals(Task.Status.IN_PROGRESS.toString())) {
+                        LocalDateTime endTime = LocalDateTime.now();
+                        Duration duration = Duration.between(task.getStartTime(), endTime);
+                        long minutes = duration.toMinutes();
+                        if (minutes >= task.getTotal_time()) {
+                            isValidChange = true;
+                        } else {
+                            System.out.printf("The minimum time for the task to stay in the IN_PROGRESS state is %d minutes.", task.getTotal_time());
+                        }
+                    } else {
+                        System.out.println("The task is not in a desirable state.");
+                    }
+                } else if (status == Task.Status.IN_PROGRESS) {
+                    if (currentStatus.equals(Task.Status.CREATED.toString())) {
+                        isValidChange = true;
+                    } else {
+                        System.out.println("The task is not in a desirable state.");
+                    }
+                }
+                break;
+
+            case "Manager":
+                if (currentStatus.equals(Task.Status.IN_REVIEW.toString())) {
+                    isValidChange = true;
+                } else {
+                    System.out.println("The task is not in a desirable state.");
+                }
+                break;
+
+            default:
+                System.out.println("Invalid role.");
+                break;
         }
 
+        if (isValidChange) {
+            task.setTaskStatus(status.toString());
+            task.getHistory().setTimestamp(Instant.now());
+            task.getHistory().setOldStatus(Task.Status.valueOf(currentStatus));
+            task.getHistory().setNewStatus(status);
+
+            User user = new User();
+            user.setFirstName(person.getFirstName());
+            user.setLastName(person.getLastName());
+            task.getHistory().setMovedBy(user);
+
+            System.out.println("The task has been moved successfully to " + status + " state.");
+        }
     }
+
 
     @Override
     public void viewAllTasksByStatusCreatedBySingleManager(Manager activeManager) {
-        EmployeeDao employeeDao = new EmployeeDaoImpl();
-        for (int i = 0; i < employeeDao.getAllTasks().size(); i++) {
-            if (employeeDao.getAllTasks().get(i).getCreatedBy().equals(activeManager.getFirstName() + " " + activeManager.getLastName())) {
+        String managerName = activeManager.getFirstName() + " " + activeManager.getLastName();
 
-                System.out.printf("The title of task is %s with its description which is %s and its status is %s.\n", employeeDao.getAllTasks().get(i).getTitle(), employeeDao.getAllTasks().get(i).getDescription(), employeeDao.getAllTasks().get(i).getTaskStatus());
+        for (Task task : taskDao.getAllTasksbyEmployee()) {
+            String createdBy = task.getCreatedBy().getFirstName() + " " + task.getCreatedBy().getLastName();
+
+            if (createdBy.equals(managerName)) {
+                System.out.printf("The title of task is %s with its description which is %s and its status is %s.\n",
+                        task.getTitle(), task.getDescription(), task.getTaskStatus());
             }
-
         }
     }
+
 
     @Override
     public void viewAllTasksByEmployeeAndStatusCreatedBySingleManager(Manager activeManager) {
-        EmployeeDao employeeDao = new EmployeeDaoImpl();
-        for (int i = 0; i < employeeDao.getAllTasks().size(); i++) {
-            if (employeeDao.getAllTasks().get(i).getCreatedBy().equals(activeManager.getFirstName() + " " + activeManager.getLastName())) {
+        String managerName = activeManager.getFirstName() + " " + activeManager.getLastName();
 
-                System.out.printf("The title of task is %s with its description which is %s whose employee is %s and  its status is %s.\n", employeeDao.getAllTasks().get(i).getTitle(), employeeDao.getAllTasks().get(i).getDescription(), employeeDao.getAllTasks().get(i).getAssignee(), employeeDao.getAllTasks().get(i).getTaskStatus());
+        for (Task task : taskDao.getAllTasksbyEmployee()) {
+            String createdBy = task.getCreatedBy().getFirstName() + " " + task.getCreatedBy().getLastName();
+            String assigneeName = task.getAssignee().getFirstName() + " " + task.getAssignee().getLastName();
+
+            if (createdBy.equals(managerName)) {
+                System.out.printf("The title of task is %s with its description which is %s whose employee is %s and its status is %s.\n",
+                        task.getTitle(), task.getDescription(), assigneeName, task.getTaskStatus());
             }
-
         }
     }
 
+
     @Override
     public void viewTasksByStatus() {
-        EmployeeDao employeeDao = new EmployeeDaoImpl();
+        List<Task> tasks = taskDao.getAllTasksbyEmployee();
 
-        for (int i = 0; i < employeeDao.getAllTasks().size(); i++) {
-
-            System.out.println("The tasks whose status are CREATED are:");
-            if (employeeDao.getAllTasks().get(i).getTaskStatus().equals("CREATED")) {
-
-                System.out.printf("The title of task is %s with its description which is %s.", employeeDao.getAllTasks().get(i).getTitle(), employeeDao.getAllTasks().get(i).getDescription());
-            }
-
+        if (tasks.isEmpty()) {
+            System.out.println("No Tasks");
+            return;
         }
-        System.out.println(" ");
 
-        for (int i = 0; i < employeeDao.getAllTasks().size(); i++) {
+        System.out.println("The tasks whose status are CREATED are:");
+        printTasksByStatus(tasks, Task.Status.CREATED);
 
-            System.out.println("The tasks whose status are In Progress are:");
-            if (employeeDao.getAllTasks().get(i).getTaskStatus().equals("IN_PROGRESS")) {
+        System.out.println("\nThe tasks whose status are IN_PROGRESS are:");
+        printTasksByStatus(tasks, Task.Status.IN_PROGRESS);
 
-                System.out.printf("The title of task is %s with its description which is %s.", employeeDao.getAllTasks().get(i).getTitle(), employeeDao.getAllTasks().get(i).getDescription());
+        System.out.println("\nThe tasks whose status are IN_REVIEW are:");
+        printTasksByStatus(tasks, Task.Status.IN_REVIEW);
+
+        System.out.println("\nThe tasks whose status are COMPLETED are:");
+        printTasksByStatus(tasks, Task.Status.COMPLETED);
+    }
+
+    @Override
+    public void printTasksByStatus(List<Task> tasks, Task.Status status) {
+        for (Task task : tasks) {
+            if (task.getTaskStatus().equals(status.toString())) {
+                System.out.printf("The title of task is %s with its description which is %s.\n", task.getTitle(), task.getDescription());
             }
-
         }
-        System.out.println(" ");
-        for (int i = 0; i < employeeDao.getAllTasks().size(); i++) {
-
-            System.out.println("The tasks whose status are In Review are:");
-            if (employeeDao.getAllTasks().get(i).getTaskStatus().equals("IN_REVIEW")) {
-
-                System.out.printf("The title of task is %s with its description which is %s.", employeeDao.getAllTasks().get(i).getTitle(), employeeDao.getAllTasks().get(i).getDescription());
-            }
-
-        }
-        System.out.println(" ");
-        for (int i = 0; i < employeeDao.getAllTasks().size(); i++) {
-
-            System.out.println("The tasks whose status are COMPLETED are:");
-            if (employeeDao.getAllTasks().get(i).getTaskStatus().equals("COMPLETED")) {
-
-                System.out.printf("The title of task is %s with its description which is %s.", employeeDao.getAllTasks().get(i).getTitle(), employeeDao.getAllTasks().get(i).getDescription());
-            }
-
-        }
-        System.out.println(" ");
-
     }
 
     @Override
     public void assignTask() {
-        String title1;
-        String name11 = null;
-        Task task = null;
-        Scanner scan = new Scanner(System.in);
-        EmployeeDao employeeDao = new EmployeeDaoImpl();
-        System.out.println("The Tasks are:");
-        for (Task t : employeeDao.getAllTasks()) {
-            System.out.println(t.getTitle());
+        Task task = taskbytitle.gettaskbytitle();
+
+        if (task == null) {
+            System.out.println("Task not found.");
+            return;
         }
 
-        // Loop until the correct title is entered
-        do {
-            System.out.println("Enter the title of the task that you want to assign.");
-            String title = scan.nextLine();
-            task = getTaskByTitle(title);
-            if (task == null) {
-                System.out.println("Wrong title entered");
-            }
-        } while (task == null);
-
-        title1 = task.getTitle();
+        String taskTitle = task.getTitle();
 
         System.out.println("The Employees are:");
         for (Employee employee : employeeDao.getEmployees()) {
             System.out.println(employee.getFirstName() + " " + employee.getLastName());
         }
 
-        // Loop until the correct name is entered and it's not the manager's name
+        User assignee = null;
+
         do {
-            System.out.println("Enter the full name of the employee that you want to assign.");
-            String name = scan.nextLine();
-            name11 = employeeService.getEmployeeByName(name);
+            String name = taskbytitle.nameofEmployee();
+            assignee = employeeService.getEmployeeByName(name);
+            Manager manager = (Manager) managerService.getManagerByName(name);
 
-            // Check if the selected employee is the manager
-            if (name11.equals(" ")) {
+            if (manager != null) {
+                System.out.println("The task cannot be assigned to a manager.");
+            } else if (assignee != null) {
                 // If the name is valid and not the manager's name, proceed with task assignment
-                System.out.println("The task can not be assigned to manager.");
-
-            } else if (name11 != null && !name11.equals(" ")) {
-                // If the name is the manager's name, display a message and re-loop to get a different name
                 break;
             } else {
                 // If the name is not found, display a message and re-loop to get a different name
-                System.out.println("Wrong name entered");
+                System.out.println("Employee not found.");
             }
         } while (true);
 
-        if (task != null && name11 != null) {
-
+        if (assignee != null) {
             if (task.isAssigned()) {
-                System.out.println("Already assigned task.");
+                System.out.println("Task is already assigned.");
             } else {
-                task.setAssignee(name11);
+                task.setAssignee(assignee);
                 task.setAssigned(true);
-                System.out.printf("The Task titled %s is assigned to %s.\n", title1, name11);
-                // Add the task to the assigned tasks list of the selected employee
-                for (Employee employee : employeeDao.getEmployees()) {
-                    String name = employee.getFirstName() + " " + employee.getLastName();
-                    if (name.equalsIgnoreCase(name11)) {
-                        employee.setAssignedTasks(task, employee);
-                        break;
+                System.out.printf("The Task titled %s is assigned to %s.\n", taskTitle, assignee.getFirstName() + " " + assignee.getLastName());
+            }
+        }
+    }
+
+
+    @Override
+    public void viewTasksByUser(User person) {
+        if (person.getUserRole().equals("Employee")) {
+            System.out.println("The tasks are categorized employee-wise with their respective statuses.");
+
+            for (Employee employee : employeeDao.getEmployees()) {
+                System.out.printf("The name of Employee is %s %s and its assigned tasks with their status are:\n",
+                        employee.getFirstName(), employee.getLastName());
+
+                for (Task task : taskDao.getAllTasksbyEmployee()) {
+                    if (task.getAssignee().equals(employee)) {
+                        System.out.printf("The title of task is %s with its description which is %s and its status is %s and is created by %s.\n",
+                                task.getTitle(), task.getDescription(), task.getTaskStatus(),
+                                task.getCreatedBy().getFirstName() + " " + task.getCreatedBy().getLastName());
+                    }
+                }
+            }
+        } else {
+            System.out.println("The tasks are categorized manager-wise with their respective statuses.");
+
+            for (Manager manager : managerDao.getManagers()) {
+                System.out.printf("The name of Manager is %s %s and its created tasks with their status are:\n",
+                        manager.getFirstName(), manager.getLastName());
+
+                for (Task task : taskDao.getAllTasksbyEmployee()) {
+                    if (task.getCreatedBy().equals(manager)) {
+                        System.out.printf("The title of task is %s with its description which is %s and its status is %s.\n",
+                                task.getTitle(), task.getDescription(), task.getTaskStatus());
                     }
                 }
             }
         }
     }
 
-    @Override
-    public void viewTasksByEmployee() {
-        System.out.println("The tasks are categorized employee-wise with their respective statuses.");
-        EmployeeDao employeeDao = new EmployeeDaoImpl();
-        for (int i = 0; i < employeeDao.getEmployees().size(); i++) {
-
-            System.out.printf("The name of Employee is %s %s and its assigned tasks with their status are:\n", employeeDao.getEmployees().get(i).getFirstName(), employeeDao.getEmployees().get(i).getLastName());
-
-            for (int j = 0; j < employeeDao.getAllTasks().size(); j++) {
-                if (employeeDao.getAllTasks().get(j).getAssignee().equals(employeeDao.getEmployees().get(i).getFirstName() + " " + employeeDao.getEmployees().get(i).getLastName())) {
-
-                    System.out.printf("The title of task is %s with its description which is %s and its status is %s and is created by %s.", employeeDao.getAllTasks().get(j).getTitle(), employeeDao.getAllTasks().get(j).getDescription(), employeeDao.getAllTasks().get(j).getTaskStatus(), employeeDao.getAllTasks().get(i).getCreatedBy());
-
-                }
-
-            }
-
-        }
-
-
-    }
-
-    @Override
-    public void viewTasksByManager() {
-        ManagerDao managerDao = new ManagerDaoImpl();
-        EmployeeDao employeeDao = new EmployeeDaoImpl();
-        System.out.println("The tasks are categorized manager-wise with their respective statuses.");
-
-        for (int i = 0; i < managerDao.getManagers().size(); i++) {
-
-            System.out.printf("The name of Manager is %s %s and its created tasks with their status are:\n", managerDao.getManagers().get(i).getFirstName(), managerDao.getManagers().get(i).getLastName());
-
-            for (int j = 0; j < employeeDao.getAllTasks().size(); j++) {
-                if (employeeDao.getAllTasks().get(j).getCreatedBy().equals(managerDao.getManagers().get(i).getFirstName() + " " + managerDao.getManagers().get(i).getLastName())) {
-
-                    System.out.printf("The title of task is %s with its description which is %s and its status is %s.", employeeDao.getAllTasks().get(j).getTitle(), employeeDao.getAllTasks().get(j).getDescription(), employeeDao.getAllTasks().get(j).getTaskStatus());
-
-                }
-
-            }
-
-        }
-
-
-    }
 
     @Override
     public void viewAssignedTasks(Employee employee) {
-        EmployeeDao employeeDao = new EmployeeDaoImpl();
-        if (employeeDao.getAssignedTasks(employee).size() != 0) {
+        boolean hasAssignedTasks = false;
 
+        System.out.println("The assigned tasks for the employee are:");
 
-            System.out.print("The assigned tasks for the employee are:\n");
-            for (int i = 0; i < employeeDao.getAssignedTasks(employee).size(); i++) {
-                System.out.print(employeeDao.getAssignedTasks(employee).get(i).getDescription());
+        for (Task task : taskDao.getAllTasksbyEmployee()) {
+            if (task.getAssignee().equals(employee)) {
+                System.out.println(task.getDescription());
+                hasAssignedTasks = true;
             }
-        } else {
+        }
 
+        if (!hasAssignedTasks) {
             System.out.println("No Tasks.");
         }
     }
 
+
     @Override
     public Task getTaskByTitle(String title) {
-        EmployeeDao employeeDao = new EmployeeDaoImpl();
-        for (Task task : employeeDao.getAllTasks()) {
+        for (Task task : taskDao.getAllTasksbyEmployee()) {
             if (task.getTitle().equalsIgnoreCase(title)) {
                 return task;
             }
         }
         return null; // Task not found
-
     }
 
 
 
     @Override
-
     public void archiveTask() {
-        Scanner scan = new Scanner(System.in);
-        Task task = null;
-        EmployeeDao employeeDao = new EmployeeDaoImpl();
-        System.out.println("The Tasks are:");
-        for (Task t : employeeDao.getAllTasks()) {
-            System.out.println(t.getTitle());
-        }
-
-        do {
-            System.out.println("Enter the title of task that you want to archive.");
-            String title = scan.nextLine();
-            task = getTaskByTitle(title);
-            if (task == null) {
-                System.out.println("Wrong title entered");
-            }
-        } while (task == null);
-
+        Task task = taskbytitle.gettaskbytitle();
         task.setAssigned(false);
         task.setAssignee(null);
-        //status of task !!!!
-        //task.taskStatus= String.valueOf(server.domain.Task.Status.CREATED);
 
-        System.out.println("The task has been archive successfully.");
-
+        System.out.println("The task has been archived successfully.");
     }
 
 

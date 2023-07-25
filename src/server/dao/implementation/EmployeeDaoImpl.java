@@ -1,47 +1,43 @@
 package server.dao.implementation;
+
 import server.dao.EmployeeDao;
 import server.domain.Employee;
-import server.domain.Task;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class EmployeeDaoImpl implements EmployeeDao {
-    @Override
-    public List<Task> getAssignedTasks(Employee employee) {
 
-        return employee.getAssignedTasks(employee);
+    private static EmployeeDaoImpl instance;  // Singleton instance
+    private List<Employee> employees = new ArrayList<>();
+
+    // Private constructor to prevent external instantiation
+    private EmployeeDaoImpl() {
     }
 
-    @Override
-    public void addTask(Task task) {
-        Employee.getAllTasks().add(task);
-    }
-
-    @Override
-    public List<Task> getAllTasks() {
-        return Employee.getAllTasks();
-    }
-
-    @Override
-    public void setAssignedTasks(Task assignedTask, Employee employee) {
-        employee.getAssignedTasks(employee).add(assignedTask);
+    // Method to get the Singleton instance
+    public static EmployeeDaoImpl getInstance() {
+        if (instance == null) {
+            instance = new EmployeeDaoImpl();
+        }
+        return instance;
     }
 
     @Override
     public List<Employee> getEmployees() {
-        return Employee.getEmployees();
+        return employees;
     }
 
     @Override
-    public void setEmployees(Employee employee) {
-        Employee.getEmployees().add(employee);
+    public void addEmployee(Employee employee) {
+        employees.add(employee);
     }
 
     @Override
     public void createEmployee(String firstname, String lastname, String username, String password) {
-        Employee e = new Employee(firstname, lastname, username, password);
+        Employee employee = new Employee(firstname, lastname, username, password);
         System.out.println("Employee created successfully.");
-        setEmployees(e);
-
+        addEmployee(employee);
     }
+
 }

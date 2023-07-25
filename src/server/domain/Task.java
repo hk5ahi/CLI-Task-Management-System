@@ -1,7 +1,6 @@
 package server.domain;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
+
+import java.time.Instant;
 
 public class Task {
 
@@ -17,13 +16,11 @@ public class Task {
     private String title;
     private String description;
     private String createdAt;
-    private String createdBy;
+    private User createdBy;
     private int total_time;
-    private String assignee;
-    private List<Comment> comments = new ArrayList<>();
+    private User assignee;
     private boolean assigned;
-
-    private LocalDateTime startTime;
+    private Instant startTime;
 
     public Task(String title, String description, int total_time) {
         this.setTaskStatus(String.valueOf(Status.CREATED));
@@ -74,11 +71,11 @@ public class Task {
         this.createdAt = createdAt;
     }
 
-    public String getCreatedBy() {
+    public User getCreatedBy() {
         return createdBy;
     }
 
-    public void setCreatedBy(String createdBy) {
+    public void setCreatedBy(User createdBy) {
         this.createdBy = createdBy;
     }
 
@@ -90,20 +87,12 @@ public class Task {
         this.total_time = total_time;
     }
 
-    public String getAssignee() {
+    public User getAssignee() {
         return assignee;
     }
 
-    public void setAssignee(String assignee) {
+    public void setAssignee(User assignee) {
         this.assignee = assignee;
-    }
-
-    public List<Comment> getComments(Task task) {
-        return task.comments;
-    }
-
-    public void addComment(Comment comment) {
-        this.comments.add(comment);
     }
 
     public boolean isAssigned() {
@@ -114,11 +103,11 @@ public class Task {
         this.assigned = assigned;
     }
 
-    public LocalDateTime getStartTime() {
+    public Instant getStartTime() {
         return startTime;
     }
 
-    public void setStartTime(LocalDateTime startTime) {
+    public void setStartTime(Instant startTime) {
         this.startTime = startTime;
     }
 }

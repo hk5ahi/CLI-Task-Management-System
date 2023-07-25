@@ -1,15 +1,15 @@
 package server.service;
-import server.domain.Supervisor;
 
+import server.domain.Supervisor;
 
 public interface SupervisorService {
 
-    void initializeSupervisor(Supervisor supervisor);
+    // Initialize supervisor
+    void initializeSupervisor();
 
+    // Verify supervisor credentials
     Supervisor verifyCredentials(String username, String password);
 
+    // View supervisor details
     void viewSupervisor();
-
-
 }
-

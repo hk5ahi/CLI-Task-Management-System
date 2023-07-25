@@ -1,33 +1,40 @@
 package server.dao.implementation;
 
-import server.dao.EmployeeDao;
 import server.dao.TaskDao;
-import server.domain.Comment;
-import server.domain.Manager;
 import server.domain.Task;
 
-import java.time.LocalTime;
+import java.util.ArrayList;
 import java.util.List;
 
 public class TaskDaoImpl implements TaskDao {
 
-    @Override
-    public List<Comment> getComments(Task task) {
-        return task.getComments(task);
+
+    private static TaskDaoImpl instance;  // Singleton instance
+    private List<Task> Tasks = new ArrayList<>();
+
+    // Private constructor to prevent external instantiation
+    private TaskDaoImpl() {
     }
 
-    @Override
-    public void addComment(Comment comment, Task task) {
-        task.getComments(task).add(comment);
+    // Method to get the Singleton instance
+    public static TaskDaoImpl getInstance() {
+        if (instance == null) {
+            instance = new TaskDaoImpl();
+        }
+        return instance;
     }
 
-    @Override
-    public void createTask(Manager activeManager, String title, String description, int total_time) {
-        Task t = new Task(title, description, total_time);
-        t.setCreatedBy(activeManager.getFirstName() + " " + activeManager.getLastName());
 
-        t.setCreatedAt(LocalTime.now().toString());
-        EmployeeDao employeeDao = new EmployeeDaoImpl();
-        employeeDao.addTask(t);
+    @Override
+    public void addTask(Task task) {
+        this.Tasks.add(task);
     }
+
+
+    @Override
+    public List<Task> getAllTasksbyEmployee() {
+        return this.Tasks;
+    }
+
+
 }

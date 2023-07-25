@@ -1,44 +1,46 @@
 package server.domain;
 
+import java.time.Instant;
+
 public class TaskHistory {
 
-    private String timestamp;
-    private String oldStatus;
-    private String newStatus;
-    private String movedBy;
 
+    private Instant timestamp;
+    private Task.Status oldStatus;
+    private Task.Status newStatus;
+    private User movedBy;
 
 
     // Getters and Setters for the properties
-    public String getTimestamp() {
+    public Instant getTimestamp() {
         return timestamp;
     }
 
-    public void setTimestamp(String timestamp) {
+    public void setTimestamp(Instant timestamp) {
         this.timestamp = timestamp;
     }
 
-    public String getOldStatus() {
+    public Task.Status getOldStatus() {
         return oldStatus;
     }
 
-    public void setOldStatus(String oldStatus) {
+    public void setOldStatus(Task.Status oldStatus) {
         this.oldStatus = oldStatus;
     }
 
-    public String getNewStatus() {
+    public Task.Status getNewStatus() {
         return newStatus;
     }
 
-    public void setNewStatus(String newStatus) {
+    public void setNewStatus(Task.Status newStatus) {
         this.newStatus = newStatus;
     }
 
-    public String getMovedBy() {
+    public User getMovedBy() {
         return movedBy;
     }
 
-    public void setMovedBy(String movedBy) {
+    public void setMovedBy(User movedBy) {
         this.movedBy = movedBy;
     }
 }

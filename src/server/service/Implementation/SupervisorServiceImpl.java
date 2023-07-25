@@ -1,27 +1,32 @@
 package server.service.Implementation;
+import server.dao.implementation.SupervisorDaoImpl;
 import server.domain.Supervisor;
 import server.service.SupervisorService;
-import static server.domain.Supervisor.getInstance;
+
 
 public class SupervisorServiceImpl implements SupervisorService {
 
+    private SupervisorDaoImpl supervisorDao = SupervisorDaoImpl.getInstance();
+    private Supervisor supervisor = supervisorDao.getSupervisorInfo();
+
     @Override
-    public void initializeSupervisor(Supervisor supervisor) {
-        supervisor.setFirstName("Muhammad");
-        supervisor.setLastName("Asif");
-        supervisor.setUsername("m.asif");
-        supervisor.setPassword("Ts12");
-        supervisor.setUserRole("Supervisor");
+    public void initializeSupervisor() {
+
+
+        supervisorDao.setSupervisorInfo("Muhammad", "Asif", "m.asif", "Ts12", "Supervisor");
 
     }
 
 
     @Override
     public Supervisor verifyCredentials(String providedUsername, String providedPassword) {
-        SupervisorService supervisorService = new SupervisorServiceImpl();
-        supervisorService.initializeSupervisor(getInstance());
-        if (getInstance().getUsername().equals(providedUsername) && getInstance().getPassword().equals(providedPassword)) {
-            return getInstance(); // Return the current Supervisor object
+        initializeSupervisor();
+
+        String storedUsername = supervisor.getUsername();
+        String storedPassword = supervisor.getPassword();
+
+        if (storedUsername.equals(providedUsername) && storedPassword.equals(providedPassword)) {
+            return supervisor; // Return the current Supervisor object
         } else {
             return null; // If the credentials don't match, return null
         }
@@ -30,12 +35,10 @@ public class SupervisorServiceImpl implements SupervisorService {
 
     @Override
     public void viewSupervisor() {
+
         System.out.println("The Supervisor of the System is: ");
-        System.out.println(getInstance().getFirstName() + " " + getInstance().getLastName());
-
+        System.out.println(supervisor.getFirstName() + " " + supervisor.getLastName());
     }
-
-
 
 
 

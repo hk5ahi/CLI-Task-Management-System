@@ -1,30 +1,26 @@
 package client;
 
-import server.dao.TaskDao;
-import server.dao.implementation.TaskDaoImpl;
 import server.domain.Employee;
 import server.domain.Manager;
 import server.domain.Supervisor;
-import server.service.EmployeeService;
-import server.service.Implementation.EmployeeServiceImpl;
-import server.service.Implementation.ManagerServiceImpl;
-import server.service.Implementation.SupervisorServiceImpl;
-import server.service.Implementation.TaskServiceImpl;
-import server.service.ManagerService;
-import server.service.SupervisorService;
-import server.service.TaskService;
+import server.domain.Task;
+import server.service.*;
+import server.service.Implementation.*;
+import server.utilities.Taskbytitle;
 
 import java.util.Scanner;
 
 public class CLI {
     public static void main(String[] args) throws InterruptedException {
         Scanner scanner = new Scanner(System.in);
-        Employee employee = new Employee();
+        Employee employee = new Employee(); // for initialization
         Manager manager = new Manager();
         EmployeeService employeeService = new EmployeeServiceImpl();
+        employeeService.initializeEmployee(employee);
         System.out.println("Welcome to the CLI Task Management System!!!");
         SupervisorService supervisorService = new SupervisorServiceImpl();
         ManagerService managerService = new ManagerServiceImpl();
+        managerService.initializeManager(manager);
         int input;
 
         while (true) {
@@ -41,19 +37,19 @@ public class CLI {
 
                     System.out.println("Hey Employee!!");
                     System.out.println("Please Enter the Credentials:");
-                    employeeService.initializeEmployee(employee);
 
-                    String u, p;
+
+                    String employee_username, employee_password;
                     Employee authenticatedEmployee;
-                    EmployeeService emp = new EmployeeServiceImpl();
+
 
                     do {
                         System.out.print("Username: ");
-                        u = scanner.nextLine();
+                        employee_username = scanner.nextLine();
                         System.out.print("Password: ");
-                        p = scanner.nextLine();
+                        employee_password = scanner.nextLine();
 
-                        authenticatedEmployee = emp.findEmployee(u, p);
+                        authenticatedEmployee = employeeService.findEmployee(employee_username, employee_password);
 
                         if (authenticatedEmployee != null) {
                             System.out.println("Credentials verified. Access granted!");
@@ -64,15 +60,86 @@ public class CLI {
                         }
                     } while (true);
 
-                    //working of employee here
-                    TaskService taskService = new TaskServiceImpl();
-                    taskService.viewAssignedTasks(authenticatedEmployee);
-                    taskService.viewAllTasks();
+
+                    boolean exitMenu = false;
+
+                    while (!exitMenu) {
+                        System.out.println("Please select the task that you would like to do:");
+                        System.out.println("1: Change task status");
+                        System.out.println("2: Add total time before moving it to IN_PROGRESS to IN_REVIEW");
+                        System.out.println("3: Add comments to a task");
+                        System.out.println("4: View all assigned tasks");
+                        System.out.println("5: View all tasks by status");
+                        System.out.println("6: Return");
+
+                        int input_employee = Integer.parseInt(scanner.nextLine());
+
+                        switch (input_employee) {
+                            case 1:
+
+                                Taskbytitle taskbytitle = new Taskbytitle();
+                                Task task = taskbytitle.gettaskbytitle();
+
+                                System.out.println("To which status do you want to change:");
+                                System.out.println("1:IN_PROGRESS");
+                                System.out.println("2:IN_REVIEW");
+
+                                int number = Integer.parseInt(scanner.nextLine());
+                                TaskService taskService = new TaskServiceImpl();
+                                if (number == 1) {
+                                    taskService.changeTaskStatus(task, Task.Status.valueOf("IN_PROGRESS"), authenticatedEmployee);
+
+                                } else if (number == 2) {
+                                    taskService.changeTaskStatus(task, Task.Status.valueOf("IN_REVIEW"), authenticatedEmployee);
+
+                                } else {
+
+                                    System.out.println("Invalid Input");
+                                }
+
+                                break;
+
+
+                            case 2:
+                                System.out.println("Enter the total time for task to be moved from IN Progress to IN Review.");
+                                int time = Integer.parseInt(scanner.nextLine());
+                                employeeService.addTotaltime(time);
+                                break;
+
+                            case 3:
+                                Taskbytitle taskTitle = new Taskbytitle();
+                                Task task1 = taskTitle.gettaskbytitle();
+                                System.out.println("Please enter the comments for the task.");
+                                String message = scanner.nextLine();
+                                CommentService commentService = new CommentServiceImpl();
+                                commentService.addComments(message, authenticatedEmployee, task1);
+                                break;
+
+                            case 4:
+                                TaskService taskService1 = new TaskServiceImpl();
+                                taskService1.viewAssignedTasks(authenticatedEmployee);
+                                break;
+
+                            case 5:
+                                TaskService taskService11 = new TaskServiceImpl();
+                                taskService11.viewTasksByStatus();
+                                break;
+
+                            case 6:
+                                exitMenu = true; // Set the flag to true to exit the loop
+                                break;
+
+                            default:
+                                System.out.println("Invalid Input");
+                                break;
+                        }
+                    }
+
                     break;
                 case 2:
                     System.out.println("Hey Manager!!");
                     System.out.println("Please Enter the Credentials:");
-                    managerService.initializeManager(manager);
+
                     // Variables to store username and password
 
                     String manager_username;
@@ -96,20 +163,32 @@ public class CLI {
                         }
                     } while (true);
                     //working of manager here
+
+                    System.out.println("Please select the task that you would like to do:");
+                    System.out.println("1: Create Task");
+                    System.out.println("2: Assign task to any employee");
+                    System.out.println("3: Change task status from IN_REVIEW to COMPLETED");
+                    System.out.println("4: Add comments to a task");
+                    System.out.println("5: View all tasks created by YOU");
+                    System.out.println("6: View all tasks by employee");
+                    System.out.println("7: View all tasks by status");
+                    System.out.println("8: View all tasks by employee and status");
+
+
                     System.out.print("Please enter title for task to create.\n");
                     String t1 = scanner.nextLine();
-                    TaskDao anothertaskService = new TaskDaoImpl();
-                    TaskService taskService1 = new TaskServiceImpl();
-                    anothertaskService.createTask(authenticatedManager, t1, "Understand the situation and code it", 2);
+                    TaskServiceImpl taskService = new TaskServiceImpl();
+
+                    taskService.createTask(authenticatedManager, t1, "Understand the situation and code it", 2);
                     System.out.print("Please enter title for task to create.\n");
                     String t2 = scanner.nextLine();
-                    anothertaskService.createTask(authenticatedManager, t2, "Debug the errors and remove it", 2);
-                    taskService1.assignTask();
+                    taskService.createTask(authenticatedManager, t2, "Debug the errors and remove it", 2);
+                    taskService.assignTask();
                     //authenticatedManager.addComments("Improve work!!");
                     //authenticatedManager.viewallTasksbyEmp();
                     //authenticatedManager.viewallTasksbyStat();
                     //authenticatedManager.viewallTasks();
-                    taskService1.viewAllTasksByEmployeeAndStatusCreatedBySingleManager(authenticatedManager);
+                    taskService.viewAllTasksByEmployeeAndStatusCreatedBySingleManager(authenticatedManager);
                     break;
                 case 3:
                     System.out.println("Hey Supervisor!!");
@@ -138,6 +217,21 @@ public class CLI {
                         }
                     } while (true);
                     // working of supervisor
+
+
+                    System.out.println("Please select the task that you would like to do:");
+                    System.out.println("1: View all tasks");
+                    System.out.println("2: View all tasks by status");
+                    System.out.println("3: View all tasks by Employee with status");
+                    System.out.println("4: View all tasks by Manager with status");
+                    System.out.println("5: Archive Task");
+                    System.out.println("6: Add comments to task");
+                    System.out.println("7: View Task History");
+                    System.out.println("8: View all Employees by User role");
+                    System.out.println("9: Create Employee User");
+                    System.out.println("10: Create Manager User");
+
+
                     break;
                 case 4:
                     System.out.println("Exiting...");

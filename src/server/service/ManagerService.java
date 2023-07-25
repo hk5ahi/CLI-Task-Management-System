@@ -1,6 +1,7 @@
 package server.service;
 
 import server.domain.Manager;
+import server.domain.User;
 
 public interface ManagerService {
 
@@ -10,9 +11,7 @@ public interface ManagerService {
 
     void viewAllManagers();
 
-
-    void inReviewToCompleted(Manager activeManager);
-
+    User getManagerByName(String name);
 
     void viewAllTasksCreatedByManager(Manager activeManager);
 

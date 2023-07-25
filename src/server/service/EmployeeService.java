@@ -1,23 +1,22 @@
 package server.service;
 
 import server.domain.Employee;
+import server.domain.User;
 
 public interface EmployeeService {
 
 
-    void employeeCheck();
-
     void initializeEmployee(Employee employee);
+
+    void addTotaltime(int time);
 
     Employee findEmployee(String providedUsername, String providedPassword);
 
-    String getEmployeeByName(String name);
+    User getEmployeeByName(String name);
 
     void viewAllEmployees();
 
-    void createdToInProgress(Employee employee);
 
-    void inProgressToInReview(Employee employee);
 
 
 }

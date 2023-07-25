@@ -3,9 +3,11 @@ package server.service;
 import server.domain.Employee;
 import server.domain.Manager;
 import server.domain.Task;
+import server.domain.User;
+
+import java.util.List;
 
 public interface TaskService {
-
 
     void assignTask();
 
@@ -13,9 +15,9 @@ public interface TaskService {
 
     void viewTasksByStatus();
 
-    void viewTasksByEmployee();
+    void viewTasksByUser(User person);
 
-    void viewTasksByManager();
+    void changeTaskStatus(Task task, Task.Status status, User person);
 
     void viewAllTasksByStatusCreatedBySingleManager(Manager activeManager);
 
@@ -27,5 +29,7 @@ public interface TaskService {
 
     void viewAllTasksByEmployeeAndStatusCreatedBySingleManager(Manager activeManager);
 
+    void createTask(Manager activeManager, String title, String description, int total_time);
 
+    void printTasksByStatus(List<Task> tasks, Task.Status status);
 }

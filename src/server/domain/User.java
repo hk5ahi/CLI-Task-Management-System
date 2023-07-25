@@ -8,6 +8,7 @@ public class User {
     private String password;
 
 
+    // Getter and Setter methods for all properties
     public String getUsername() {
         return username;
     }
