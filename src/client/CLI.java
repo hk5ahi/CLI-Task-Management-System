@@ -350,16 +350,16 @@ public class CLI {
 
                 case 3:
 
-                    Employee employee1 = new Employee();
-                    employee1.setUserRole("Employee");
-                    taskService.viewTasksByUser(employee1);
+                    Employee anotheremployee = new Employee();
+                    anotheremployee.setUserRole("Employee");
+                    taskService.viewTasksByUser(anotheremployee);
                     break;
 
                 case 4:
 
-                    Manager manager1 = new Manager();
-                    manager1.setUserRole("Manager");
-                    taskService.viewTasksByUser(manager1);
+                    Manager anothermanager = new Manager();
+                    anothermanager.setUserRole("Manager");
+                    taskService.viewTasksByUser(anothermanager);
                     break;
 
                 case 5:
