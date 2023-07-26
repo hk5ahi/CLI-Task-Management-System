@@ -37,6 +37,7 @@ public class ManagerDaoImpl implements ManagerDao {
     public void createManager(String firstName, String lastName, String username, String password) {
         Manager manager = new Manager(firstName, lastName, username, password);
         System.out.println("Manager created successfully.");
+        manager.setUserRole("Manager");
         addManager(manager);
     }
 

@@ -37,6 +37,7 @@ public class EmployeeDaoImpl implements EmployeeDao {
     public void createEmployee(String firstname, String lastname, String username, String password) {
         Employee employee = new Employee(firstname, lastname, username, password);
         System.out.println("Employee created successfully.");
+        employee.setUserRole("Employee");
         addEmployee(employee);
     }
 

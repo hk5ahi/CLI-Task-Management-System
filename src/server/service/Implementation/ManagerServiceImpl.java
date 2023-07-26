@@ -50,17 +50,35 @@ public class ManagerServiceImpl implements ManagerService {
     public void viewAllTasksCreatedByManager(Manager activeManager) {
         System.out.println("The tasks which are created by the Manager are: ");
 
+        boolean foundTasks = false; // To track if any tasks are found for the manager
+
         for (Task task : taskDao.getAllTasksbyEmployee()) {
-            String createdByFullName = task.getCreatedBy().getFirstName() + " " + task.getCreatedBy().getLastName();
+            String createdByFullName = "N/A"; // Default value in case createdBy is null
+            String assigneeFullName = "N/A"; // Default value in case assignee is null
+
+            if (task.getCreatedBy() != null) {
+                createdByFullName = task.getCreatedBy().getFirstName() + " " + task.getCreatedBy().getLastName();
+            }
+
+            if (task.getAssignee() != null) {
+                assigneeFullName = task.getAssignee().getFirstName() + " " + task.getAssignee().getLastName();
+            }
+
             String activeManagerFullName = activeManager.getFirstName() + " " + activeManager.getLastName();
 
             if (createdByFullName.equals(activeManagerFullName)) {
                 String taskTitle = task.getTitle();
                 String taskDescription = task.getDescription();
-                String assigneeFullName = task.getAssignee().getFirstName() + " " + task.getAssignee().getLastName();
 
                 System.out.printf("The title of the task is %s with its description which is %s and its employee is %s.\n", taskTitle, taskDescription, assigneeFullName);
+
+                foundTasks = true; // Set the flag to true as tasks are found
             }
+        }
+
+        // If no tasks are found, print "None"
+        if (!foundTasks) {
+            System.out.println("None");
         }
     }
 

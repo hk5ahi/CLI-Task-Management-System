@@ -13,7 +13,9 @@ public interface TaskService {
 
     void viewAllTasks();
 
-    void viewTasksByStatus();
+    void viewTasksByStatus(Employee employee);
+
+    void viewallTasksByStatus();
 
     void viewTasksByUser(User person);
 
@@ -31,5 +33,7 @@ public interface TaskService {
 
     void createTask(Manager activeManager, String title, String description, int total_time);
 
-    void printTasksByStatus(List<Task> tasks, Task.Status status);
+    void printTasksByStatus(List<Task> tasks, Task.Status status, Employee employee);
+
+    void printallTasksByStatus(List<Task> tasks, Task.Status status);
 }

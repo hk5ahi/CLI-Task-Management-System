@@ -5,7 +5,6 @@ import server.domain.Employee;
 import server.domain.Task;
 import server.domain.User;
 import server.service.EmployeeService;
-import server.utilities.Taskbytitle;
 
 public class EmployeeServiceImpl implements EmployeeService {
 
@@ -33,13 +32,16 @@ public class EmployeeServiceImpl implements EmployeeService {
     }
 
     @Override
-    public void addTotaltime(int time) {
+    public void addTotaltime(double time, Task task) {
 
-        Taskbytitle taskbytitle = new Taskbytitle();
-        Task task = taskbytitle.gettaskbytitle();
+
+        if (task == null) {
+            System.out.println("There are no tasks to set total time.");
+            return;
+        }
+
         task.setTotal_time(time);
         System.out.println("The total time has been added successfully.");
-
     }
 
 

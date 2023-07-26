@@ -3,10 +3,7 @@ package server.service.Implementation;
 import server.dao.implementation.EmployeeDaoImpl;
 import server.dao.implementation.ManagerDaoImpl;
 import server.dao.implementation.TaskDaoImpl;
-import server.domain.Employee;
-import server.domain.Manager;
-import server.domain.Task;
-import server.domain.User;
+import server.domain.*;
 import server.service.EmployeeService;
 import server.service.ManagerService;
 import server.service.TaskService;
@@ -15,13 +12,15 @@ import server.utilities.Taskbytitle;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.ArrayList;
 import java.util.List;
 
 public class TaskServiceImpl implements TaskService {
 
     EmployeeService employeeService = new EmployeeServiceImpl();
     private TaskDaoImpl taskDao = TaskDaoImpl.getInstance();
-    private Taskbytitle taskbytitle = new Taskbytitle();
+
 
     ManagerService managerService = new ManagerServiceImpl();
     private EmployeeDaoImpl employeeDao = EmployeeDaoImpl.getInstance();
@@ -30,8 +29,20 @@ public class TaskServiceImpl implements TaskService {
 
     @Override
     public void viewAllTasks() {
-        for (Task task : taskDao.getAllTasksbyEmployee()) {
-            String assigneeName = task.getAssignee().getFirstName() + " " + task.getAssignee().getLastName();
+        List<Task> allTasks = taskDao.getAllTasksbyEmployee();
+        if (allTasks.isEmpty()) {
+            System.out.println("There are no tasks yet.");
+            return;
+        }
+
+        System.out.println("The Tasks of the system are: ");
+
+        for (Task task : allTasks) {
+            String assigneeName = "N/A"; // Default value in case assignee is null
+            if (task.getAssignee() != null) {
+                assigneeName = task.getAssignee().getFirstName() + " " + task.getAssignee().getLastName();
+            }
+
             String creatorName = task.getCreatedBy().getFirstName() + " " + task.getCreatedBy().getLastName();
 
             System.out.printf("The title of task is %s with its description which is %s whose employee is %s and its status is %s. It is created by %s.%n",
@@ -39,48 +50,72 @@ public class TaskServiceImpl implements TaskService {
         }
     }
 
+
     @Override
     public void createTask(Manager activeManager, String title, String description, int total_time) {
         Task task = new Task(title, description, total_time);
         task.setCreatedBy(activeManager);
         task.setCreatedAt(Instant.now().toString());
         taskDao.addTask(task);
+        System.out.println("The Task has been created Successfully.");
     }
 
     @Override
     public void changeTaskStatus(Task task, Task.Status status, User person) {
         String currentStatus = task.getTaskStatus();
         boolean isValidChange = false;
+        if (task.getAssignee() == null) {
+            System.out.println("You do not have permission to do this.");
+            return;
+        }
+        String assigneeFullName = task.getAssignee().getFirstName() + " " + task.getAssignee().getLastName();
+        String personFullName = person.getFirstName() + " " + person.getLastName();
+        String createdFullName = task.getCreatedBy().getFirstName() + " " + task.getCreatedBy().getLastName();
 
         switch (person.getUserRole()) {
             case "Employee":
-                if (status == Task.Status.IN_REVIEW) {
-                    if (currentStatus.equals(Task.Status.IN_PROGRESS.toString())) {
-                        LocalDateTime endTime = LocalDateTime.now();
-                        Duration duration = Duration.between(task.getStartTime(), endTime);
-                        long minutes = duration.toMinutes();
-                        if (minutes >= task.getTotal_time()) {
+                if (assigneeFullName.equals(personFullName)) {
+                    if (status == Task.Status.IN_REVIEW) {
+                        if (currentStatus.equals(Task.Status.IN_PROGRESS.toString())) {
+                            LocalDateTime endTime = LocalDateTime.now();
+                            Instant startInstant = task.getStartTime().atZone(ZoneId.systemDefault()).toInstant();
+                            Instant endInstant = endTime.atZone(ZoneId.systemDefault()).toInstant();
+                            Duration duration = Duration.between(startInstant, endInstant);
+                            long minutes = duration.toMinutes();
+                            if (minutes >= task.getTotal_time()) {
+                                isValidChange = true;
+                            } else {
+                                System.out.printf("The minimum time for the task to stay in the IN_PROGRESS state is %f minutes.", task.getTotal_time());
+                            }
+                        } else {
+                            System.out.println("The task is not in a desirable state.");
+                        }
+                    } else if (status == Task.Status.IN_PROGRESS) {
+                        if (currentStatus.equals(Task.Status.CREATED.toString())) {
+                            task.setStartTime(Instant.now());
                             isValidChange = true;
                         } else {
-                            System.out.printf("The minimum time for the task to stay in the IN_PROGRESS state is %d minutes.", task.getTotal_time());
+                            System.out.println("The task is not in a desirable state.");
                         }
-                    } else {
-                        System.out.println("The task is not in a desirable state.");
                     }
-                } else if (status == Task.Status.IN_PROGRESS) {
-                    if (currentStatus.equals(Task.Status.CREATED.toString())) {
-                        isValidChange = true;
-                    } else {
-                        System.out.println("The task is not in a desirable state.");
-                    }
+                } else {
+
+                    System.out.println("You do not have permission to do this.");
+
                 }
                 break;
 
             case "Manager":
-                if (currentStatus.equals(Task.Status.IN_REVIEW.toString())) {
-                    isValidChange = true;
+
+                if (createdFullName.equals(personFullName)) {
+                    if (currentStatus.equals(Task.Status.IN_REVIEW.toString())) {
+                        isValidChange = true;
+                    } else {
+                        System.out.println("The task is not in a desirable state.");
+                    }
                 } else {
-                    System.out.println("The task is not in a desirable state.");
+
+                    System.out.println("You do not have permission to do this.");
                 }
                 break;
 
@@ -91,9 +126,11 @@ public class TaskServiceImpl implements TaskService {
 
         if (isValidChange) {
             task.setTaskStatus(status.toString());
-            task.getHistory().setTimestamp(Instant.now());
-            task.getHistory().setOldStatus(Task.Status.valueOf(currentStatus));
-            task.getHistory().setNewStatus(status);
+            TaskHistory history = new TaskHistory();
+            history.setTimestamp(Instant.now());
+            history.setOldStatus(Task.Status.valueOf(currentStatus));
+            history.setNewStatus(status);
+            task.setHistory(history);
 
             User user = new User();
             user.setFirstName(person.getFirstName());
@@ -108,14 +145,26 @@ public class TaskServiceImpl implements TaskService {
     @Override
     public void viewAllTasksByStatusCreatedBySingleManager(Manager activeManager) {
         String managerName = activeManager.getFirstName() + " " + activeManager.getLastName();
+        List<Task> tasksCreatedByManager = new ArrayList<>();
 
         for (Task task : taskDao.getAllTasksbyEmployee()) {
             String createdBy = task.getCreatedBy().getFirstName() + " " + task.getCreatedBy().getLastName();
 
             if (createdBy.equals(managerName)) {
-                System.out.printf("The title of task is %s with its description which is %s and its status is %s.\n",
-                        task.getTitle(), task.getDescription(), task.getTaskStatus());
+                tasksCreatedByManager.add(task);
             }
+        }
+
+        if (tasksCreatedByManager.isEmpty()) {
+            System.out.println("No tasks yet.");
+            return;
+        }
+
+        System.out.println("The tasks created by the manager are: ");
+
+        for (Task task : tasksCreatedByManager) {
+            System.out.printf("The title of task is %s with its description which is %s and its status is %s.%n",
+                    task.getTitle(), task.getDescription(), task.getTaskStatus());
         }
     }
 
@@ -123,21 +172,47 @@ public class TaskServiceImpl implements TaskService {
     @Override
     public void viewAllTasksByEmployeeAndStatusCreatedBySingleManager(Manager activeManager) {
         String managerName = activeManager.getFirstName() + " " + activeManager.getLastName();
+        List<Task> tasksCreatedByManager = new ArrayList<>();
 
         for (Task task : taskDao.getAllTasksbyEmployee()) {
-            String createdBy = task.getCreatedBy().getFirstName() + " " + task.getCreatedBy().getLastName();
-            String assigneeName = task.getAssignee().getFirstName() + " " + task.getAssignee().getLastName();
+            String createdBy = "N/A"; // Default value in case createdBy is null
+            String assigneeName = "N/A"; // Default value in case assignee is null
+
+            if (task.getCreatedBy() != null) {
+                createdBy = task.getCreatedBy().getFirstName() + " " + task.getCreatedBy().getLastName();
+            }
+
+            if (task.getAssignee() != null) {
+                assigneeName = task.getAssignee().getFirstName() + " " + task.getAssignee().getLastName();
+            }
 
             if (createdBy.equals(managerName)) {
-                System.out.printf("The title of task is %s with its description which is %s whose employee is %s and its status is %s.\n",
-                        task.getTitle(), task.getDescription(), assigneeName, task.getTaskStatus());
+                tasksCreatedByManager.add(task);
             }
+        }
+
+        if (tasksCreatedByManager.isEmpty()) {
+            System.out.println("No tasks yet.");
+            return;
+        }
+
+        System.out.println("The tasks created by the manager for each employee are: ");
+
+        for (Task task : tasksCreatedByManager) {
+            String assigneeName = "N/A"; // Default value in case assignee is null
+
+            if (task.getAssignee() != null) {
+                assigneeName = task.getAssignee().getFirstName() + " " + task.getAssignee().getLastName();
+            }
+
+            System.out.printf("The title of task is %s with its description which is %s whose employee is %s and its status is %s.\n",
+                    task.getTitle(), task.getDescription(), assigneeName, task.getTaskStatus());
         }
     }
 
 
     @Override
-    public void viewTasksByStatus() {
+    public void viewTasksByStatus(Employee employee) {
         List<Task> tasks = taskDao.getAllTasksbyEmployee();
 
         if (tasks.isEmpty()) {
@@ -146,29 +221,80 @@ public class TaskServiceImpl implements TaskService {
         }
 
         System.out.println("The tasks whose status are CREATED are:");
-        printTasksByStatus(tasks, Task.Status.CREATED);
+        printTasksByStatus(tasks, Task.Status.CREATED, employee);
 
         System.out.println("\nThe tasks whose status are IN_PROGRESS are:");
-        printTasksByStatus(tasks, Task.Status.IN_PROGRESS);
+        printTasksByStatus(tasks, Task.Status.IN_PROGRESS, employee);
 
         System.out.println("\nThe tasks whose status are IN_REVIEW are:");
-        printTasksByStatus(tasks, Task.Status.IN_REVIEW);
+        printTasksByStatus(tasks, Task.Status.IN_REVIEW, employee);
 
         System.out.println("\nThe tasks whose status are COMPLETED are:");
-        printTasksByStatus(tasks, Task.Status.COMPLETED);
+        printTasksByStatus(tasks, Task.Status.COMPLETED, employee);
     }
 
     @Override
-    public void printTasksByStatus(List<Task> tasks, Task.Status status) {
+    public void printTasksByStatus(List<Task> tasks, Task.Status status, Employee employee) {
+        boolean hasTasksWithStatus = false;
+
         for (Task task : tasks) {
-            if (task.getTaskStatus().equals(status.toString())) {
+            String assigneeName = task.getAssignee().getFirstName() + " " + task.getAssignee().getLastName();
+            String employeename = employee.getFirstName() + " " + employee.getLastName();
+            if ((task.getTaskStatus().equals(status.toString()) && assigneeName.equals(employeename))) {
                 System.out.printf("The title of task is %s with its description which is %s.\n", task.getTitle(), task.getDescription());
+                hasTasksWithStatus = true;
             }
+        }
+
+        if (!hasTasksWithStatus) {
+            System.out.println("There are no tasks yet.");
         }
     }
 
+
+    @Override
+    public void viewallTasksByStatus() {
+        List<Task> tasks = taskDao.getAllTasksbyEmployee();
+
+        if (tasks.isEmpty()) {
+            System.out.println("No Tasks");
+            return;
+        }
+
+        System.out.println("The tasks whose status are CREATED are:");
+        printallTasksByStatus(tasks, Task.Status.CREATED);
+
+        System.out.println("\nThe tasks whose status are IN_PROGRESS are:");
+        printallTasksByStatus(tasks, Task.Status.IN_PROGRESS);
+
+        System.out.println("\nThe tasks whose status are IN_REVIEW are:");
+        printallTasksByStatus(tasks, Task.Status.IN_REVIEW);
+
+        System.out.println("\nThe tasks whose status are COMPLETED are:");
+        printallTasksByStatus(tasks, Task.Status.COMPLETED);
+    }
+
+    @Override
+    public void printallTasksByStatus(List<Task> tasks, Task.Status status) {
+        boolean hasTasksWithStatus = false;
+
+        for (Task task : tasks) {
+
+            if ((task.getTaskStatus().equals(status.toString()))) {
+                System.out.printf("The title of task is %s with its description which is %s.\n", task.getTitle(), task.getDescription());
+                hasTasksWithStatus = true;
+            }
+        }
+
+        if (!hasTasksWithStatus) {
+            System.out.println("There are no tasks yet.");
+        }
+    }
+
+
     @Override
     public void assignTask() {
+        Taskbytitle taskbytitle = new Taskbytitle();
         Task task = taskbytitle.gettaskbytitle();
 
         if (task == null) {
@@ -215,6 +341,7 @@ public class TaskServiceImpl implements TaskService {
 
     @Override
     public void viewTasksByUser(User person) {
+        boolean noTasks = false;
         if (person.getUserRole().equals("Employee")) {
             System.out.println("The tasks are categorized employee-wise with their respective statuses.");
 
@@ -223,11 +350,16 @@ public class TaskServiceImpl implements TaskService {
                         employee.getFirstName(), employee.getLastName());
 
                 for (Task task : taskDao.getAllTasksbyEmployee()) {
-                    if (task.getAssignee().equals(employee)) {
+                    if (task.getAssignee() != null && task.getAssignee().equals(employee)) {
                         System.out.printf("The title of task is %s with its description which is %s and its status is %s and is created by %s.\n",
                                 task.getTitle(), task.getDescription(), task.getTaskStatus(),
                                 task.getCreatedBy().getFirstName() + " " + task.getCreatedBy().getLastName());
+
+                        noTasks = true;
                     }
+                }
+                if (!noTasks) {
+                    System.out.println("There are no tasks assigned to the employee.");
                 }
             }
         } else {
@@ -255,8 +387,12 @@ public class TaskServiceImpl implements TaskService {
         System.out.println("The assigned tasks for the employee are:");
 
         for (Task task : taskDao.getAllTasksbyEmployee()) {
-            if (task.getAssignee().equals(employee)) {
-                System.out.println(task.getDescription());
+            String assigneeFullName = task.getAssignee() != null
+                    ? task.getAssignee().getFirstName() + " " + task.getAssignee().getLastName()
+                    : "N/A";
+
+            if (assigneeFullName.equals(employee.getFirstName() + " " + employee.getLastName())) {
+                System.out.println(task.getTitle());
                 hasAssignedTasks = true;
             }
         }
@@ -281,6 +417,7 @@ public class TaskServiceImpl implements TaskService {
 
     @Override
     public void archiveTask() {
+        Taskbytitle taskbytitle = new Taskbytitle();
         Task task = taskbytitle.gettaskbytitle();
         task.setAssigned(false);
         task.setAssignee(null);

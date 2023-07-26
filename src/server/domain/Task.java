@@ -17,7 +17,7 @@ public class Task {
     private String description;
     private String createdAt;
     private User createdBy;
-    private int total_time;
+    private double total_time;
     private User assignee;
     private boolean assigned;
     private Instant startTime;
@@ -79,11 +79,11 @@ public class Task {
         this.createdBy = createdBy;
     }
 
-    public int getTotal_time() {
+    public double getTotal_time() {
         return total_time;
     }
 
-    public void setTotal_time(int total_time) {
+    public void setTotal_time(double total_time) {
         this.total_time = total_time;
     }
 
