@@ -1,8 +1,6 @@
 package server.domain;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 
 public class Comment {
 
@@ -10,7 +8,7 @@ public class Comment {
     private User createdBy;
     private String body;
 
-    private List<Task> tasks = new ArrayList<>();
+    private Task tasks;
 
 
     // Getters and Setters
@@ -38,12 +36,13 @@ public class Comment {
         this.body = body;
     }
 
-    public List<Task> getTasks() {
+    public Task getTasks() {
         return tasks;
     }
 
     // Setter for the tasks field
     public void addTaskForComment(Task task) {
-        this.tasks.add(task);
+        this.tasks = task;
     }
+
 }

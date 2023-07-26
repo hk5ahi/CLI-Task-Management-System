@@ -29,11 +29,11 @@ public class CommentDaoImpl implements CommentDao {
         List<Comment> commentsForTask = new ArrayList<>();
 
         for (Comment comment : comments) {
-            for (Task taskInComment : comment.getTasks()) {
-                if (taskInComment.getTitle().equals(task.getTitle())) {
-                    commentsForTask.add(comment);
-                }
+
+            if (comment.getTasks().getTitle().equals(task.getTitle())) {
+                commentsForTask.add(comment);
             }
+
         }
 
         return commentsForTask.isEmpty() ? null : commentsForTask;
