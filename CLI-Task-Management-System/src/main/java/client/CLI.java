@@ -7,6 +7,7 @@ import server.utilities.Taskbytitle;
 
 import java.util.Scanner;
 
+
 public class CLI {
     private static final int ROLE_EMPLOYEE = 1;
     private static final int ROLE_MANAGER = 2;
@@ -401,7 +402,7 @@ public class CLI {
 
                     System.out.println("1: To Create Employee");
                     System.out.println("2: To Create Manager");
-                    UserService userService = new UserServiceImpl();
+                    UserService userService = null;
                     int parseInt = Integer.parseInt(scanner.nextLine());
 
                     if (parseInt == 1) {

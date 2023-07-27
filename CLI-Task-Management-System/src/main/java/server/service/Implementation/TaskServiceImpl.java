@@ -402,7 +402,6 @@ public class TaskServiceImpl implements TaskService {
         }
     }
 
-
     @Override
     public Task getTaskByTitle(String title) {
         for (Task task : taskDao.getAllTasksbyEmployee()) {
@@ -412,8 +411,6 @@ public class TaskServiceImpl implements TaskService {
         }
         return null; // Task not found
     }
-
-
 
     @Override
     public void archiveTask() {
