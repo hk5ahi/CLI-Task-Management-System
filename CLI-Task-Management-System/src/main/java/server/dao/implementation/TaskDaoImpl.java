@@ -1,19 +1,21 @@
 package server.dao.implementation;
 
+import org.springframework.stereotype.Repository;
 import server.dao.TaskDao;
 import server.domain.Task;
 
 import java.util.ArrayList;
 import java.util.List;
-
+@Repository
 public class TaskDaoImpl implements TaskDao {
 
 
     private static TaskDaoImpl instance;  // Singleton instance
-    private List<Task> Tasks = new ArrayList<>();
+    private final List<Task> Tasks = new ArrayList<>();
 
     // Private constructor to prevent external instantiation
     private TaskDaoImpl() {
+
     }
 
     // Method to get the Singleton instance

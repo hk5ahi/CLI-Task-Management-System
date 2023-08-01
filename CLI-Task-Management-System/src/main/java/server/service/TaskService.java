@@ -11,6 +11,7 @@ public interface TaskService {
 
     void assignTask();
 
+    List<Task> getallTasks();
     void viewAllTasks();
 
     void viewTasksByStatus(Employee employee);

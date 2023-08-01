@@ -1,8 +1,15 @@
 package server.service;
 
+import server.domain.User;
+
+import java.util.List;
+
 public interface UserService {
 
-    void createUser(String type, String firstname, String lastname, String username, String password);
+    String createUser(String type, String firstname, String lastname, String username, String password);
 
-    String printName();
+    List<User> allUsers();
+
+    String verifyUser(String username,String pass);
+
 }

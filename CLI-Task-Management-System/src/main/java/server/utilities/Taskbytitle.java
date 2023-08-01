@@ -10,7 +10,7 @@ import java.util.Scanner;
 
 public class Taskbytitle {
 
-    TaskServiceImpl taskService = new TaskServiceImpl();
+    TaskServiceImpl taskService;
     private TaskDaoImpl taskDao = TaskDaoImpl.getInstance();
     Scanner scan = new Scanner(System.in);
 

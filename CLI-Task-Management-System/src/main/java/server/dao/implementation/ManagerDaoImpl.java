@@ -9,6 +9,8 @@ import java.util.List;
 public class ManagerDaoImpl implements ManagerDao {
 
     private static ManagerDaoImpl instance; // Singleton instance
+
+    private UserDaoImpl userDao=UserDaoImpl.getInstance();
     private List<Manager> managers = new ArrayList<>();
 
     // Private constructor to prevent external instantiation
@@ -36,9 +38,9 @@ public class ManagerDaoImpl implements ManagerDao {
     @Override
     public void createManager(String firstName, String lastName, String username, String password) {
         Manager manager = new Manager(firstName, lastName, username, password);
-        System.out.println("Manager created successfully.");
         manager.setUserRole("Manager");
         addManager(manager);
+        userDao.addUser(manager);
     }
 
 }

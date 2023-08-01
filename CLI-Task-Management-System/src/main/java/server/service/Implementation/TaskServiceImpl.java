@@ -1,5 +1,10 @@
 package server.service.Implementation;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import server.dao.EmployeeDao;
+import server.dao.ManagerDao;
+import server.dao.TaskDao;
 import server.dao.implementation.EmployeeDaoImpl;
 import server.dao.implementation.ManagerDaoImpl;
 import server.dao.implementation.TaskDaoImpl;
@@ -15,18 +20,34 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
-
+@Service
 public class TaskServiceImpl implements TaskService {
 
-    EmployeeService employeeService = new EmployeeServiceImpl();
-    private TaskDaoImpl taskDao = TaskDaoImpl.getInstance();
+    private final EmployeeService employeeService;
+    private final ManagerService managerService;
+    private final TaskDao taskDao;
+    private final EmployeeDao employeeDao;
+
+    private final ManagerDao managerDao;
+
+    @Autowired
+    public TaskServiceImpl(EmployeeService employeeService, ManagerService managerService, TaskDao taskDao, EmployeeDao employeeDao,ManagerDao managerDao) {
+        this.employeeService=employeeService;
+        this.managerService=managerService;
+        this.taskDao=taskDao;
+        this.employeeDao=employeeDao;
+        this.managerDao=managerDao;
+    }
 
 
-    ManagerService managerService = new ManagerServiceImpl();
-    private EmployeeDaoImpl employeeDao = EmployeeDaoImpl.getInstance();
+    @Override
+    public List<Task> getallTasks()
+    {
 
-    private ManagerDaoImpl managerDao = ManagerDaoImpl.getInstance();
+        List<Task> allTasks=taskDao.getAllTasksbyEmployee();
 
+            return allTasks;
+    }
     @Override
     public void viewAllTasks() {
         List<Task> allTasks = taskDao.getAllTasksbyEmployee();

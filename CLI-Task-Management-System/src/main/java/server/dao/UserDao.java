@@ -1,7 +1,15 @@
 package server.dao;
 
+import server.domain.User;
+
+import java.util.List;
+
 public interface UserDao {
 
-    String getName();
+    List<User> getallUsers();
+
+    void addUser(User user);
 
 }
+
+

@@ -4,10 +4,12 @@ import server.domain.Employee;
 import server.domain.Task;
 import server.domain.User;
 
+import java.util.List;
+
 public interface EmployeeService {
 
 
-    void initializeEmployee(Employee employee);
+    void initializeEmployee();
 
     void addTotaltime(double time, Task task);
 
@@ -15,7 +17,7 @@ public interface EmployeeService {
 
     User getEmployeeByName(String name);
 
-    void viewAllEmployees();
+    List<Employee> getAllEmployees();
 
 
 }

@@ -1,6 +1,7 @@
 package server.dao.implementation;
 
 import server.dao.SupervisorDao;
+import server.dao.UserDao;
 import server.domain.Supervisor;
 
 public class SupervisorDaoImpl implements SupervisorDao {
@@ -8,10 +9,12 @@ public class SupervisorDaoImpl implements SupervisorDao {
     private static SupervisorDaoImpl instance; // Singleton instance
     private final Supervisor supervisor; // Instance variable to store supervisor information
 
+
     // Private constructor to prevent external instantiation
     private SupervisorDaoImpl() {
         supervisor = new Supervisor();
     }
+
 
 
     public static SupervisorDaoImpl getInstance() {
@@ -29,6 +32,7 @@ public class SupervisorDaoImpl implements SupervisorDao {
         supervisor.setUsername(username);
         supervisor.setPassword(password);
         supervisor.setUserRole(userRole);
+
     }
 
     @Override

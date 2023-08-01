@@ -1,16 +1,26 @@
 package server.service.Implementation;
 
-import server.dao.implementation.ManagerDaoImpl;
-import server.dao.implementation.TaskDaoImpl;
+import org.springframework.stereotype.Service;
+import server.dao.ManagerDao;
+import server.dao.TaskDao;
+import server.dao.UserDao;
 import server.domain.Manager;
 import server.domain.Task;
 import server.domain.User;
 import server.service.ManagerService;
-
+@Service
 public class ManagerServiceImpl implements ManagerService {
 
-    private ManagerDaoImpl managerDao = ManagerDaoImpl.getInstance();
-    private TaskDaoImpl taskDao = TaskDaoImpl.getInstance();
+    private final ManagerDao managerDao;
+    private final TaskDao taskDao;
+    private final UserDao userDao;
+
+    public ManagerServiceImpl(ManagerDao managerDao, TaskDao taskDao, UserDao userDao) {
+        this.managerDao = managerDao;
+        this.taskDao = taskDao;
+        this.userDao = userDao;
+    }
+
 
     @Override
     public Manager findManager(String providedUsername, String providedPassword) {
@@ -24,13 +34,15 @@ public class ManagerServiceImpl implements ManagerService {
 
 
     @Override
-    public void initializeManager(Manager manager) {
+    public void initializeManager() {
+        Manager manager=new Manager();
         manager.setFirstName("Muhammad");
         manager.setLastName("Ubaid");
         manager.setUsername("m.ubaid");
         manager.setPassword("Ts12");
         manager.setUserRole("Manager");
         managerDao.addManager(manager);
+        userDao.addUser(manager);
     }
 
     @Override

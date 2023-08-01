@@ -2,15 +2,36 @@ package server.dao.implementation;
 
 import org.springframework.stereotype.Repository;
 import server.dao.UserDao;
+import server.domain.User;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Repository
 public class UserDaoImpl implements UserDao {
 
-    private String Name = "Muhammad Hanan";
+    private static UserDaoImpl instance;  // Singleton instance
+    private final List<User> users=new ArrayList<>();
 
-    @Override
-    public String getName() {
-        return Name;
+    private UserDaoImpl() {
+
+    }
+
+    // Method to get the Singleton instance
+    public static UserDaoImpl getInstance() {
+        if (instance == null) {
+            instance = new UserDaoImpl();
+        }
+        return instance;
+    }
+    public void addUser(User user)
+    {
+        users.add(user);
+
+    }
+    public List<User> getallUsers()
+    {
+        return users;
 
     }
 }
