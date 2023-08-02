@@ -9,6 +9,7 @@ import server.domain.User;
 import server.service.UserService;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -25,22 +26,17 @@ public class UserServiceImpl implements UserService {
 
 
     @Override
-    public String verifyUser(String providedUsername, String providedPassword) {
+    public Optional<String> verifyUser(String providedUsername, String providedPassword) {
         List<User> users = userDao.getallUsers();
 
-        for (int i = 0; i < users.size(); i++) {
-
-
-            if (users.get(i).getUsername().equals(providedUsername) && users.get(i).getPassword().equals(providedPassword)) {
-                return users.get(i).getUserRole(); // Return the current Supervisor object
+        for (User user : users) {
+            if (user.getUsername().equals(providedUsername) && user.getPassword().equals(providedPassword)) {
+                return Optional.of(user.getUserRole()); // Return the current user's role
             }
         }
-        return "Not Found";
+
+        return Optional.empty(); // Return an empty Optional if user is not found
     }
-
-
-
-
 
 
     @Override

@@ -1,5 +1,6 @@
 package server.domain;
 
+
 public class User {
     private String username;
     private String firstName;
@@ -7,7 +8,13 @@ public class User {
     private String userRole;
     private String password;
 
+    public enum UserRole{
 
+        Supervisor,
+        Manager,
+        Employee
+
+    }
     // Getter and Setter methods for all properties
     public String getUsername() {
         return username;

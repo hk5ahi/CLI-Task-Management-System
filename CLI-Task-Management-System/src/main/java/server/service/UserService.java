@@ -3,6 +3,7 @@ package server.service;
 import server.domain.User;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface UserService {
 
@@ -10,6 +11,6 @@ public interface UserService {
 
     List<User> allUsers();
 
-    String verifyUser(String username,String pass);
+    Optional<String> verifyUser(String username, String pass);
 
 }

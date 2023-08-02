@@ -14,8 +14,8 @@ public class CustomExceptionHandler {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Invalid Credentials or User does not exist.");
     }
 
-    @ExceptionHandler(UnauthorizedAccessException.class)
-    public ResponseEntity<String> handleUnauthorizedAccessException(UnauthorizedAccessException ex) {
-        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(" Unauthorized access.");
+    @ExceptionHandler(ForbiddenAccessException.class)
+    public ResponseEntity<String> handleUnauthorizedAccessException(ForbiddenAccessException ex) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Forbidden access to resource.");
     }
 }

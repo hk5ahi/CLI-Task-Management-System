@@ -1,4 +1,4 @@
-package server.Controller;
+package server.controller;
 
 import server.service.CommentService;
 
