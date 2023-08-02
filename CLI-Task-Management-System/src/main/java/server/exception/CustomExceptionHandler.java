@@ -1,9 +1,11 @@
-package server.utilities;
+package server.exception;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import server.exception.ForbiddenAccessException;
+import server.exception.UserNotFoundException;
 
 
 @RestControllerAdvice

@@ -15,14 +15,14 @@ public class Task {
     private TaskHistory history;
     private String title;
     private String description;
-    private String createdAt;
+    private Instant createdAt;
     private User createdBy;
     private double total_time;
     private User assignee;
     private boolean assigned;
     private Instant startTime;
 
-    public Task(String title, String description, int total_time) {
+    public Task(String title, String description, double total_time) {
         this.setTaskStatus(String.valueOf(Status.CREATED));
         this.setAssigned(false);
         this.setTitle(title);
@@ -63,11 +63,11 @@ public class Task {
         this.description = description;
     }
 
-    public String getCreatedAt() {
+    public Instant getCreatedAt() {
         return createdAt;
     }
 
-    public void setCreatedAt(String createdAt) {
+    public void setCreatedAt(Instant createdAt) {
         this.createdAt = createdAt;
     }
 

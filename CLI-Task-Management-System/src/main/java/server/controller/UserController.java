@@ -5,13 +5,12 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import server.domain.Employee;
 import server.domain.User;
 import server.service.EmployeeService;
 import server.service.ManagerService;
 import server.service.SupervisorService;
 import server.service.UserService;
-import server.utilities.ForbiddenAccessException;
+import server.exception.ForbiddenAccessException;
 
 import server.utilities.UtilityService;
 
@@ -19,7 +18,7 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
-@RequestMapping()
+@RequestMapping("/user")
 public class UserController {
 
     private final UserService userService;
@@ -37,7 +36,7 @@ public class UserController {
         this.utilityService=utilityService;
     }
 
-    @GetMapping("/user/init")
+    @GetMapping("/init")
     public String initUsers() {
         supervisorService.initializeSupervisor();
         managerService.initializeManager();
@@ -45,7 +44,7 @@ public class UserController {
         return "The users have been initialized successfully.";
     }
 
-    @GetMapping("/user")
+    @GetMapping("/view")
     public ResponseEntity<List<User>> getAllUsers(@RequestHeader("Authorization") String authorizationHeader) {
         // Check for authentication here. If user is not authenticated, return 401.
         String authenticatedUserRole = utilityService.isAuthenticated(authorizationHeader);

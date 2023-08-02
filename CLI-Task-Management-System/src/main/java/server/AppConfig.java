@@ -2,11 +2,8 @@ package server;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import server.dao.EmployeeDao;
-import server.dao.ManagerDao;
+import server.dao.*;
 
-import server.dao.SupervisorDao;
-import server.dao.UserDao;
 import server.dao.implementation.*;
 import server.service.EmployeeService;
 import server.service.Implementation.EmployeeServiceImpl;
@@ -42,6 +39,11 @@ public class AppConfig {
     @Bean
     public TaskDaoImpl taskDao() {
         return TaskDaoImpl.getInstance();
+    }
+
+    @Bean
+    public CommentDaoImpl commentDao() {
+        return CommentDaoImpl.getInstance();
     }
 
     @Bean

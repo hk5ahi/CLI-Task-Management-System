@@ -4,17 +4,21 @@ import server.domain.Employee;
 import server.domain.Manager;
 import server.domain.Task;
 import server.domain.User;
+import server.dto.TaskInfoDTO;
+import server.dto.TaskbyEmployeeDTO;
+import server.dto.TaskbyEmployeeandStatusDTO;
+import server.dto.TaskbyStatusDTO;
 
 import java.util.List;
 
 public interface TaskService {
 
-    void assignTask();
+    String assignTask(String title,String fullname);
 
     List<Task> getallTasks();
-    void viewAllTasks();
+    List<TaskbyEmployeeDTO> viewAllTasks(Manager manager);
 
-    void viewTasksByStatus(Employee employee);
+    List<TaskbyStatusDTO> viewTasksByStatus(Employee employee);
 
     void viewallTasksByStatus();
 
@@ -22,19 +26,19 @@ public interface TaskService {
 
     void changeTaskStatus(Task task, Task.Status status, User person);
 
-    void viewAllTasksByStatusCreatedBySingleManager(Manager activeManager);
+    List<TaskInfoDTO> viewAllTasksByStatusCreatedBySingleManager(Manager activeManager);
 
     Task getTaskByTitle(String title);
 
     void archiveTask();
 
-    void viewAssignedTasks(Employee employee);
+    List<Task> viewAssignedTasks(Employee employee);
 
-    void viewAllTasksByEmployeeAndStatusCreatedBySingleManager(Manager activeManager);
+    List<TaskbyEmployeeandStatusDTO> viewAllTasksByEmployeeAndStatusCreatedBySingleManager(Manager activeManager);
 
-    void createTask(Manager activeManager, String title, String description, int total_time);
+    void createTask(Manager activeManager, String title, String description, double total_time);
 
-    void printTasksByStatus(List<Task> tasks, Task.Status status, Employee employee);
+
 
     void printallTasksByStatus(List<Task> tasks, Task.Status status);
 }

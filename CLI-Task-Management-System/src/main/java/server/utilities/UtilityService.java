@@ -4,6 +4,8 @@ import org.springframework.stereotype.Service;
 import server.service.UserService;
 
 import java.util.Base64;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 @Service
 public class UtilityService {
@@ -38,4 +40,34 @@ public class UtilityService {
 
         return null;
     }
+
+
+    public Map<String, String> getUsernamePassword(String authorizationHeader) {
+
+        if (authorizationHeader != null && authorizationHeader.startsWith("Basic ")) {
+            // Extract the Base64-encoded credentials from the header
+            String encodedCredentials = authorizationHeader.substring("Basic ".length());
+
+            // Decode the Base64-encoded credentials
+            byte[] decodedCredentials = Base64.getDecoder().decode(encodedCredentials);
+            String credentials = new String(decodedCredentials);
+
+            // Extract the username and password from the credentials string
+            String[] usernameAndPassword = credentials.split(":");
+            String username = usernameAndPassword[0];
+            String password = usernameAndPassword[1];
+
+            Map<String, String> credential = new HashMap<>();
+            credential.put("username", username);
+            credential.put("password", password);
+            return credential;
+
+        }
+
+        return null;
+    }
+
+
+
+
 }

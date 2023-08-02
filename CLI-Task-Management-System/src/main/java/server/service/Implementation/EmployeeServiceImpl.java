@@ -63,13 +63,13 @@ public class EmployeeServiceImpl implements EmployeeService {
 
     @Override
     public User getEmployeeByName(String name) {
-        for (Employee employee : employeeDao.getEmployees()) {
-            String employeename = employee.getFirstName() + " " + employee.getLastName();
-            if (employeename.equalsIgnoreCase(name)) {
-                Employee theemployee = new Employee();
-                theemployee.setFirstName(employee.getFirstName());
-                theemployee.setLastName(employee.getLastName());
-                return theemployee;
+        if(name!=null) {
+            for (Employee employee : employeeDao.getEmployees()) {
+                String employeename = employee.getFirstName() + " " + employee.getLastName();
+                if (employeename.equalsIgnoreCase(name)) {
+
+                    return employee;
+                }
             }
         }
         return null; // Employee not found
