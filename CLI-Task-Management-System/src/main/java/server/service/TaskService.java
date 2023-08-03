@@ -4,41 +4,36 @@ import server.domain.Employee;
 import server.domain.Manager;
 import server.domain.Task;
 import server.domain.User;
-import server.dto.TaskInfoDTO;
-import server.dto.TaskbyEmployeeDTO;
-import server.dto.TaskbyEmployeeandStatusDTO;
-import server.dto.TaskbyStatusDTO;
+import server.dto.*;
 
 import java.util.List;
 
 public interface TaskService {
 
-    String assignTask(String title,String fullname);
+    String assignTask(String title,String fullname,Manager manager);
 
     List<Task> getallTasks();
-    List<TaskbyEmployeeDTO> viewAllTasks(Manager manager);
+    List<TaskbyEmployeeDTO> viewAllTasksbyManager(Manager manager);
+    List<TaskbyEmployeeDTO> viewAllTasksbySupervisor();
 
     List<TaskbyStatusDTO> viewTasksByStatus(Employee employee);
 
-    void viewallTasksByStatus();
+    List<TaskbyStatusDTO> viewallTasksByStatus();
 
-    void viewTasksByUser(User person);
+    List<TaskbyEmployeeandStatusDTO> viewTasksByUser(String userRole);
 
-    void changeTaskStatus(Task task, Task.Status status, User person);
+    String changeTaskStatus(String task, Task.Status status, User person);
 
     List<TaskInfoDTO> viewAllTasksByStatusCreatedBySingleManager(Manager activeManager);
 
     Task getTaskByTitle(String title);
 
-    void archiveTask();
+    String archiveTask(String title);
 
-    List<Task> viewAssignedTasks(Employee employee);
+    List<ViewAssignTask> viewAssignedTasks(Employee employee);
 
     List<TaskbyEmployeeandStatusDTO> viewAllTasksByEmployeeAndStatusCreatedBySingleManager(Manager activeManager);
 
-    void createTask(Manager activeManager, String title, String description, double total_time);
+    String createTask(Manager activeManager, String title, String description, double total_time);
 
-
-
-    void printallTasksByStatus(List<Task> tasks, Task.Status status);
 }

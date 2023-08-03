@@ -6,6 +6,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import server.domain.User;
+import server.dto.UserDTO;
 import server.service.EmployeeService;
 import server.service.ManagerService;
 import server.service.SupervisorService;
@@ -80,6 +81,19 @@ public class UserController {
         }
     }
 
+
+    @GetMapping("/view-all")
+    public ResponseEntity<List<UserDTO>> viewAllUsers(@RequestHeader("Authorization") String authorizationHeader) {
+        // Check for authentication here. If user is not authenticated, return 401.
+        String authenticatedUserRole = utilityService.isAuthenticated(authorizationHeader);
+        String value= String.valueOf(User.UserRole.Supervisor);
+        if (authenticatedUserRole != null && authenticatedUserRole.equals(value)) {
+
+            return ResponseEntity.status(HttpStatus.OK).body(userService.viewallUsers());
+        } else  {
+            throw new ForbiddenAccessException();
+        }
+    }
 
 
 }

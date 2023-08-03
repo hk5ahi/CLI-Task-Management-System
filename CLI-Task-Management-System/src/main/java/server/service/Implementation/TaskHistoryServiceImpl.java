@@ -1,32 +1,40 @@
 package server.service.Implementation;
 
+import org.springframework.stereotype.Service;
 import server.domain.Task;
+import server.domain.TaskHistory;
 import server.service.TaskHistoryService;
-import server.utilities.Taskbytitle;
+import server.service.TaskService;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-
+@Service
 public class TaskHistoryServiceImpl implements TaskHistoryService {
 
-    private Taskbytitle taskbytitle = new Taskbytitle();
+
+private final TaskService taskService;
+
+    public TaskHistoryServiceImpl(TaskService taskService) {
+        this.taskService = taskService;
+    }
 
     @Override
-    public void viewTaskHistory() {
-        Task task = taskbytitle.gettaskbytitle();
-        Instant timestamp = task.getHistory().getTimestamp();
+    public String viewTaskHistory(String title) {
+        Task task = taskService.getTaskByTitle(title);
+        TaskHistory history = task.getHistory();
+
+        Instant timestamp = history.getTimestamp();
         LocalDateTime localDateTime = timestamp.atZone(ZoneId.systemDefault()).toLocalDateTime();
-
-        // Define the desired date and time format
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-
-        // Format the LocalDateTime to the desired format
         String formattedDateTime = localDateTime.format(formatter);
 
-        // Print the formatted date and time
-        System.out.printf("The old status of the task is %s, its new status is %s, the movement occurred at date and time which is %s, and it was moved by %s.%n",
-                task.getHistory().getOldStatus(), task.getHistory().getNewStatus(), formattedDateTime, task.getHistory().getMovedBy().getFirstName() + " " + task.getHistory().getMovedBy().getLastName());
+        String oldStatus = history.getOldStatus().toString();
+        String newStatus = history.getNewStatus().toString();
+        String movedBy = history.getMovedBy().getFirstName() + " " + history.getMovedBy().getLastName();
+
+        return "The old status of the task is " + oldStatus + ", its new status is " + newStatus + ", the movement occurred at date and time which is " + formattedDateTime + ", and it was moved by " + movedBy;
     }
+
 }

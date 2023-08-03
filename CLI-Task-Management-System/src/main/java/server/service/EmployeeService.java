@@ -11,7 +11,7 @@ public interface EmployeeService {
 
     void initializeEmployee();
 
-    void addTotaltime(double time, Task task);
+    String addTotaltime(double time, String title,Employee employee);
 
     Employee findEmployee(String providedUsername, String providedPassword);
 

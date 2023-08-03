@@ -1,17 +1,19 @@
 package server.dto;
 
-public class TaskInfoDTO {
+import java.time.Instant;
+
+public class ViewAssignTask {
+
+    private String taskStatus;
     private String title;
 
-    public String getCreatedAt() {
-        return createdAt;
+    public String getTaskStatus() {
+        return taskStatus;
     }
 
-    public void setCreatedAt(String createdAt) {
-        this.createdAt = createdAt;
+    public void setTaskStatus(String taskStatus) {
+        this.taskStatus = taskStatus;
     }
-
-    private String createdAt;
 
     public String getTitle() {
         return title;
@@ -29,16 +31,14 @@ public class TaskInfoDTO {
         this.description = description;
     }
 
-    public String getTaskStatus() {
-        return taskStatus;
+    public String getCreatedAt() {
+        return createdAt;
     }
 
-    public void setTaskStatus(String taskStatus) {
-        this.taskStatus = taskStatus;
+    public void setCreatedAt(String createdAt) {
+        this.createdAt = createdAt;
     }
 
     private String description;
-    private String taskStatus;
-
-
+    private String createdAt;
 }

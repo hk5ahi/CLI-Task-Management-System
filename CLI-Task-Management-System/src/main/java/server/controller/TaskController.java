@@ -5,7 +5,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import server.domain.Employee;
 import server.domain.Manager;
-import server.domain.Task;
+
 import server.domain.User;
 import server.dto.*;
 import server.exception.ForbiddenAccessException;
@@ -14,9 +14,9 @@ import server.service.ManagerService;
 import server.service.TaskService;
 import server.utilities.UtilityService;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/task")
@@ -35,9 +35,8 @@ public class TaskController {
     }
 
 
-
     @PostMapping("/create")
-    public ResponseEntity<String> createTask(@RequestBody Task task, @RequestHeader("Authorization") String authorizationHeader) {
+    public ResponseEntity<String> createTask(@RequestBody createTaskDTO task, @RequestHeader("Authorization") String authorizationHeader) {
         String authenticatedUserRole = utilityService.isAuthenticated(authorizationHeader);
 
         if (authenticatedUserRole != null && authenticatedUserRole.equals(User.UserRole.Manager.toString())) {
@@ -48,27 +47,33 @@ public class TaskController {
 
             Manager activeManager = managerService.findManager(username, password);
             if (activeManager != null) {
-                taskService.createTask(activeManager, task.getTitle(), task.getDescription(), task.getTotal_time());
-                return ResponseEntity.status(HttpStatus.CREATED).body("Task created successfully");
+                String response=taskService.createTask(activeManager, task.getTitle(), task.getDescription(), task.getTotal_time());
+                return  ResponseEntity.ok(response);
             } else {
                 throw new ForbiddenAccessException(); // Manager not found or invalid credentials
             }
-        }
-
-        else {
+        } else {
             throw new ForbiddenAccessException();
         }
     }
 
     @PostMapping("/assign")
-    public ResponseEntity<String> assignTask(@RequestHeader("Authorization") String authorizationHeader,@RequestBody AssignTaskRequestDTO request) {
+    public ResponseEntity<String> assignTask(@RequestHeader("Authorization") String authorizationHeader, @RequestBody AssignTaskRequestDTO request) {
 
 
         String authenticatedUserRole = utilityService.isAuthenticated(authorizationHeader);
 
         if (authenticatedUserRole != null && authenticatedUserRole.equals(User.UserRole.Manager.toString())) {
 
-            String response = taskService.assignTask(request.getTaskTitle(), request.getAssigneeName());
+
+            Map<String, String> usernamePassword = utilityService.getUsernamePassword(authorizationHeader);
+
+            String username = usernamePassword.get("username");
+            String password = usernamePassword.get("password");
+
+            Manager activeManager = managerService.findManager(username, password);
+
+            String response = taskService.assignTask(request.getTaskTitle(), request.getAssigneeName(),activeManager);
             return ResponseEntity.ok(response);
 
         } else {
@@ -76,7 +81,7 @@ public class TaskController {
         }
     }
 
-    @GetMapping("/view-by-status")
+    @GetMapping("/manager/view-by-status")
     public ResponseEntity<List<TaskInfoDTO>> viewAllTasksByStatusCreatedBySingleManager(@RequestHeader("Authorization") String authorizationHeader) {
 
         //Manager
@@ -97,7 +102,7 @@ public class TaskController {
         }
     }
 
-    @GetMapping("/view-by-employee-and-status")
+    @GetMapping("/manager/view-by-employee-and-status")
     public ResponseEntity<List<TaskbyEmployeeandStatusDTO>> viewTasksbyEmployeeandStatus(@RequestHeader("Authorization") String authorizationHeader) {
 
         //Manager
@@ -112,7 +117,7 @@ public class TaskController {
             Manager manager = managerService.findManager(username, password);
 
 
-            List<TaskbyEmployeeandStatusDTO> taskbyEmployees=taskService.viewAllTasksByEmployeeAndStatusCreatedBySingleManager(manager);
+            List<TaskbyEmployeeandStatusDTO> taskbyEmployees = taskService.viewAllTasksByEmployeeAndStatusCreatedBySingleManager(manager);
 
             return ResponseEntity.status(HttpStatus.OK).body(taskbyEmployees);
         } else {
@@ -120,7 +125,7 @@ public class TaskController {
         }
     }
 
-    @GetMapping("/view-by-employee")
+    @GetMapping("/manager/view-by-employee")
     public ResponseEntity<List<TaskbyEmployeeDTO>> viewTasksbyEmployee(@RequestHeader("Authorization") String authorizationHeader) {
 
         //Manager
@@ -135,7 +140,7 @@ public class TaskController {
             Manager manager = managerService.findManager(username, password);
 
 
-            List<TaskbyEmployeeDTO> taskbyEmployees=taskService.viewAllTasks(manager);
+            List<TaskbyEmployeeDTO> taskbyEmployees = taskService.viewAllTasksbyManager(manager);
 
             return ResponseEntity.status(HttpStatus.OK).body(taskbyEmployees);
         } else {
@@ -144,7 +149,7 @@ public class TaskController {
     }
 
     @GetMapping("/employee/view-assigned")
-    public ResponseEntity<List<Task>> viewAssignedTasks(@RequestHeader("Authorization") String authorizationHeader) {
+    public ResponseEntity<List<ViewAssignTask>> viewAssignedTasks(@RequestHeader("Authorization") String authorizationHeader) {
         String authenticatedUserRole = utilityService.isAuthenticated(authorizationHeader);
 
         if (authenticatedUserRole != null && authenticatedUserRole.equals(User.UserRole.Employee.toString())) {
@@ -155,7 +160,7 @@ public class TaskController {
 
             Employee activeEmployee = employeeService.findEmployee(username, password);
 
-            List<Task> assignedTasks = taskService.viewAssignedTasks(activeEmployee);
+            List<ViewAssignTask> assignedTasks = taskService.viewAssignedTasks(activeEmployee);
 
             return ResponseEntity.ok(assignedTasks);
         } else {
@@ -184,4 +189,118 @@ public class TaskController {
         }
     }
 
-}
+    @PostMapping("/change-status")
+    public ResponseEntity<String> changeTaskStatus(@RequestHeader("Authorization") String authorizationHeader, @RequestBody TaskStatusDTO taskStatusDTO) {
+
+        String authenticatedUserRole = utilityService.isAuthenticated(authorizationHeader);
+
+        if (authenticatedUserRole != null && authenticatedUserRole.equals(User.UserRole.Employee.toString())) {
+            Map<String, String> usernamePassword = utilityService.getUsernamePassword(authorizationHeader);
+
+            String username = usernamePassword.get("username");
+            String password = usernamePassword.get("password");
+
+            Employee activeEmployee = employeeService.findEmployee(username, password);
+            return ResponseEntity.ok(taskService.changeTaskStatus(taskStatusDTO.getTitle(), taskStatusDTO.getStatus(), activeEmployee));
+
+
+        } else if (authenticatedUserRole != null && authenticatedUserRole.equals(User.UserRole.Manager.toString())) {
+
+            Map<String, String> usernamePassword = utilityService.getUsernamePassword(authorizationHeader);
+
+            String username = usernamePassword.get("username");
+            String password = usernamePassword.get("password");
+
+            Manager manager = managerService.findManager(username, password);
+            return ResponseEntity.ok(taskService.changeTaskStatus(taskStatusDTO.getTitle(), taskStatusDTO.getStatus(), manager));
+
+
+        } else {
+
+            throw new ForbiddenAccessException();
+        }
+
+    }
+
+    @PostMapping("/archive")
+    public ResponseEntity<String> archiveTask(@RequestHeader("Authorization") String authorizationHeader,@RequestParam("title") String title) {
+
+        Optional<String> authenticatedUserRole = Optional.ofNullable(utilityService.isAuthenticated(authorizationHeader));
+        String supervisorRole = User.UserRole.Supervisor.toString();
+
+        if (authenticatedUserRole.isPresent() && supervisorRole.equals(authenticatedUserRole.get())) {
+            String result = taskService.archiveTask(title);
+            return ResponseEntity.ok(result);
+        } else {
+            throw new ForbiddenAccessException();
+        }
+    }
+
+    @PostMapping("/supervisor/view-all")
+    public ResponseEntity<List<TaskbyEmployeeDTO>> viewallTasksbySupervisor(@RequestHeader("Authorization") String authorizationHeader) {
+
+        Optional<String> authenticatedUserRole = Optional.ofNullable(utilityService.isAuthenticated(authorizationHeader));
+        String supervisorRole = User.UserRole.Supervisor.toString();
+
+        if (authenticatedUserRole.isPresent() && supervisorRole.equals(authenticatedUserRole.get())) {
+
+            return ResponseEntity.ok(taskService.viewAllTasksbySupervisor());
+        } else {
+            throw new ForbiddenAccessException();
+        }
+    }
+
+    @GetMapping("/supervisor/view-by-status")
+    public ResponseEntity<List<TaskbyStatusDTO>> viewAllTasksByStatusbySupervisor(@RequestHeader("Authorization") String authorizationHeader) {
+
+
+        Optional<String> authenticatedUserRole = Optional.ofNullable(utilityService.isAuthenticated(authorizationHeader));
+        String supervisorRole = User.UserRole.Supervisor.toString();
+
+        if (authenticatedUserRole.isPresent() && supervisorRole.equals(authenticatedUserRole.get())) {
+
+            return ResponseEntity.status(HttpStatus.OK).body(taskService.viewallTasksByStatus());
+        } else {
+            throw new ForbiddenAccessException();
+        }
+     
+
+        }
+
+    @GetMapping("/supervisor/view-by-status-by-employee")
+    public ResponseEntity<List<TaskbyEmployeeandStatusDTO>> viewAllTasksByStatusbyEmployee(@RequestHeader("Authorization") String authorizationHeader) {
+
+
+        Optional<String> authenticatedUserRole = Optional.ofNullable(utilityService.isAuthenticated(authorizationHeader));
+        String supervisorRole = User.UserRole.Supervisor.toString();
+
+        if (authenticatedUserRole.isPresent() && supervisorRole.equals(authenticatedUserRole.get())) {
+
+            return ResponseEntity.status(HttpStatus.OK).body(taskService.viewTasksByUser(User.UserRole.Employee.toString()));
+        } else {
+            throw new ForbiddenAccessException();
+        }
+
+
+    }
+
+    @GetMapping("/supervisor/view-by-status-by-manager")
+    public ResponseEntity<List<TaskbyEmployeeandStatusDTO>> viewAllTasksByStatusbyManager(@RequestHeader("Authorization") String authorizationHeader) {
+
+
+        Optional<String> authenticatedUserRole = Optional.ofNullable(utilityService.isAuthenticated(authorizationHeader));
+        String supervisorRole = User.UserRole.Supervisor.toString();
+
+        if (authenticatedUserRole.isPresent() && supervisorRole.equals(authenticatedUserRole.get())) {
+
+            return ResponseEntity.status(HttpStatus.OK).body(taskService.viewTasksByUser(User.UserRole.Manager.toString()));
+        } else {
+            throw new ForbiddenAccessException();
+        }
+
+
+    }
+
+    }
+    
+

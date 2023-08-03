@@ -7,18 +7,8 @@ import server.service.SupervisorService;
 @RequestMapping("/supervisor")
 public class SupervisorController {
 
-    private final SupervisorService supervisorService;
 
-    public SupervisorController(SupervisorService supervisorService) {
-        this.supervisorService = supervisorService;
-    }
 
-//    @GetMapping()
-//    public void initsupervisor()
-//    {
-//        supervisorService.initializeSupervisor();
-//
-//    }
 
 
 }

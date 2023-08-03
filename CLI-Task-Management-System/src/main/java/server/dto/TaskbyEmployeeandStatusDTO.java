@@ -6,13 +6,52 @@ public class TaskbyEmployeeandStatusDTO {
     private String assignee;
     private String taskStatus;
 
+    public String getCreatedBy() {
+        return CreatedBy;
+    }
 
-    public TaskbyEmployeeandStatusDTO(String title, String description, String assignee, String taskStatus) {
+    public void setCreatedBy(String createdBy) {
+        CreatedBy = createdBy;
+    }
+
+    private String CreatedBy;
+
+    public void setAssignee(String assignee) {
+        this.assignee = assignee;
+    }
+
+    public void setTaskStatus(String taskStatus) {
+        this.taskStatus = taskStatus;
+    }
+
+    public String getCreatedAt() {
+        return CreatedAt;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public void setCreatedAt(String createdAt) {
+        CreatedAt = createdAt;
+    }
+
+    private String CreatedAt;
+
+    public TaskbyEmployeeandStatusDTO()
+    {}
+
+    public TaskbyEmployeeandStatusDTO(String title, String description, String assignee, String taskStatus, String createdAt) {
         this.title = title;
         this.description = description;
         this.assignee = assignee;
         this.taskStatus = taskStatus;
 
+        CreatedAt = createdAt;
     }
 
 

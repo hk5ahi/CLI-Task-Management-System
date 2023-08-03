@@ -2,11 +2,12 @@ package server.service.Implementation;
 
 import org.springframework.stereotype.Service;
 import server.dao.EmployeeDao;
+import server.dao.TaskDao;
 import server.dao.UserDao;
-import server.dao.implementation.EmployeeDaoImpl;
 import server.domain.Employee;
 import server.domain.Task;
 import server.domain.User;
+import server.exception.ForbiddenAccessException;
 import server.service.EmployeeService;
 
 import java.util.List;
@@ -17,10 +18,14 @@ public class EmployeeServiceImpl implements EmployeeService {
 
     private final EmployeeDao employeeDao;
     private final UserDao userDao;
+    private final TaskDao taskDao;
 
-    public EmployeeServiceImpl(EmployeeDao employeeDao, UserDao userDao) {
+
+    public EmployeeServiceImpl(EmployeeDao employeeDao, UserDao userDao, TaskDao taskDao) {
         this.employeeDao = employeeDao;
         this.userDao = userDao;
+
+        this.taskDao = taskDao;
     }
 
     @Override
@@ -48,16 +53,31 @@ public class EmployeeServiceImpl implements EmployeeService {
     }
 
     @Override
-    public void addTotaltime(double time, Task task) {
+    public String addTotaltime(double time, String title,Employee employee) {
 
-
-        if (task == null) {
-            System.out.println("There are no tasks to set total time.");
-            return;
+        Task providedtask=null;
+        if (title != null) {
+            for (Task task : taskDao.getAllTasksbyEmployee()) {
+                if (task != null && task.getTitle() != null && task.getTitle().equalsIgnoreCase(title)) {
+                    providedtask=task;
+                }
+            }
         }
 
-        task.setTotal_time(time);
-        System.out.println("The total time has been added successfully.");
+        if (providedtask == null) {
+            return "There are no tasks to set total time.";
+
+        }
+        String assigneeName=providedtask.getAssignee().getFirstName()+" "+providedtask.getAssignee().getLastName();
+        String employeeName=employee.getFirstName()+" "+employee.getLastName();
+        if(assigneeName.equals(employeeName)) {
+            providedtask.setTotal_time(time);
+            return "The total time has been added successfully.";
+        }
+        else {
+
+            throw new ForbiddenAccessException();
+        }
     }
 
 

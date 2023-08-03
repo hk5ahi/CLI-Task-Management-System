@@ -4,10 +4,13 @@ import org.springframework.stereotype.Service;
 import server.dao.UserDao;
 import server.dao.implementation.EmployeeDaoImpl;
 import server.dao.implementation.ManagerDaoImpl;
+import server.domain.Employee;
 import server.domain.Supervisor;
 import server.domain.User;
+import server.dto.UserDTO;
 import server.service.UserService;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -44,6 +47,23 @@ public class UserServiceImpl implements UserService {
     {
         return userDao.getallUsers();
 
+    }
+
+    @Override
+    public List<UserDTO> viewallUsers()
+    {
+        List<UserDTO> userDTOS=new ArrayList<>();
+
+        for(User user:allUsers())
+        {
+            UserDTO userDTO=new UserDTO();
+            userDTO.setFirstName(user.getFirstName());
+            userDTO.setLastName(user.getLastName());
+            userDTO.setUserRole(user.getUserRole());
+            userDTOS.add(userDTO);
+
+        }
+        return userDTOS;
     }
     @Override
     public String createUser(String userRole, String firstname, String lastname, String username, String password) {

@@ -5,14 +5,8 @@ import org.springframework.context.annotation.Configuration;
 import server.dao.*;
 
 import server.dao.implementation.*;
-import server.service.EmployeeService;
-import server.service.Implementation.EmployeeServiceImpl;
-import server.service.Implementation.ManagerServiceImpl;
-import server.service.Implementation.SupervisorServiceImpl;
-import server.service.Implementation.UserServiceImpl;
-import server.service.ManagerService;
-import server.service.SupervisorService;
-import server.service.UserService;
+import server.service.*;
+import server.service.Implementation.*;
 
 @Configuration
 public class AppConfig {
@@ -48,7 +42,7 @@ public class AppConfig {
 
     @Bean
     public EmployeeService employeeService() {
-        return new EmployeeServiceImpl(employeeDao(),userDao());
+        return new EmployeeServiceImpl(employeeDao(),userDao(), taskDao());
     }
 
     @Bean

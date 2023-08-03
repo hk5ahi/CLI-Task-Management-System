@@ -1,27 +1,50 @@
 package server.controller;
 
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 import server.domain.Employee;
 
+import server.domain.User;
+import server.exception.ForbiddenAccessException;
 import server.service.EmployeeService;
+import server.service.TaskService;
+import server.utilities.UtilityService;
 
 import java.util.List;
+import java.util.Map;
+
 @RestController
-@RequestMapping("/user")
+@RequestMapping("/employee")
 public class EmployeeController {
 
     private final EmployeeService employeeService;
+    private final UtilityService utilityService;
 
-    public EmployeeController(EmployeeService employeeService) {
+    public EmployeeController(EmployeeService employeeService, UtilityService utilityService) {
         this.employeeService = employeeService;
+        this.utilityService = utilityService;
+
     }
 
-    @GetMapping("/employee")
-    public List<Employee> getallEmployees()
-    {
-        return employeeService.getAllEmployees();
 
+    @PostMapping("/add-total-time")
+    public ResponseEntity<String> addTotalTime(@RequestHeader("Authorization") String authorizationHeader,@RequestParam String title, @RequestParam double time) {
+
+        String authenticatedUserRole = utilityService.isAuthenticated(authorizationHeader);
+
+        if (authenticatedUserRole != null && authenticatedUserRole.equals(User.UserRole.Employee.toString())) {
+            Map<String, String> usernamePassword = utilityService.getUsernamePassword(authorizationHeader);
+
+            String username = usernamePassword.get("username");
+            String password = usernamePassword.get("password");
+
+            Employee activeEmployee = employeeService.findEmployee(username, password);
+
+            String response = employeeService.addTotaltime(time, title,activeEmployee);
+            return ResponseEntity.ok(response);
+
+        } else {
+            throw new ForbiddenAccessException();
+        }
     }
 }

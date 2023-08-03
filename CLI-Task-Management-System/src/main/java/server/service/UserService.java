@@ -1,6 +1,7 @@
 package server.service;
 
 import server.domain.User;
+import server.dto.UserDTO;
 
 import java.util.List;
 import java.util.Optional;
@@ -12,5 +13,7 @@ public interface UserService {
     List<User> allUsers();
 
     Optional<String> verifyUser(String username, String pass);
+
+    List<UserDTO> viewallUsers();
 
 }

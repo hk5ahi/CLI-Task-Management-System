@@ -11,7 +11,7 @@ public class Task {
         IN_REVIEW
     }
 
-    private String taskStatus;
+    private Status taskStatus;
     private TaskHistory history;
     private String title;
     private String description;
@@ -23,7 +23,7 @@ public class Task {
     private Instant startTime;
 
     public Task(String title, String description, double total_time) {
-        this.setTaskStatus(String.valueOf(Status.CREATED));
+        this.setTaskStatus(Status.CREATED);
         this.setAssigned(false);
         this.setTitle(title);
         this.setDescription(description);
@@ -31,11 +31,11 @@ public class Task {
     }
 
     // Getters and Setters for the properties
-    public String getTaskStatus() {
+    public Status getTaskStatus() {
         return taskStatus;
     }
 
-    public void setTaskStatus(String taskStatus) {
+    public void setTaskStatus(Status taskStatus) {
         this.taskStatus = taskStatus;
     }
 

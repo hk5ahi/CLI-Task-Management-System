@@ -30,6 +30,16 @@ public class TaskbyStatusDTO {
     private String taskStatus;
     private String title;
     private String description;
+
+    public String getCreatedAt() {
+        return CreatedAt;
+    }
+
+    public void setCreatedAt(String createdAt) {
+        CreatedAt = createdAt;
+    }
+
+    private String CreatedAt;
 }
 
 

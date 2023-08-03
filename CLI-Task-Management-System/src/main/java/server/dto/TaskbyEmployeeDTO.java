@@ -5,17 +5,36 @@ public class TaskbyEmployeeDTO{
     private String description;
     private String assignee;
 
+    public String getCreatedBy() {
+        return CreatedBy;
+    }
 
-    public TaskbyEmployeeDTO(String title, String description, String assignee) {
+    public void setCreatedBy(String createdBy) {
+        CreatedBy = createdBy;
+    }
+
+    private String CreatedBy;
+
+    public String getCreatedAt() {
+        return CreatedAt;
+    }
+
+    public void setCreatedAt(String createdAt) {
+        CreatedAt = createdAt;
+    }
+
+    private String CreatedAt;
+
+
+    public TaskbyEmployeeDTO(String title, String description, String assignee,String createdAt,String createdBy) {
         this.title = title;
         this.description = description;
         this.assignee = assignee;
+        this.CreatedAt=createdAt;
+        this.CreatedBy=createdBy;
 
     }
 
-    // Getters and setters (or lombok annotations) for each field
-
-    // Example getters (you can generate these using your IDE or Lombok)
     public String getTitle() {
         return title;
     }
