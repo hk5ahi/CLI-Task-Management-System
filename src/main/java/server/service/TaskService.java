@@ -1,5 +1,6 @@
 package server.service;
 
+import org.springframework.http.ResponseEntity;
 import server.domain.Employee;
 import server.domain.Manager;
 import server.domain.Task;
@@ -10,30 +11,30 @@ import java.util.List;
 
 public interface TaskService {
 
-    String assignTask(String title,String fullname,Manager manager);
+    ResponseEntity<String> assignTask(String title,String fullname,Manager manager);
 
     List<Task> getallTasks();
-    List<TaskbyEmployeeDTO> viewAllTasksbyManager(Manager manager);
-    List<TaskbyEmployeeDTO> viewAllTasksbySupervisor();
+    List<TaskDTO> viewAllTasksbyUser(User person);
+    List<TaskDTO> viewAllTasksbyUser();
 
-    List<TaskbyStatusDTO> viewTasksByStatus(Employee employee);
+    List<TaskDTO> viewTasksByStatus(Employee employee);
 
-    List<TaskbyStatusDTO> viewallTasksByStatus();
+    List<TaskDTO> viewAllTasksByStatus();
 
-    List<TaskbyEmployeeandStatusDTO> viewTasksByUser(String userRole);
+    List<TaskDTO> viewTasksByUser(String userRole);
 
-    String changeTaskStatus(String task, Task.Status status, User person);
+    ResponseEntity<String> changeTaskStatus(String task, Task.Status status, User person);
 
-    List<TaskInfoDTO> viewAllTasksByStatusCreatedBySingleManager(Manager activeManager);
+    List<TaskDTO> viewAllTasksByStatusCreatedBySingleManager(Manager activeManager);
 
     Task getTaskByTitle(String title);
 
-    String archiveTask(String title);
+    ResponseEntity<String > archiveTask(String title);
 
-    List<ViewAssignTask> viewAssignedTasks(Employee employee);
+    List<TaskDTO> viewAssignedTasks(Employee employee);
 
-    List<TaskbyEmployeeandStatusDTO> viewAllTasksByEmployeeAndStatusCreatedBySingleManager(Manager activeManager);
+    List<TaskDTO> viewAllTasksByEmployeeAndStatusCreatedBySingleManager(Manager activeManager);
 
-    String createTask(Manager activeManager, String title, String description, double total_time);
+    ResponseEntity<String> createTask(Manager activeManager, String title, String description, double total_time);
 
 }

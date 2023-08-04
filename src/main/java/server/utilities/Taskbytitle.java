@@ -15,7 +15,7 @@ public class Taskbytitle {
     Scanner scan = new Scanner(System.in);
 
     public Task gettaskbytitle() {
-        Task task = null;
+        Task task;
 
 
         List<Task> allTasks = taskDao.getAllTasksbyEmployee();
@@ -51,7 +51,7 @@ public class Taskbytitle {
 
 
     public Task getAssignTaskByTitle(Employee employee) {
-        Task assignedTask = null;
+        Task assignedTask;
         boolean hasAssignedTasks = false;
 
         System.out.println("The assigned tasks for the employee are:");

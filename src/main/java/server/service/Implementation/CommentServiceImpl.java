@@ -1,15 +1,19 @@
 package server.service.Implementation;
 
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import server.dao.CommentDao;
 import server.domain.Comment;
 import server.domain.Task;
 import server.domain.User;
-import server.dto.ViewCommentDTO;
+import server.dto.CommentDTO;
 import server.service.CommentService;
 import server.service.TaskService;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
@@ -26,36 +30,70 @@ public class CommentServiceImpl implements CommentService {
 
 
     @Override
-    public String addComments(String message, User person, String tasktitle) {
+    public ResponseEntity<String> addComments(String message, User person, String tasktitle) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         Comment comment = new Comment();
         Task task=taskService.getTaskByTitle(tasktitle);
-        comment.setBody(message);
-        String formattedDateTime = LocalDateTime.now().format(formatter);
-        LocalDateTime dateTime = LocalDateTime.parse(formattedDateTime, formatter);
-        comment.setCreatedAt(dateTime);
-        comment.setCreatedBy(person);
-        comment.addTaskForComment(task);
+        if(task!=null) {
+            String fullname = person.getFirstName() + " " + person.getLastName();
+            String assignee="";
+            if(task.getAssignee()!=null) {
+                 assignee = task.getAssignee().getFirstName() + " " + task.getAssignee().getLastName();
+            }
+            if (!(person.getUserRole().equals(User.UserRole.Supervisor.toString()))) {
 
-        commentDao.addComment(comment);
-       return "The comment has been added successfully by " +person.getFirstName() + " " + person.getLastName();
+                if(person.getUserRole().equals(User.UserRole.Manager.toString()))
+                {
+                    if (!(task.getCreatedBy().getFirstName() + " " + task.getCreatedBy().getLastName()).equals(fullname)) {
+                    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("her");
+                }
+                } else if (person.getUserRole().equals(User.UserRole.Employee.toString())) {
+                    if (task.getAssignee() != null && !assignee.equals(fullname)) {
+                        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("his");
+                    }
+                }
+
+            }
+            comment.setBody(message);
+            String formattedDateTime = LocalDateTime.now().format(formatter);
+            LocalDateTime dateTime = LocalDateTime.parse(formattedDateTime, formatter);
+            comment.setCreatedAt(dateTime);
+            comment.setCreatedBy(person);
+            comment.addTaskForComment(task);
+
+            commentDao.addComment(comment);
+            return ResponseEntity.status(HttpStatus.OK).body(null);
+        }
+        else {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+        }
     }
 
     @Override
-    public List<ViewCommentDTO> viewComments(String title) {
+    public List<CommentDTO> viewComments(String title) {
         Task task = taskService.getTaskByTitle(title);
-        List<Comment> comments = commentDao.getComments(task);
-        List<ViewCommentDTO> viewCommentDTOList = new ArrayList<>();
+        if (task != null) {
+            List<Comment> comments = commentDao.getComments(task);
+            List<CommentDTO> viewCommentDTOList = new ArrayList<>();
 
-        for (Comment comment : comments) {
-            ViewCommentDTO commentDTO = new ViewCommentDTO();
-            commentDTO.setCreatedAt(comment.getCreatedAt());
-            commentDTO.setCreatedBy(comment.getCreatedBy().getFirstName() + " " + comment.getCreatedBy().getLastName());
-            commentDTO.setMessage(comment.getBody());
-            viewCommentDTOList.add(commentDTO);
+            for (Comment comment : comments) {
+                CommentDTO commentDTO = new CommentDTO();
+
+                LocalDateTime timestamp = comment.getCreatedAt();
+                LocalDateTime localDateTime = timestamp.atZone(ZoneId.systemDefault()).toLocalDateTime();
+                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+                String formattedDateTime = localDateTime.format(formatter);
+                commentDTO.setCreatedAt(formattedDateTime);
+                commentDTO.setCreatedBy(comment.getCreatedBy().getFirstName() + " " + comment.getCreatedBy().getLastName());
+                commentDTO.setMessage(comment.getBody());
+                viewCommentDTOList.add(commentDTO);
+            }
+
+            return viewCommentDTOList;
         }
-
-        return viewCommentDTOList;
+        else {
+            return null;
+        }
     }
 
 

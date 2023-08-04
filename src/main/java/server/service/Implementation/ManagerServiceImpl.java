@@ -65,8 +65,8 @@ public class ManagerServiceImpl implements ManagerService {
         boolean foundTasks = false; // To track if any tasks are found for the manager
 
         for (Task task : taskDao.getAllTasksbyEmployee()) {
-            String createdByFullName = "N/A"; // Default value in case createdBy is null
-            String assigneeFullName = "N/A"; // Default value in case assignee is null
+            String createdByFullName ="N/A";
+            String assigneeFullName = "N/A";
 
             if (task.getCreatedBy() != null) {
                 createdByFullName = task.getCreatedBy().getFirstName() + " " + task.getCreatedBy().getLastName();

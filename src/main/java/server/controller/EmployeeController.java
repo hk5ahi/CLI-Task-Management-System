@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/employee")
+@RequestMapping("/employees")
 public class EmployeeController {
 
     private final EmployeeService employeeService;
@@ -27,7 +27,7 @@ public class EmployeeController {
     }
 
 
-    @PostMapping("/add-total-time")
+    @PatchMapping("/time")
     public ResponseEntity<String> addTotalTime(@RequestHeader("Authorization") String authorizationHeader,@RequestParam String title, @RequestParam double time) {
 
         String authenticatedUserRole = utilityService.isAuthenticated(authorizationHeader);
@@ -40,8 +40,8 @@ public class EmployeeController {
 
             Employee activeEmployee = employeeService.findEmployee(username, password);
 
-            String response = employeeService.addTotaltime(time, title,activeEmployee);
-            return ResponseEntity.ok(response);
+            return employeeService.addTotaltime(time, title,activeEmployee);
+
 
         } else {
             throw new ForbiddenAccessException();

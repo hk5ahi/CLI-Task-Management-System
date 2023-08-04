@@ -1,6 +1,8 @@
 package server.service;
 
+import server.dto.TaskHistoryDTO;
+
 public interface TaskHistoryService {
 
-    String viewTaskHistory(String title);
+    TaskHistoryDTO viewTaskHistory(String title);
 }

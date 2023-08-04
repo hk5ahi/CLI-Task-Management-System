@@ -1,5 +1,7 @@
 package server.dao.implementation;
 
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import server.dao.CommentDao;
 import server.domain.Comment;
 import server.domain.Task;
@@ -28,15 +30,17 @@ public class CommentDaoImpl implements CommentDao {
     public List<Comment> getComments(Task task) {
         List<Comment> commentsForTask = new ArrayList<>();
 
-        for (Comment comment : comments) {
-            Task commentTask = comment.getTasks();
-            if (commentTask != null && commentTask.getTitle() != null && commentTask.getTitle().equals(task.getTitle())) {
-                commentsForTask.add(comment);
+            for (Comment comment : comments) {
+                Task commentTask = comment.getTasks();
+                if (commentTask != null && commentTask.getTitle() != null && commentTask.getTitle().equals(task.getTitle())) {
+                    commentsForTask.add(comment);
+                }
             }
+
+            return commentsForTask.isEmpty() ? null : commentsForTask;
         }
 
-        return commentsForTask.isEmpty() ? null : commentsForTask;
-    }
+
 
 
 

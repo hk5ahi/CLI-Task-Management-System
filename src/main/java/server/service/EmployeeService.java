@@ -1,5 +1,6 @@
 package server.service;
 
+import org.springframework.http.ResponseEntity;
 import server.domain.Employee;
 import server.domain.Task;
 import server.domain.User;
@@ -11,7 +12,7 @@ public interface EmployeeService {
 
     void initializeEmployee();
 
-    String addTotaltime(double time, String title,Employee employee);
+    ResponseEntity<String> addTotaltime(double time, String title, Employee employee);
 
     Employee findEmployee(String providedUsername, String providedPassword);
 

@@ -1,5 +1,7 @@
 package server.service.Implementation;
 
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import server.dao.EmployeeDao;
 import server.dao.TaskDao;
@@ -53,7 +55,7 @@ public class EmployeeServiceImpl implements EmployeeService {
     }
 
     @Override
-    public String addTotaltime(double time, String title,Employee employee) {
+    public ResponseEntity<String> addTotaltime(double time, String title, Employee employee) {
 
         Task providedtask=null;
         if (title != null) {
@@ -65,14 +67,14 @@ public class EmployeeServiceImpl implements EmployeeService {
         }
 
         if (providedtask == null) {
-            return "There are no tasks to set total time.";
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
 
         }
         String assigneeName=providedtask.getAssignee().getFirstName()+" "+providedtask.getAssignee().getLastName();
         String employeeName=employee.getFirstName()+" "+employee.getLastName();
         if(assigneeName.equals(employeeName)) {
             providedtask.setTotal_time(time);
-            return "The total time has been added successfully.";
+            return ResponseEntity.status(HttpStatus.OK).body(null);
         }
         else {
 
@@ -98,11 +100,6 @@ public class EmployeeServiceImpl implements EmployeeService {
 
     @Override
     public List<Employee> getAllEmployees() {
-//        System.out.println("The Employees of the System are:");
-//
-//        for (Employee employee : employeeDao.getEmployees()) {
-//            System.out.println(employee.getFirstName() + " " + employee.getLastName());
-//        }
 
         return employeeDao.getEmployees();
     }

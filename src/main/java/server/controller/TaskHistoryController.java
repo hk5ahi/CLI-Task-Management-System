@@ -3,6 +3,7 @@ package server.controller;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import server.domain.User;
+import server.dto.TaskHistoryDTO;
 import server.exception.ForbiddenAccessException;
 import server.service.TaskHistoryService;
 import server.utilities.UtilityService;
@@ -10,7 +11,7 @@ import server.utilities.UtilityService;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/task history")
+@RequestMapping("/taskhistories")
 public class TaskHistoryController {
 
     private final TaskHistoryService taskHistoryService;
@@ -21,15 +22,15 @@ public class TaskHistoryController {
         this.utilityService = utilityService;
     }
 
-    @PostMapping("/view")
-    public ResponseEntity<String> archiveTask(@RequestHeader("Authorization") String authorizationHeader, @RequestParam("title") String title) {
+    @GetMapping("/view")
+    public ResponseEntity<TaskHistoryDTO> getTaskHistory(@RequestHeader("Authorization") String authorizationHeader, @RequestParam("title") String title) {
 
         Optional<String> authenticatedUserRole = Optional.ofNullable(utilityService.isAuthenticated(authorizationHeader));
         String supervisorRole = User.UserRole.Supervisor.toString();
 
         if (authenticatedUserRole.isPresent() && supervisorRole.equals(authenticatedUserRole.get())) {
-            String result = taskHistoryService.viewTaskHistory(title);
-            return ResponseEntity.ok(result);
+            TaskHistoryDTO taskHistoryDTO = taskHistoryService.viewTaskHistory(title);
+            return ResponseEntity.ok(taskHistoryDTO);
         } else {
             throw new ForbiddenAccessException();
         }

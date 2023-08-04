@@ -1,13 +1,11 @@
 package server.controller;
 
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import server.dao.SupervisorDao;
 import server.domain.*;
 
-import server.dto.SentCommentDTO;
-import server.dto.ViewCommentDTO;
+import server.dto.CommentDTO;
 import server.exception.ForbiddenAccessException;
 import server.service.CommentService;
 import server.service.EmployeeService;
@@ -21,7 +19,7 @@ import java.util.Map;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/comment")
+@RequestMapping("/comments")
 public class CommentController {
 
     private final CommentService commentService;
@@ -46,39 +44,39 @@ public class CommentController {
 
 
     @PostMapping("/add")
-    public ResponseEntity<String> addComments(@RequestHeader("Authorization") String authorizationHeader, @RequestBody SentCommentDTO comment) {
+    public ResponseEntity<String> addComments(@RequestHeader("Authorization") String authorizationHeader, @RequestBody CommentDTO comment) {
         String authenticatedUserRole = utilityService.isAuthenticated(authorizationHeader);
 
         if (authenticatedUserRole != null) {
-            String response;
+
 
             if (authenticatedUserRole.equals(User.UserRole.Supervisor.toString())) {
                 Supervisor supervisor = supervisorDao.getSupervisorInfo();
-                response = commentService.addComments(comment.getMessage(), supervisor, comment.getTitle());
+                return  commentService.addComments(comment.getMessage(), supervisor, comment.getTitle());
             } else if (authenticatedUserRole.equals(User.UserRole.Manager.toString())) {
                 Map<String, String> usernamePassword = utilityService.getUsernamePassword(authorizationHeader);
                 String username = usernamePassword.get("username");
                 String password = usernamePassword.get("password");
                 Manager activeManager = managerService.findManager(username, password);
-                response = commentService.addComments(comment.getMessage(), activeManager, comment.getTitle());
+                return commentService.addComments(comment.getMessage(), activeManager, comment.getTitle());
             } else if (authenticatedUserRole.equals(User.UserRole.Employee.toString())) {
                 Map<String, String> usernamePassword = utilityService.getUsernamePassword(authorizationHeader);
                 String username = usernamePassword.get("username");
                 String password = usernamePassword.get("password");
                 Employee activeEmployee = employeeService.findEmployee(username, password);
-                response = commentService.addComments(comment.getMessage(), activeEmployee, comment.getTitle());
+                return  commentService.addComments(comment.getMessage(), activeEmployee, comment.getTitle());
             } else {
                 throw new ForbiddenAccessException();
             }
 
-            return ResponseEntity.ok(response);
+
         } else {
             throw new ForbiddenAccessException();
         }
     }
 
     @GetMapping("/view")
-    public ResponseEntity<List<ViewCommentDTO>> viewComments( @RequestHeader("Authorization") String authorizationHeader,@RequestParam("title") String title) {
+    public ResponseEntity<List<CommentDTO>> getComments( @RequestHeader("Authorization") String authorizationHeader,@RequestParam("title") String title) {
 
         Optional<String> authenticatedUserRole = Optional.ofNullable(utilityService.isAuthenticated(authorizationHeader));
         String supervisorRole = User.UserRole.Supervisor.toString();
@@ -87,7 +85,7 @@ public class CommentController {
             if (title == null) {
                 return ResponseEntity.notFound().build();
             }
-            List<ViewCommentDTO> comments = commentService.viewComments(title);
+            List<CommentDTO> comments = commentService.viewComments(title);
             return ResponseEntity.ok(comments);
         }
         else {
