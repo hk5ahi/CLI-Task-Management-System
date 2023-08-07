@@ -8,6 +8,7 @@ import server.dao.EmployeeDao;
 import server.dao.ManagerDao;
 import server.dao.TaskDao;
 
+import server.dao.TaskHistoryDao;
 import server.domain.*;
 import server.dto.*;
 import server.exception.ForbiddenAccessException;
@@ -30,91 +31,114 @@ public class TaskServiceImpl implements TaskService {
     private final EmployeeDao employeeDao;
 
     private final ManagerDao managerDao;
+    private final TaskHistoryDao taskHistoryDao;
 
 
     @Autowired
-    public TaskServiceImpl(EmployeeService employeeService, ManagerService managerService, TaskDao taskDao, EmployeeDao employeeDao, ManagerDao managerDao) {
+    public TaskServiceImpl(EmployeeService employeeService, ManagerService managerService, TaskDao taskDao, EmployeeDao employeeDao, ManagerDao managerDao, TaskHistoryDao taskHistoryDao) {
         this.employeeService = employeeService;
         this.managerService = managerService;
         this.taskDao = taskDao;
         this.employeeDao = employeeDao;
         this.managerDao = managerDao;
+        this.taskHistoryDao = taskHistoryDao;
     }
 
 
     @Override
     public List<Task> getAllTasks() {
 
-        List<Task> allTasks = taskDao.getAllTasksbyEmployee();
+        List<Task> allTasks = taskDao.getAll();
 
         return allTasks;
     }
 
     @Override
-    public List<TaskDTO> viewAllTasksbyUser(User person) {
-        List<TaskDTO> taskbyEmployees = new ArrayList<>();
-        List<Task> allTasks = taskDao.getAllTasksbyEmployee();
+    public List<TaskDTO> viewAllTasksCreatedByManager(Manager manager, String employeeName) {
+        Employee employee = (Employee) employeeDao.getEmployeeByName(employeeName);
+        if (employee != null) {
 
-        String managerName = person.getFirstName() + " " + person.getLastName();
-        for (Task task : allTasks) {
-            String assigneeName = "N/A"; // Default value in case assignee is null
-            if (task.getAssignee() != null) {
-                assigneeName = task.getAssignee().getFirstName() + " " + task.getAssignee().getLastName();
+            List<TaskDTO> taskbyEmployees = new ArrayList<>();
+            List<Task> allTasks = taskDao.getAll();
+
+
+            for (Task task : allTasks) {
+                String assigneeName = "N/A"; // Default value in case assignee is null
+                if (task.getAssignee() != null) {
+                    assigneeName = task.getAssignee().getUsername();
+                }
+
+                String creatorUserName = task.getCreatedBy().getUsername();
+                String creatorName = task.getCreatedBy().getFirstName() + " " + task.getCreatedBy().getLastName();
+
+                if (manager.getUsername().equals(creatorUserName) && employee.getUsername().equals(assigneeName)) {
+
+                    Instant timestamp = task.getCreatedAt();
+                    LocalDateTime localDateTime = timestamp.atZone(ZoneId.systemDefault()).toLocalDateTime();
+
+                    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+                    String formattedDateTime = localDateTime.format(formatter);
+                    TaskDTO taskbyEmployee = new TaskDTO();
+                    taskbyEmployee.setTitle(task.getTitle());
+                    taskbyEmployee.setDescription(task.getDescription());
+                    taskbyEmployee.setAssignee(assigneeName);
+                    taskbyEmployee.setCreatedAt(formattedDateTime);
+                    taskbyEmployee.setCreatedBy(creatorName);
+
+                    taskbyEmployees.add(taskbyEmployee);
+                }
             }
+            return taskbyEmployees;
+        } else {
 
-            String creatorName = task.getCreatedBy().getFirstName() + " " + task.getCreatedBy().getLastName();
-
-            if (managerName.equals(creatorName)) {
-
-                Instant timestamp = task.getCreatedAt();
-                LocalDateTime localDateTime = timestamp.atZone(ZoneId.systemDefault()).toLocalDateTime();
-
-                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-                String formattedDateTime = localDateTime.format(formatter);
-                TaskDTO taskbyEmployee = new TaskDTO();
-                taskbyEmployee.setTitle(task.getTitle());
-                taskbyEmployee.setDescription(task.getDescription());
-                taskbyEmployee.setAssignee(assigneeName);
-                taskbyEmployee.setCreatedAt(formattedDateTime);
-                taskbyEmployee.setCreatedBy(creatorName);
-                
-                taskbyEmployees.add(taskbyEmployee);
-            }
+            return null;
         }
-        return taskbyEmployees;
     }
 
+
+
     @Override
-    public List<TaskDTO> viewAllTasksbyUser() {
-        List<TaskDTO> taskbyEmployees = new ArrayList<>();
-        List<Task> allTasks = taskDao.getAllTasksbyEmployee();
+    public List<TaskDTO> viewAllTasksByUser(String employeeName) {
 
-        for (Task task : allTasks) {
-            String assigneeName = "N/A"; // Default value in case assignee is null
-            if (task.getAssignee() != null) {
-                assigneeName = task.getAssignee().getFirstName() + " " + task.getAssignee().getLastName();
+        Employee employee= (Employee) employeeDao.getEmployeeByName(employeeName);
+        if(employee!=null) {
+            List<TaskDTO> taskbyEmployees = new ArrayList<>();
+            List<Task> allTasks = taskDao.getAll();
+
+            for (Task task : allTasks) {
+                String assigneeName = "N/A"; // Default value in case assignee is null
+                if (task.getAssignee() != null) {
+                    assigneeName = task.getAssignee().getUsername();
+                }
+
+                String creatorName = task.getCreatedBy().getFirstName() + " " + task.getCreatedBy().getLastName();
+
+                if (employee.getUsername().equals(assigneeName)) {
+                    Instant timestamp = task.getCreatedAt();
+                    LocalDateTime localDateTime = timestamp.atZone(ZoneId.systemDefault()).toLocalDateTime();
+
+                    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+                    String formattedDateTime = localDateTime.format(formatter);
+                    TaskDTO taskbyEmployee = new TaskDTO();
+
+
+                    taskbyEmployee.setTitle(task.getTitle());
+                    taskbyEmployee.setDescription(task.getDescription());
+                    taskbyEmployee.setAssignee(assigneeName);
+                    taskbyEmployee.setCreatedAt(formattedDateTime);
+                    taskbyEmployee.setCreatedBy(creatorName);
+                    taskbyEmployee.setTaskStatus(task.getTaskStatus());
+                    taskbyEmployee.setTotal_time(task.getTotal_time());
+
+                    taskbyEmployees.add(taskbyEmployee);
+                }
             }
+            return taskbyEmployees;
+        }
+        else {
 
-            String creatorName = task.getCreatedBy().getFirstName() + " " + task.getCreatedBy().getLastName();
-                Instant timestamp = task.getCreatedAt();
-                LocalDateTime localDateTime = timestamp.atZone(ZoneId.systemDefault()).toLocalDateTime();
-
-                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-                String formattedDateTime = localDateTime.format(formatter);
-                TaskDTO taskbyEmployee = new TaskDTO();
-                       
-            
-                taskbyEmployee.setTitle(task.getTitle());
-                taskbyEmployee.setDescription(task.getDescription());
-                taskbyEmployee.setAssignee(assigneeName);
-                taskbyEmployee.setCreatedAt(formattedDateTime);
-                taskbyEmployee.setCreatedBy(creatorName);
-                taskbyEmployee.setTaskStatus(task.getTaskStatus());
-                taskbyEmployee.setTotal_time(task.getTotal_time());
-
-                taskbyEmployees.add(taskbyEmployee);
-            }
-        return taskbyEmployees;
+            return null;
+        }
     }
 
 
@@ -124,7 +148,7 @@ public class TaskServiceImpl implements TaskService {
         task.setCreatedBy(activeManager);
         Instant currentInstant = Instant.now();
         task.setCreatedAt(currentInstant); // Store the formatted timestamp
-        for(Task taskinDoa:taskDao.getAllTasksbyEmployee())
+        for(Task taskinDoa:taskDao.getAll())
         {
             if(taskinDoa.getTitle().equals(task.getTitle()))
             {
@@ -140,109 +164,97 @@ public class TaskServiceImpl implements TaskService {
     @Override
     public ResponseEntity<String> changeTaskStatus(String title, Task.Status status, User person) {
         Task task = getTaskByTitle(title);
-        if (task != null) {
-            Task.Status currentStatus = task.getTaskStatus();
-            boolean isValidChange = false;
 
-            if (task.getAssignee() == null) {
-                throw new ForbiddenAccessException();
-            }
+        if (task == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+        }
 
-            if (currentStatus.toString().equals(Task.Status.COMPLETED.toString())) {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
-            }
+        Task.Status currentStatus = task.getTaskStatus();
 
-            String assigneeFullName = task.getAssignee().getFirstName() + " " + task.getAssignee().getLastName();
-            String personFullName = person.getFirstName() + " " + person.getLastName();
-            String createdFullName = task.getCreatedBy().getFirstName() + " " + task.getCreatedBy().getLastName();
+        if (currentStatus == Task.Status.COMPLETED) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+        }
 
-            switch (person.getUserRole()) {
-                case "Employee" -> {
-                    if (assigneeFullName.equals(personFullName)) {
-                        if (status == Task.Status.IN_REVIEW) {
-                            if (currentStatus.toString().equals(Task.Status.IN_PROGRESS.toString())) {
-                                Instant endTime = Instant.now();
-                                Instant startInstant = task.getStartTime().atZone(ZoneId.systemDefault()).toInstant();
-                                Instant endInstant = endTime.atZone(ZoneId.systemDefault()).toInstant();
-                                Duration duration = Duration.between(startInstant, endInstant);
-                                long minutes = duration.toMinutes();
+        if (task.getAssignee() == null) {
+            throw new ForbiddenAccessException();
+        }
 
-                                if (minutes >= task.getTotal_time()) {
-                                    isValidChange = true;
-                                } else {
+        String assigneeFullName = task.getAssignee().getFirstName()+" "+task.getAssignee().getLastName();
+        String personFullName = person.getFirstName()+" "+person.getLastName();
+        String createdFullName = task.getCreatedBy().getFirstName()+" "+task.getCreatedBy().getLastName();
 
-                                    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
-                                }
-                            } else {
-                                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
-                            }
-                        } else if (status == Task.Status.IN_PROGRESS) {
-                            if (currentStatus.toString().equals(Task.Status.CREATED.toString())) {
-                                task.setStartTime(Instant.now());
-                                isValidChange = true;
-                            } else {
-                                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
-                            }
-                        } else if (status == Task.Status.COMPLETED) {
-                            throw new ForbiddenAccessException();
-                        }
-                    } else {
-                        throw new ForbiddenAccessException();
-                    }
+        boolean isValidChange = false;
+
+        switch (person.getUserRole()) {
+            case "Employee":
+                if (!assigneeFullName.equals(personFullName)) {
+                    throw new ForbiddenAccessException();
                 }
-                case "Manager" -> {
-                    if (createdFullName.equals(personFullName)) {
-                        if (currentStatus.toString().equals(Task.Status.IN_REVIEW.toString())) {
-                            if (status == Task.Status.COMPLETED) {
-                                isValidChange = true;
-                            } else {
-                                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
-                            }
-                        } else {
-                            throw new ForbiddenAccessException();
-                        }
+
+                if (status == Task.Status.IN_REVIEW && currentStatus == Task.Status.IN_PROGRESS) {
+                    Instant endTime = Instant.now();
+                    Instant startInstant = task.getStartTime().atZone(ZoneId.systemDefault()).toInstant();
+                    Instant endInstant = endTime.atZone(ZoneId.systemDefault()).toInstant();
+                    Duration duration = Duration.between(startInstant, endInstant);
+                    long minutes = duration.toMinutes();
+
+                    if (minutes >= task.getTotal_time()) {
+                        isValidChange = true;
                     } else {
-                        throw new ForbiddenAccessException();
+                        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
                     }
-                }
-                default -> {
+                } else if (status == Task.Status.IN_PROGRESS && currentStatus == Task.Status.CREATED) {
+                    task.setStartTime(Instant.now());
+                    isValidChange = true;
+                } else {
                     return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
                 }
-            }
+                break;
 
-            if (isValidChange) {
-                task.setTaskStatus(status);
-                TaskHistory history = new TaskHistory();
-                history.setTimestamp(Instant.now());
-                history.setOldStatus(currentStatus);
-                history.setNewStatus(status);
-                task.setHistory(history);
+            case "Manager":
+                if (!createdFullName.equals(personFullName)) {
+                    throw new ForbiddenAccessException();
+                }
 
-                User user = new User();
-                user.setFirstName(person.getFirstName());
-                user.setLastName(person.getLastName());
-                task.getHistory().setMovedBy(user);
+                if (status == Task.Status.COMPLETED && currentStatus == Task.Status.IN_REVIEW) {
+                    isValidChange = true;
+                } else {
+                    throw new ForbiddenAccessException();
+                }
+                break;
 
-                return ResponseEntity.status(HttpStatus.OK).body(null);
-            } else {
+            default:
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
-            }
+        }
+
+        if (isValidChange) {
+            task.setTaskStatus(status);
+            TaskHistory history = new TaskHistory();
+            User user = new User();
+            user.setFirstName(person.getFirstName());
+            user.setLastName(person.getLastName());
+            history.setTimestamp(Instant.now());
+            history.setOldStatus(currentStatus);
+            history.setNewStatus(status);
+            history.setMovedBy(user);
+            taskHistoryDao.setTaskHistory(history,task);
+
+            return ResponseEntity.status(HttpStatus.OK).body(null);
         } else {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
         }
     }
 
-
     @Override
-    public List<TaskDTO> viewAllTasksByStatusCreatedBySingleManager(Manager activeManager) {
-        String managerName = activeManager.getFirstName() + " " + activeManager.getLastName();
-        List<Task> tasksCreatedByManager = taskDao.getAllTasksbyEmployee();
+    public List<TaskDTO> viewAllTasksCreatedByManager(Manager activeManager,Task.Status status) {
+
+        List<Task> allTasks = taskDao.getAll();
         List<TaskDTO> taskInfoList = new ArrayList<>();
 
-        for (Task task : tasksCreatedByManager) {
-            String createdBy = task.getCreatedBy().getFirstName() + " " + task.getCreatedBy().getLastName();
+        for (Task task : allTasks) {
+            String createdBy = task.getCreatedBy().getUsername();
 
-            if (createdBy.equals(managerName)) {
+            if (createdBy.equals(activeManager.getUsername()) && task.getTaskStatus().equals(status)) {
                 TaskDTO taskInfo = new TaskDTO();
                 taskInfo.setTitle(task.getTitle());
                 taskInfo.setDescription(task.getDescription());
@@ -268,51 +280,58 @@ public class TaskServiceImpl implements TaskService {
 
 
     @Override
-    public List<TaskDTO>viewAllTasksByEmployeeAndStatusCreatedBySingleManager(Manager activeManager) {
-        String managerName = activeManager.getFirstName() + " " + activeManager.getLastName();
+    public List<TaskDTO> viewAllTasksCreatedByManager(Manager activeManager,Task.Status status,String employeeName) {
 
-        List<TaskDTO> taskbyEmployeeandStatuses=new ArrayList<>();
+        Employee employee= (Employee) employeeDao.getEmployeeByName(employeeName);
+        if(employee!=null) {
+            List<TaskDTO> taskbyEmployeeandStatuses = new ArrayList<>();
 
-        for (Task task : taskDao.getAllTasksbyEmployee()) {
-            String createdBy = "N/A"; // Default value in case createdBy is null
-            String assigneeName = "N/A"; // Default value in case assignee is null
+            for (Task task : taskDao.getAll()) {
+                String createdBy = "N/A"; // Default value in case createdBy is null
+                String assigneeName = "N/A"; // Default value in case assignee is null
 
-            if (task.getCreatedBy() != null) {
-                createdBy = task.getCreatedBy().getFirstName() + " " + task.getCreatedBy().getLastName();
+                if (task.getCreatedBy() != null) {
+                    createdBy = task.getCreatedBy().getUsername();
+                }
+
+                if (task.getAssignee() != null) {
+                    assigneeName = task.getAssignee().getUsername();
+                }
+
+                if (createdBy.equals(activeManager.getUsername()) && (task.getTaskStatus().equals(status)) && assigneeName.equals(employee.getUsername())) {
+
+                    Instant timestamp = task.getCreatedAt();
+                    LocalDateTime localDateTime = timestamp.atZone(ZoneId.systemDefault()).toLocalDateTime();
+
+                    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+
+
+                    String formattedDateTime = localDateTime.format(formatter);
+                    TaskDTO taskbyEmployeeandStatus = new TaskDTO();
+                    taskbyEmployeeandStatus.setTitle(task.getTitle());
+                    taskbyEmployeeandStatus.setDescription(task.getDescription());
+                    taskbyEmployeeandStatus.setAssignee(assigneeName);
+                    taskbyEmployeeandStatus.setTaskStatus(task.getTaskStatus());
+                    taskbyEmployeeandStatus.setCreatedAt(formattedDateTime);
+
+                    taskbyEmployeeandStatuses.add(taskbyEmployeeandStatus);
+
+                }
             }
 
-            if (task.getAssignee() != null) {
-                assigneeName = task.getAssignee().getFirstName() + " " + task.getAssignee().getLastName();
-            }
 
-            if (createdBy.equals(managerName)) {
-
-                Instant timestamp = task.getCreatedAt();
-                LocalDateTime localDateTime = timestamp.atZone(ZoneId.systemDefault()).toLocalDateTime();
-                
-                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-
-                
-                String formattedDateTime = localDateTime.format(formatter);
-                TaskDTO taskbyEmployeeandStatus = new TaskDTO();
-                taskbyEmployeeandStatus.setTitle(task.getTitle());
-                taskbyEmployeeandStatus.setDescription(task.getDescription());
-                taskbyEmployeeandStatus.setAssignee(assigneeName);
-                taskbyEmployeeandStatus.setTaskStatus(task.getTaskStatus());
-                taskbyEmployeeandStatus.setCreatedAt(formattedDateTime);
-                
-                taskbyEmployeeandStatuses.add(taskbyEmployeeandStatus);
-                
-            }
+            return (taskbyEmployeeandStatuses);
         }
+        else {
 
-        return (taskbyEmployeeandStatuses);
+            return null;
+        }
     }
 
     @Override
     public List<TaskDTO> viewTasksByStatus(Employee employee) {
         List<TaskDTO> allTasks = new ArrayList<>();
-        List<Task> tasks = taskDao.getAllTasksbyEmployee();
+        List<Task> tasks = taskDao.getAll();
 
         for (Task task : tasks) {
             if (isTaskAssignedToEmployee(task, employee)) {
@@ -326,7 +345,7 @@ public class TaskServiceImpl implements TaskService {
     @Override
     public List<TaskDTO> viewAllTasksByStatus() {
         List<TaskDTO> allTasks = new ArrayList<>();
-        List<Task> tasks = taskDao.getAllTasksbyEmployee();
+        List<Task> tasks = taskDao.getAll();
 
         for (Task task : tasks) {
             allTasks.add(createTaskDTO(task));
@@ -336,15 +355,15 @@ public class TaskServiceImpl implements TaskService {
     }
 
     private boolean isTaskAssignedToEmployee(Task task, Employee employee) {
-        String assigneeName;
+        String assigneeUserName;
         if(task.getAssignee()!=null) {
-             assigneeName = task.getAssignee().getFirstName() + " " + task.getAssignee().getLastName();
+             assigneeUserName = task.getAssignee().getUsername();
         }
         else {
-             assigneeName="N/A";
+             assigneeUserName="N/A";
         }
-        String employeeName = employee.getFirstName() + " " + employee.getLastName();
-        return assigneeName.equals(employeeName);
+        String employeeUserName = employee.getUsername();
+        return assigneeUserName.equals(employeeUserName);
     }
 
     private TaskDTO createTaskDTO(Task task) {
@@ -377,12 +396,12 @@ public class TaskServiceImpl implements TaskService {
             if (task.equals(null)) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
             }
-            Manager managerByName = (Manager) managerService.getManagerByName(fullName);
+            Manager managerByName = (Manager) managerDao.getManagerByName(fullName);
 
             if (managerByName != null) {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
             }
-            User assignee = employeeService.getEmployeeByName(fullName);
+            User assignee = employeeDao.getEmployeeByName(fullName);
             if (assignee == null) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
             }
@@ -406,7 +425,7 @@ public class TaskServiceImpl implements TaskService {
     public List<TaskDTO> viewTasksByUser(String userRole) {
         List<TaskDTO> taskbyEmployeeandStatusDTOS = new ArrayList<>();
 
-        List<Task> tasks = taskDao.getAllTasksbyEmployee();
+        List<Task> tasks = taskDao.getAll();
 
         if (userRole.equals(User.UserRole.Employee.toString())) {
             for (Task task : tasks) {
@@ -452,7 +471,7 @@ public class TaskServiceImpl implements TaskService {
 
         List<TaskDTO> assignedTasks=new ArrayList<>();
 
-        for (Task task : taskDao.getAllTasksbyEmployee()) {
+        for (Task task : taskDao.getAll()) {
             String assigneeFullName = task.getAssignee() != null
                     ? task.getAssignee().getFirstName() + " " + task.getAssignee().getLastName()
                     : "N/A";
@@ -480,7 +499,7 @@ public class TaskServiceImpl implements TaskService {
     @Override
     public Task getTaskByTitle(String title) {
         if (title != null) {
-            for (Task task : taskDao.getAllTasksbyEmployee()) {
+            for (Task task : taskDao.getAll()) {
                 if (task != null && task.getTitle() != null && task.getTitle().equalsIgnoreCase(title)) {
                     return task;
                 }

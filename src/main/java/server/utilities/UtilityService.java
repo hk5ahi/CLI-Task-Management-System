@@ -1,10 +1,10 @@
 package server.utilities;
 
 import org.springframework.stereotype.Service;
+import server.dao.EmployeeDao;
+import server.dao.ManagerDao;
 import server.domain.Employee;
 import server.domain.Manager;
-import server.service.EmployeeService;
-import server.service.ManagerService;
 import server.service.UserService;
 
 import java.util.Base64;
@@ -15,13 +15,13 @@ import java.util.Optional;
 public class UtilityService {
 
     private final UserService userService;
-    private final ManagerService managerService;
-    private final EmployeeService employeeService;
+    private final ManagerDao managerDao;
+    private final EmployeeDao employeeDao;
 
-    public UtilityService(UserService userService, ManagerService managerService, EmployeeService employeeService) {
+    public UtilityService(UserService userService, ManagerDao managerDao, EmployeeDao employeeDao) {
         this.userService = userService;
-        this.managerService = managerService;
-        this.employeeService = employeeService;
+        this.managerDao = managerDao;
+        this.employeeDao = employeeDao;
     }
 
     public String isAuthenticated(String authorizationHeader) {
@@ -78,14 +78,14 @@ public class UtilityService {
         Map<String, String> usernamePassword = getUsernamePassword(authorizationHeader);
         String username = usernamePassword.get("username");
         String password = usernamePassword.get("password");
-        return employeeService.findEmployee(username, password);
+        return employeeDao.findEmployee(username, password);
     }
 
     public Manager getActiveManager(String authorizationHeader) {
         Map<String, String> usernamePassword = getUsernamePassword(authorizationHeader);
         String username = usernamePassword.get("username");
         String password = usernamePassword.get("password");
-        return managerService.findManager(username, password);
+        return managerDao.findManager(username, password);
     }
 
 

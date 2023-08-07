@@ -10,33 +10,21 @@ import server.service.SupervisorService;
 @Service
 public class SupervisorServiceImpl implements SupervisorService {
 
-    private SupervisorDao supervisorDao;
+    private final SupervisorDao supervisorDao;
 
-    private  final UserDao userDao;
-    private Supervisor supervisor;
     @Autowired
-    public SupervisorServiceImpl(UserDao userDao,SupervisorDao supervisorDao) {
+    public SupervisorServiceImpl(SupervisorDao supervisorDao) {
         this.supervisorDao=supervisorDao;
-        this.userDao = userDao;
-        supervisor = supervisorDao.getSupervisorInfo();
-    }
 
-
-
-    @Override
-    public void initializeSupervisor() {
-
-
-        supervisorDao.setSupervisorInfo("Muhammad", "Asif", "m.asif", "Ts12", "Supervisor");
-        userDao.addUser(supervisor);
 
     }
 
-
     @Override
-    public Supervisor verifyCredentials(String providedUsername, String providedPassword) {
-        initializeSupervisor();
+    public Supervisor getAndVerify(String providedUsername, String providedPassword) {
 
+        String supervisorName=supervisorDao.getSupervisors().get(0).getFirstName()+" "+supervisorDao.getSupervisors().get(0).getLastName();
+
+        Supervisor supervisor=supervisorDao.getSupervisorByName(supervisorName);
         String storedUsername = supervisor.getUsername();
         String storedPassword = supervisor.getPassword();
 
@@ -51,6 +39,7 @@ public class SupervisorServiceImpl implements SupervisorService {
     @Override
     public void viewSupervisor() {
 
+        Supervisor supervisor=supervisorDao.getSupervisorByName("Muhammad Asif");
         System.out.println("The Supervisor of the System is: ");
         System.out.println(supervisor.getFirstName() + " " + supervisor.getLastName());
     }

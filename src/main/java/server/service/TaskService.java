@@ -11,11 +11,11 @@ import java.util.List;
 
 public interface TaskService {
 
-    ResponseEntity<String> assignTask(String title,String fullname,Manager manager);
+    ResponseEntity<String> assignTask(String title,String fullName,Manager manager);
 
     List<Task> getAllTasks();
-    List<TaskDTO> viewAllTasksbyUser(User person);
-    List<TaskDTO> viewAllTasksbyUser();
+    List<TaskDTO> viewAllTasksCreatedByManager(Manager manager,String employeeName);
+    List<TaskDTO> viewAllTasksByUser(String employeeName);
 
     List<TaskDTO> viewTasksByStatus(Employee employee);
 
@@ -25,7 +25,7 @@ public interface TaskService {
 
     ResponseEntity<String> changeTaskStatus(String task, Task.Status status, User person);
 
-    List<TaskDTO> viewAllTasksByStatusCreatedBySingleManager(Manager activeManager);
+    List<TaskDTO> viewAllTasksCreatedByManager(Manager activeManager,Task.Status status);
 
     Task getTaskByTitle(String title);
 
@@ -33,7 +33,7 @@ public interface TaskService {
 
     List<TaskDTO> viewAssignedTasks(Employee employee);
 
-    List<TaskDTO> viewAllTasksByEmployeeAndStatusCreatedBySingleManager(Manager activeManager);
+    List<TaskDTO> viewAllTasksCreatedByManager(Manager activeManager,Task.Status status,String employeeName);
 
     ResponseEntity<String> createTask(Manager activeManager, String title, String description, double total_time);
 

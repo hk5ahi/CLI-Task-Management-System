@@ -24,24 +24,17 @@ public class UserController {
 
     private final UserService userService;
     private final UtilityService utilityService;
-    private final SupervisorService supervisorService;
-    private final ManagerService managerService;
-    private final EmployeeService employeeService;
+
 
     @Autowired
-    public UserController(UserService userService, SupervisorService supervisorService, ManagerService managerService, EmployeeService employeeService,UtilityService utilityService) {
+    public UserController(UserService userService,UtilityService utilityService) {
         this.userService = userService;
-        this.supervisorService = supervisorService;
-        this.managerService = managerService;
-        this.employeeService = employeeService;
         this.utilityService=utilityService;
     }
 
     @PostMapping ()
     public ResponseEntity<String> initialize() {
-        supervisorService.initializeSupervisor();
-        managerService.initializeManager();
-        employeeService.initializeEmployee();
+        userService.initializeUsers();
         return ResponseEntity.status(HttpStatus.CREATED).body(null);
     }
 

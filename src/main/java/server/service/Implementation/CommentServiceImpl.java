@@ -35,7 +35,7 @@ public class CommentServiceImpl implements CommentService {
         Comment comment = new Comment();
         Task task=taskService.getTaskByTitle(tasktitle);
         if(task!=null) {
-            String fullname = person.getFirstName() + " " + person.getLastName();
+            String fullName = person.getFirstName() + " " + person.getLastName();
             String assignee="";
             if(task.getAssignee()!=null) {
                  assignee = task.getAssignee().getFirstName() + " " + task.getAssignee().getLastName();
@@ -44,11 +44,11 @@ public class CommentServiceImpl implements CommentService {
 
                 if(person.getUserRole().equals(User.UserRole.Manager.toString()))
                 {
-                    if (!(task.getCreatedBy().getFirstName() + " " + task.getCreatedBy().getLastName()).equals(fullname)) {
+                    if (!(task.getCreatedBy().getFirstName() + " " + task.getCreatedBy().getLastName()).equals(fullName)) {
                     return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("her");
                 }
                 } else if (person.getUserRole().equals(User.UserRole.Employee.toString())) {
-                    if (task.getAssignee() != null && !assignee.equals(fullname)) {
+                    if (task.getAssignee() != null && !assignee.equals(fullName)) {
                         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("his");
                     }
                 }

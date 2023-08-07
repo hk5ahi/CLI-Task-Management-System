@@ -6,7 +6,7 @@ import java.util.List;
 
 public interface TaskDao {
 
-    List<Task> getAllTasksbyEmployee();
+    List<Task> getAll();
 
     void addTask(Task allTasks);
 

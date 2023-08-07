@@ -1,44 +1,37 @@
 package server.dao.implementation;
 
+import org.springframework.stereotype.Repository;
 import server.dao.SupervisorDao;
-import server.dao.UserDao;
 import server.domain.Supervisor;
 
+import java.util.ArrayList;
+import java.util.List;
+@Repository
 public class SupervisorDaoImpl implements SupervisorDao {
 
-    private static SupervisorDaoImpl instance; // Singleton instance
-    private final Supervisor supervisor; // Instance variable to store supervisor information
 
 
-    // Private constructor to prevent external instantiation
-    private SupervisorDaoImpl() {
-        supervisor = new Supervisor();
-    }
+    private final List<Supervisor> supervisors=new ArrayList<>(List.of(new Supervisor("Muhammad", "Asif", "m.asif", "Ts12", "Supervisor")));
 
 
+    @Override
+    public Supervisor getSupervisorByName(String name)
+    {
+        for(Supervisor supervisor:supervisors)
+        {
+            String fullName=supervisor.getFirstName()+" "+supervisor.getLastName();
+            if(fullName.equals(name))
+            {
+                return supervisor;
+            }
 
-    public static SupervisorDaoImpl getInstance() {
-        if (instance == null) {
-            instance = new SupervisorDaoImpl();
         }
-        return instance;
-    }
 
-
-    @Override
-    public void setSupervisorInfo(String firstName, String lastName, String username, String password, String userRole) {
-        supervisor.setFirstName(firstName);
-        supervisor.setLastName(lastName);
-        supervisor.setUsername(username);
-        supervisor.setPassword(password);
-        supervisor.setUserRole(userRole);
+        return null;
 
     }
-
-    @Override
-    public Supervisor getSupervisorInfo() {
-        return supervisor;
+    public List<Supervisor> getSupervisors() {
+        return supervisors;
     }
-
 
 }

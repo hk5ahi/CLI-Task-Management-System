@@ -1,29 +1,18 @@
 package server.dao.implementation;
 
+import org.springframework.stereotype.Repository;
 import server.dao.ManagerDao;
+import server.dao.UserDao;
 import server.domain.Manager;
+import server.domain.User;
 
 import java.util.ArrayList;
 import java.util.List;
-
+@Repository
 public class ManagerDaoImpl implements ManagerDao {
 
-    private static ManagerDaoImpl instance; // Singleton instance
+    private List<Manager> managers = new ArrayList<>(List.of(new Manager("Muhammad", "Ubaid", "m.ubaid", "Ts12", "Manager")));
 
-    private UserDaoImpl userDao=UserDaoImpl.getInstance();
-    private List<Manager> managers = new ArrayList<>();
-
-    // Private constructor to prevent external instantiation
-    private ManagerDaoImpl() {
-    }
-
-    // Method to get the Singleton instance
-    public static ManagerDaoImpl getInstance() {
-        if (instance == null) {
-            instance = new ManagerDaoImpl();
-        }
-        return instance;
-    }
 
     @Override
     public List<Manager> getManagers() {
@@ -36,11 +25,31 @@ public class ManagerDaoImpl implements ManagerDao {
     }
 
     @Override
-    public void createManager(String firstName, String lastName, String username, String password) {
-        Manager manager = new Manager(firstName, lastName, username, password);
-        manager.setUserRole("Manager");
-        addManager(manager);
-        userDao.addUser(manager);
+    public Manager createManager(String firstName, String lastName, String username, String password) {
+        Manager manager = new Manager(firstName, lastName, username, password,"Manager");
+        managers.add(manager);
+        return manager;
+    }
+
+    @Override
+    public Manager findManager(String providedUsername, String providedPassword) {
+        for (Manager manager : managers) {
+            if (manager.getUsername().equals(providedUsername) && manager.getPassword().equals(providedPassword)) {
+                return manager; // Return the matched Manager object
+            }
+        }
+        return null; // If no match found, return null
+    }
+    @Override
+    public User getManagerByName(String name) {
+        for (Manager manager : managers) {
+            String managerName = manager.getFirstName() + " " + manager.getLastName();
+            if (managerName.equalsIgnoreCase(name)) {
+
+                return manager;
+            }
+        }
+        return null;
     }
 
 }

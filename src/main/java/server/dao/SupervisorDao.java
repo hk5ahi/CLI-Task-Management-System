@@ -2,9 +2,11 @@ package server.dao;
 
 import server.domain.Supervisor;
 
+import java.util.List;
+
 public interface SupervisorDao {
 
-    void setSupervisorInfo(String firstName, String lastName, String username, String password, String userRole);
+    Supervisor getSupervisorByName(String name);
 
-    Supervisor getSupervisorInfo();
+    List<Supervisor> getSupervisors();
 }

@@ -16,4 +16,6 @@ public interface UserService {
 
     List<UserDTO> viewAllUsers();
 
+    void initializeUsers();
+
 }

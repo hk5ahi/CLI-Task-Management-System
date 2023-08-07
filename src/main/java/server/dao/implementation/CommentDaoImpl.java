@@ -1,30 +1,18 @@
 package server.dao.implementation;
 
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+
+import org.springframework.stereotype.Repository;
 import server.dao.CommentDao;
 import server.domain.Comment;
 import server.domain.Task;
 
 import java.util.ArrayList;
 import java.util.List;
-
+@Repository
 public class CommentDaoImpl implements CommentDao {
 
-    private static CommentDaoImpl instance;  // Singleton instance
-    private List<Comment> comments = new ArrayList<>();
 
-    // Private constructor to prevent external instantiation
-    private CommentDaoImpl() {
-    }
-
-    // Method to get the Singleton instance
-    public static CommentDaoImpl getInstance() {
-        if (instance == null) {
-            instance = new CommentDaoImpl();
-        }
-        return instance;
-    }
+    private final List<Comment> comments = new ArrayList<>();
 
     @Override
     public List<Comment> getComments(Task task) {
@@ -39,9 +27,6 @@ public class CommentDaoImpl implements CommentDao {
 
             return commentsForTask.isEmpty() ? null : commentsForTask;
         }
-
-
-
 
 
     @Override

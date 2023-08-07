@@ -13,50 +13,15 @@ public class ManagerServiceImpl implements ManagerService {
 
     private final ManagerDao managerDao;
     private final TaskDao taskDao;
-    private final UserDao userDao;
 
-    public ManagerServiceImpl(ManagerDao managerDao, TaskDao taskDao, UserDao userDao) {
+
+    public ManagerServiceImpl(ManagerDao managerDao, TaskDao taskDao) {
         this.managerDao = managerDao;
         this.taskDao = taskDao;
-        this.userDao = userDao;
+
     }
 
 
-    @Override
-    public Manager findManager(String providedUsername, String providedPassword) {
-        for (Manager manager : managerDao.getManagers()) {
-            if (manager.getUsername().equals(providedUsername) && manager.getPassword().equals(providedPassword)) {
-                return manager; // Return the matched Manager object
-            }
-        }
-        return null; // If no match found, return null
-    }
-
-
-    @Override
-    public void initializeManager() {
-        Manager manager=new Manager();
-        manager.setFirstName("Muhammad");
-        manager.setLastName("Ubaid");
-        manager.setUsername("m.ubaid");
-        manager.setPassword("Ts12");
-        manager.setUserRole("Manager");
-        managerDao.addManager(manager);
-        userDao.addUser(manager);
-    }
-
-    @Override
-    public User getManagerByName(String name) {
-        for (Manager manager : managerDao.getManagers()) {
-            String managerName = manager.getFirstName() + " " + manager.getLastName();
-            if (managerName.equalsIgnoreCase(name)) {
-                Manager foundManager = new Manager();
-                foundManager.setFirstName("Manager");
-                return foundManager;
-            }
-        }
-        return null;
-    }
 
     @Override
     public void viewAllTasksCreatedByManager(Manager activeManager) {
@@ -64,7 +29,7 @@ public class ManagerServiceImpl implements ManagerService {
 
         boolean foundTasks = false; // To track if any tasks are found for the manager
 
-        for (Task task : taskDao.getAllTasksbyEmployee()) {
+        for (Task task : taskDao.getAll()) {
             String createdByFullName ="N/A";
             String assigneeFullName = "N/A";
 

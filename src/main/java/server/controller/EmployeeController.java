@@ -2,28 +2,31 @@ package server.controller;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import server.dao.EmployeeDao;
 import server.domain.Employee;
 
 import server.domain.User;
 import server.exception.ForbiddenAccessException;
 import server.service.EmployeeService;
-import server.service.TaskService;
+
 import server.utilities.UtilityService;
 
-import java.util.List;
 import java.util.Map;
 
 @RestController
 @RequestMapping("/employees")
 public class EmployeeController {
 
-    private final EmployeeService employeeService;
+    private final EmployeeDao employeeDao;
     private final UtilityService utilityService;
+    private final EmployeeService employeeService;
 
-    public EmployeeController(EmployeeService employeeService, UtilityService utilityService) {
-        this.employeeService = employeeService;
+    public EmployeeController(EmployeeDao employeeDao, UtilityService utilityService, EmployeeService employeeService) {
+        this.employeeDao = employeeDao;
+
         this.utilityService = utilityService;
 
+        this.employeeService = employeeService;
     }
 
 
@@ -41,9 +44,9 @@ public class EmployeeController {
             String username = usernamePassword.get("username");
             String password = usernamePassword.get("password");
 
-            Employee activeEmployee = employeeService.findEmployee(username, password);
+            Employee activeEmployee = employeeDao.findEmployee(username, password);
 
-            return employeeService.addTotaltime(time, title, activeEmployee);
+            return employeeService.addTotalTime(time, title, activeEmployee);
         } else {
             throw new ForbiddenAccessException();
         }

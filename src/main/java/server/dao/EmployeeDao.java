@@ -1,6 +1,7 @@
 package server.dao;
 
 import server.domain.Employee;
+import server.domain.User;
 
 import java.util.List;
 
@@ -11,7 +12,9 @@ public interface EmployeeDao {
 
      void addEmployee(Employee employee);
 
-     void createEmployee(String firstname, String lastname, String username, String password);
+     Employee createEmployee(String firstname, String lastname, String username, String password);
 
+     User getEmployeeByName(String name);
+     Employee findEmployee(String providedUsername, String providedPassword);
 
 }
