@@ -1,6 +1,10 @@
 package server.utilities;
 
 import org.springframework.stereotype.Service;
+import server.domain.Employee;
+import server.domain.Manager;
+import server.service.EmployeeService;
+import server.service.ManagerService;
 import server.service.UserService;
 
 import java.util.Base64;
@@ -11,9 +15,13 @@ import java.util.Optional;
 public class UtilityService {
 
     private final UserService userService;
+    private final ManagerService managerService;
+    private final EmployeeService employeeService;
 
-    public UtilityService(UserService userService) {
+    public UtilityService(UserService userService, ManagerService managerService, EmployeeService employeeService) {
         this.userService = userService;
+        this.managerService = managerService;
+        this.employeeService = employeeService;
     }
 
     public String isAuthenticated(String authorizationHeader) {
@@ -65,6 +73,19 @@ public class UtilityService {
         }
 
         return null;
+    }
+    public Employee getActiveEmployee(String authorizationHeader) {
+        Map<String, String> usernamePassword = getUsernamePassword(authorizationHeader);
+        String username = usernamePassword.get("username");
+        String password = usernamePassword.get("password");
+        return employeeService.findEmployee(username, password);
+    }
+
+    public Manager getActiveManager(String authorizationHeader) {
+        Map<String, String> usernamePassword = getUsernamePassword(authorizationHeader);
+        String username = usernamePassword.get("username");
+        String password = usernamePassword.get("password");
+        return managerService.findManager(username, password);
     }
 
 

@@ -23,81 +23,60 @@ import java.util.Optional;
 public class CommentController {
 
     private final CommentService commentService;
-
     private final UtilityService utilityService;
-
     private final SupervisorDao supervisorDao;
-    private final ManagerService managerService;
-    private final EmployeeService employeeService;
 
 
-
-    public CommentController(CommentService commentService, UtilityService utilityService, SupervisorDao supervisorDao, ManagerService managerService, EmployeeService employeeService, TaskService taskService) {
+    public CommentController(CommentService commentService, UtilityService utilityService, SupervisorDao supervisorDao) {
         this.commentService = commentService;
         this.utilityService = utilityService;
         this.supervisorDao = supervisorDao;
 
-        this.managerService = managerService;
-        this.employeeService = employeeService;
-
     }
 
-
     @PostMapping("/add")
-    public ResponseEntity<String> addComments(@RequestHeader("Authorization") String authorizationHeader, @RequestBody CommentDTO comment) {
+    public ResponseEntity<String> create(
+            @RequestHeader("Authorization") String authorizationHeader,
+            @RequestBody CommentDTO comment
+    ) {
         String authenticatedUserRole = utilityService.isAuthenticated(authorizationHeader);
 
         if (authenticatedUserRole != null) {
-
-
             if (authenticatedUserRole.equals(User.UserRole.Supervisor.toString())) {
                 Supervisor supervisor = supervisorDao.getSupervisorInfo();
-                return  commentService.addComments(comment.getMessage(), supervisor, comment.getTitle());
+                return commentService.addComments(comment.getMessage(), supervisor, comment.getTitle());
             } else if (authenticatedUserRole.equals(User.UserRole.Manager.toString())) {
-                Map<String, String> usernamePassword = utilityService.getUsernamePassword(authorizationHeader);
-                String username = usernamePassword.get("username");
-                String password = usernamePassword.get("password");
-                Manager activeManager = managerService.findManager(username, password);
+                Manager activeManager = utilityService.getActiveManager(authorizationHeader);
                 return commentService.addComments(comment.getMessage(), activeManager, comment.getTitle());
             } else if (authenticatedUserRole.equals(User.UserRole.Employee.toString())) {
-                Map<String, String> usernamePassword = utilityService.getUsernamePassword(authorizationHeader);
-                String username = usernamePassword.get("username");
-                String password = usernamePassword.get("password");
-                Employee activeEmployee = employeeService.findEmployee(username, password);
-                return  commentService.addComments(comment.getMessage(), activeEmployee, comment.getTitle());
+                Employee activeEmployee = utilityService.getActiveEmployee(authorizationHeader);
+                return commentService.addComments(comment.getMessage(), activeEmployee, comment.getTitle());
             } else {
                 throw new ForbiddenAccessException();
             }
-
-
         } else {
             throw new ForbiddenAccessException();
         }
     }
 
     @GetMapping("/view")
-    public ResponseEntity<List<CommentDTO>> getComments( @RequestHeader("Authorization") String authorizationHeader,@RequestParam("title") String title) {
-
+    public ResponseEntity<List<CommentDTO>> getComments(
+            @RequestHeader("Authorization") String authorizationHeader,
+            @RequestParam("title") String title
+    ) {
         Optional<String> authenticatedUserRole = Optional.ofNullable(utilityService.isAuthenticated(authorizationHeader));
         String supervisorRole = User.UserRole.Supervisor.toString();
 
-        if (authenticatedUserRole.isPresent() && supervisorRole.equals(authenticatedUserRole.get())) {
+        if (authenticatedUserRole.isPresent() && authenticatedUserRole.get().equals(supervisorRole)) {
             if (title == null) {
                 return ResponseEntity.notFound().build();
             }
             List<CommentDTO> comments = commentService.viewComments(title);
             return ResponseEntity.ok(comments);
-        }
-        else {
+        } else {
             throw new ForbiddenAccessException();
         }
-
-
     }
 
 
-
 }
-
-
-

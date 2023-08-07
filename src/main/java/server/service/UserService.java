@@ -14,6 +14,6 @@ public interface UserService {
 
     Optional<String> verifyUser(String username, String pass);
 
-    List<UserDTO> viewallUsers();
+    List<UserDTO> viewAllUsers();
 
 }

@@ -11,7 +11,7 @@ import server.utilities.UtilityService;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/taskhistories")
+@RequestMapping("/task-histories")
 public class TaskHistoryController {
 
     private final TaskHistoryService taskHistoryService;
@@ -22,7 +22,7 @@ public class TaskHistoryController {
         this.utilityService = utilityService;
     }
 
-    @GetMapping("/view")
+    @GetMapping()
     public ResponseEntity<TaskHistoryDTO> getTaskHistory(@RequestHeader("Authorization") String authorizationHeader, @RequestParam("title") String title) {
 
         Optional<String> authenticatedUserRole = Optional.ofNullable(utilityService.isAuthenticated(authorizationHeader));

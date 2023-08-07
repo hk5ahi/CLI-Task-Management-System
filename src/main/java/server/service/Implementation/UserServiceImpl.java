@@ -17,8 +17,8 @@ import java.util.Optional;
 @Service
 public class UserServiceImpl implements UserService {
 
-    private EmployeeDaoImpl employeeDao = EmployeeDaoImpl.getInstance();
-    private ManagerDaoImpl managerDao = ManagerDaoImpl.getInstance();
+    private final EmployeeDaoImpl employeeDao = EmployeeDaoImpl.getInstance();
+    private final ManagerDaoImpl managerDao = ManagerDaoImpl.getInstance();
 
     private final UserDao userDao;
 
@@ -50,7 +50,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public List<UserDTO> viewallUsers()
+    public List<UserDTO> viewAllUsers()
     {
         List<UserDTO> userDTOS=new ArrayList<>();
 

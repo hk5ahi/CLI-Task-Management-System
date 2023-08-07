@@ -27,9 +27,12 @@ public class EmployeeController {
     }
 
 
-    @PatchMapping("/time")
-    public ResponseEntity<String> addTotalTime(@RequestHeader("Authorization") String authorizationHeader,@RequestParam String title, @RequestParam double time) {
-
+    @PatchMapping("/task-time")
+    public ResponseEntity<String> updateTotalTime(
+            @RequestHeader("Authorization") String authorizationHeader,
+            @RequestParam String title,
+            @RequestParam double time
+    ) {
         String authenticatedUserRole = utilityService.isAuthenticated(authorizationHeader);
 
         if (authenticatedUserRole != null && authenticatedUserRole.equals(User.UserRole.Employee.toString())) {
@@ -40,11 +43,10 @@ public class EmployeeController {
 
             Employee activeEmployee = employeeService.findEmployee(username, password);
 
-            return employeeService.addTotaltime(time, title,activeEmployee);
-
-
+            return employeeService.addTotaltime(time, title, activeEmployee);
         } else {
             throw new ForbiddenAccessException();
         }
     }
+
 }

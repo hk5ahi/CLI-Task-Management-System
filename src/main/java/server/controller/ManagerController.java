@@ -6,7 +6,7 @@ import server.service.ManagerService;
 import server.service.TaskService;
 import server.utilities.*;
 @RestController
-@RequestMapping("/manager")
+@RequestMapping("/managers")
 public class ManagerController {
 
 

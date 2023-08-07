@@ -13,7 +13,7 @@ public interface TaskService {
 
     ResponseEntity<String> assignTask(String title,String fullname,Manager manager);
 
-    List<Task> getallTasks();
+    List<Task> getAllTasks();
     List<TaskDTO> viewAllTasksbyUser(User person);
     List<TaskDTO> viewAllTasksbyUser();
 

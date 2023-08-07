@@ -43,7 +43,7 @@ public class TaskServiceImpl implements TaskService {
 
 
     @Override
-    public List<Task> getallTasks() {
+    public List<Task> getAllTasks() {
 
         List<Task> allTasks = taskDao.getAllTasksbyEmployee();
 
