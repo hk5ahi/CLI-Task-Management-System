@@ -65,8 +65,8 @@ public class TaskController {
             @RequestParam(name = "userRole", defaultValue = "") String userRole,
             @RequestParam(name = "manager", defaultValue = "false") boolean manager,
             @RequestParam(name = "no_criteria", defaultValue = "false") boolean noCriteria,
-            @RequestParam(name = "task-status", defaultValue = " ") Task.Status task_status,
-            @RequestParam(name = "employeeName", defaultValue = "false") String employeeName,
+            @RequestParam(name = "task-status", defaultValue = "CREATED") Task.Status task_status,
+            @RequestParam(name = "employeeName", defaultValue = " ") String employeeName,
             @RequestHeader("Authorization") String authorizationHeader
     ) {
         String authenticatedUserRole = utilityService.isAuthenticated(authorizationHeader);
@@ -83,7 +83,7 @@ public class TaskController {
                     if (status && !employeeRole && User.UserRole.Manager.toString().equals(userRole) && !noCriteria && !assigned && manager) {
                         List<TaskDTO> tasksCreatedByManager = taskService.viewAllTasksCreatedByManager(activeManager,task_status);
                         return ResponseEntity.status(HttpStatus.OK).body(tasksCreatedByManager);
-                    } else if (!status && employeeRole && User.UserRole.Manager.toString().equals(userRole) && !noCriteria && !assigned && manager) {
+                    } else if (!status && employeeRole && User.UserRole.Manager.toString().equals(userRole) && !noCriteria && !assigned && manager && employeeName!=null) {
                         List<TaskDTO> tasksByEmployees = taskService.viewAllTasksCreatedByManager(activeManager,employeeName);
                         return ResponseEntity.status(HttpStatus.OK).body(tasksByEmployees);
                     } else if (status && employeeRole && User.UserRole.Manager.toString().equals(userRole) && !noCriteria && !assigned && manager) {
