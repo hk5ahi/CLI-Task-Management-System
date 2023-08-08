@@ -18,7 +18,7 @@ import java.util.Map;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/task")
+@RequestMapping("/tasks")
 public class TaskController {
 
     private final TaskService taskService;
@@ -35,8 +35,8 @@ public class TaskController {
     }
 
 
-    @PostMapping("/create")
-    public ResponseEntity<String> createTask(@RequestBody createTaskDTO task, @RequestHeader("Authorization") String authorizationHeader) {
+    @PostMapping()
+    public ResponseEntity<String> createTask(@RequestBody TaskDTO task, @RequestHeader("Authorization") String authorizationHeader) {
         String authenticatedUserRole = utilityService.isAuthenticated(authorizationHeader);
 
         if (authenticatedUserRole != null && authenticatedUserRole.equals(User.UserRole.Manager.toString())) {
@@ -45,8 +45,9 @@ public class TaskController {
             String username = usernamePassword.get("username");
             String password = usernamePassword.get("password");
 
-            Manager activeManager = managerService.findManager(username, password);
-            if (activeManager != null) {
+            Optional<Manager> optionalManager = managerDao.findManager(username, password);
+            if (optionalManager.isPresent()) {
+                Manager activeManager=optionalManager.get();
                 return taskService.createTask(activeManager, task.getTitle(), task.getDescription(), task.getTotal_time());
 
             } else {
