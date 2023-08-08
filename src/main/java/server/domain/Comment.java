@@ -11,7 +11,6 @@ public class Comment {
     private Task tasks;
 
 
-    // Getters and Setters
     public LocalDateTime getCreatedAt() {
         return createdAt;
     }
@@ -40,7 +39,7 @@ public class Comment {
         return tasks;
     }
 
-    // Setter for the tasks field
+    
     public void addTaskForComment(Task task) {
         this.tasks = task;
     }

@@ -1,6 +1,5 @@
 package server.domain;
 
-
 public class User {
     private String username;
     private String firstName;
@@ -15,7 +14,7 @@ public class User {
         Employee
 
     }
-    // Getter and Setter methods for all properties
+
     public String getUsername() {
         return username;
     }

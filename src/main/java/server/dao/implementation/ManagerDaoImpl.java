@@ -8,6 +8,8 @@ import server.domain.User;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+
 @Repository
 public class ManagerDaoImpl implements ManagerDao {
 
@@ -32,24 +34,24 @@ public class ManagerDaoImpl implements ManagerDao {
     }
 
     @Override
-    public Manager findManager(String providedUsername, String providedPassword) {
+    public Optional<Manager> findManager(String providedUsername, String providedPassword) {
         for (Manager manager : managers) {
             if (manager.getUsername().equals(providedUsername) && manager.getPassword().equals(providedPassword)) {
-                return manager; // Return the matched Manager object
+                return Optional.of(manager); // Return the matched Manager object
             }
         }
-        return null; // If no match found, return null
+        return Optional.empty(); // If no match found, return null
     }
     @Override
-    public User getManagerByName(String name) {
+    public Optional<Manager> getManagerByName(String name) {
         for (Manager manager : managers) {
             String managerName = manager.getFirstName() + " " + manager.getLastName();
             if (managerName.equalsIgnoreCase(name)) {
 
-                return manager;
+                return Optional.of(manager);
             }
         }
-        return null;
+        return Optional.empty();
     }
 
 }

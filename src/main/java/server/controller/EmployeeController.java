@@ -1,5 +1,6 @@
 package server.controller;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import server.dao.EmployeeDao;
@@ -12,6 +13,7 @@ import server.service.EmployeeService;
 import server.utilities.UtilityService;
 
 import java.util.Map;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/employees")
@@ -38,15 +40,16 @@ public class EmployeeController {
     ) {
         String authenticatedUserRole = utilityService.isAuthenticated(authorizationHeader);
 
-        if (authenticatedUserRole != null && authenticatedUserRole.equals(User.UserRole.Employee.toString())) {
+        if (authenticatedUserRole.equals(User.UserRole.Employee.toString())) {
             Map<String, String> usernamePassword = utilityService.getUsernamePassword(authorizationHeader);
 
             String username = usernamePassword.get("username");
             String password = usernamePassword.get("password");
 
-            Employee activeEmployee = employeeDao.findEmployee(username, password);
-
-            return employeeService.addTotalTime(time, title, activeEmployee);
+            Optional<Employee> optionalEmployee = employeeDao.findEmployee(username, password);
+            return optionalEmployee.map(employee ->
+                    employeeService.updateTotalTime(time, title, employee)
+            ).orElse(ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null));
         } else {
             throw new ForbiddenAccessException();
         }

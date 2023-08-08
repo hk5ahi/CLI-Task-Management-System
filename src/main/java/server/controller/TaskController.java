@@ -15,7 +15,7 @@ import server.service.TaskService;
 import server.utilities.UtilityService;
 import java.util.List;
 import java.util.Map;
-
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/task")
@@ -76,35 +76,53 @@ public class TaskController {
                 Map<String, String> usernamePassword = utilityService.getUsernamePassword(authorizationHeader);
                 String username = usernamePassword.get("username");
                 String password = usernamePassword.get("password");
-                Manager activeManager = managerDao.findManager(username, password);
-
-                if (status && !employeeRole && User.UserRole.Manager.toString().equals(userRole) && !noCriteria && !assigned && manager) {
-                    List<TaskDTO> tasksCreatedByManager = taskService.viewAllTasksCreatedByManager(activeManager,task_status);
-                    return ResponseEntity.status(HttpStatus.OK).body(tasksCreatedByManager);
-                } else if (!status && employeeRole && User.UserRole.Manager.toString().equals(userRole) && !noCriteria && !assigned && manager) {
-                    List<TaskDTO> tasksByEmployees = taskService.viewAllTasksCreatedByManager(activeManager,employeeName);
-                    return ResponseEntity.status(HttpStatus.OK).body(tasksByEmployees);
-                } else if (status && employeeRole && User.UserRole.Manager.toString().equals(userRole) && !noCriteria && !assigned && manager) {
-                    List<TaskDTO> tasksByEmployees = taskService.viewAllTasksCreatedByManager(activeManager,task_status,employeeName);
-                    return ResponseEntity.status(HttpStatus.OK).body(tasksByEmployees);
-                } else {
-                    throw new ForbiddenAccessException();
+                Optional<Manager> optionalManager = managerDao.findManager(username, password);
+                if(optionalManager.isPresent())
+                {
+                    Manager activeManager=optionalManager.get();
+                    if (status && !employeeRole && User.UserRole.Manager.toString().equals(userRole) && !noCriteria && !assigned && manager) {
+                        List<TaskDTO> tasksCreatedByManager = taskService.viewAllTasksCreatedByManager(activeManager,task_status);
+                        return ResponseEntity.status(HttpStatus.OK).body(tasksCreatedByManager);
+                    } else if (!status && employeeRole && User.UserRole.Manager.toString().equals(userRole) && !noCriteria && !assigned && manager) {
+                        List<TaskDTO> tasksByEmployees = taskService.viewAllTasksCreatedByManager(activeManager,employeeName);
+                        return ResponseEntity.status(HttpStatus.OK).body(tasksByEmployees);
+                    } else if (status && employeeRole && User.UserRole.Manager.toString().equals(userRole) && !noCriteria && !assigned && manager) {
+                        List<TaskDTO> tasksByEmployees = taskService.viewAllTasksCreatedByManager(activeManager,task_status,employeeName);
+                        return ResponseEntity.status(HttpStatus.OK).body(tasksByEmployees);
+                    } else {
+                        throw new ForbiddenAccessException();
+                    }
                 }
+                else {
+                    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+
+                }
+
+
             } else if (authenticatedUserRole.equals(User.UserRole.Employee.toString())) {
                 Map<String, String> usernamePassword = utilityService.getUsernamePassword(authorizationHeader);
                 String username = usernamePassword.get("username");
                 String password = usernamePassword.get("password");
-                Employee activeEmployee = employeeDao.findEmployee(username, password);
-
-                if (assigned && !status && User.UserRole.Employee.toString().equals(userRole) && !manager && !employeeRole && !noCriteria) {
-                    List<TaskDTO> assignedTasks = taskService.viewAssignedTasks(activeEmployee);
-                    return ResponseEntity.ok(assignedTasks);
-                } else if (!assigned && status && User.UserRole.Employee.toString().equals(userRole) && !manager && !employeeRole && !noCriteria) {
-                    List<TaskDTO> tasks = taskService.viewTasksByStatus(activeEmployee);
-                    return ResponseEntity.ok(tasks);
-                } else {
-                    throw new ForbiddenAccessException();
+                Optional<Employee> optionalEmployee = employeeDao.findEmployee(username, password);
+                if(optionalEmployee.isPresent())
+                {
+                    Employee activeEmployee=optionalEmployee.get();
+                    if (assigned && !status && User.UserRole.Employee.toString().equals(userRole) && !manager && !employeeRole && !noCriteria) {
+                        List<TaskDTO> assignedTasks = taskService.viewAssignedTasks(activeEmployee);
+                        return ResponseEntity.ok(assignedTasks);
+                    } else if (!assigned && status && User.UserRole.Employee.toString().equals(userRole) && !manager && !employeeRole && !noCriteria) {
+                        List<TaskDTO> tasks = taskService.viewTasksByStatus(activeEmployee);
+                        return ResponseEntity.ok(tasks);
+                    } else {
+                        throw new ForbiddenAccessException();
+                    }
                 }
+                else {
+
+                    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+                }
+
+
             } else if (authenticatedUserRole.equals(User.UserRole.Supervisor.toString())) {
                 if (!assigned && noCriteria && !manager && !employeeRole && !status && User.UserRole.Supervisor.toString().equals(userRole)) {
                     return ResponseEntity.ok(taskService.viewAllTasksByUser(employeeName));

@@ -9,7 +9,7 @@ import java.util.List;
 public interface EmployeeService {
 
 
-    ResponseEntity<String> addTotalTime(double time, String title, Employee employee);
+    ResponseEntity<String> updateTotalTime(double time, String title, Employee employee);
 
     List<Employee> getAllEmployees();
 

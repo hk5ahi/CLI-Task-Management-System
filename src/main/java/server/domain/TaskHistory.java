@@ -4,14 +4,12 @@ import java.time.Instant;
 
 public class TaskHistory {
 
-
     private Instant timestamp;
     private Task.Status oldStatus;
     private Task.Status newStatus;
     private User movedBy;
 
 
-    // Getters and Setters for the properties
     public Instant getTimestamp() {
         return timestamp;
     }

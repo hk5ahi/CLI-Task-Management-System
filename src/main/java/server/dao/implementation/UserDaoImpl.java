@@ -5,9 +5,13 @@ import server.dao.EmployeeDao;
 import server.dao.ManagerDao;
 import server.dao.SupervisorDao;
 import server.dao.UserDao;
+import server.domain.Employee;
+import server.domain.Manager;
+import server.domain.Supervisor;
 import server.domain.User;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public class UserDaoImpl implements UserDao {
@@ -26,18 +30,30 @@ public class UserDaoImpl implements UserDao {
     }
 
     @Override
-    public void initializeUsers(){
+    public void initializeUsers() {
+        Supervisor supervisor = supervisorDao.getSupervisors().get(0);
+        Manager manager = managerDao.getManagers().get(0);
+        Employee employee = employeeDao.getEmployees().get(0);
 
-        String supervisorName=supervisorDao.getSupervisors().get(0).getFirstName()+" " +supervisorDao.getSupervisors().get(0).getLastName();
-        String managerName=managerDao.getManagers().get(0).getFirstName()+" "+managerDao.getManagers().get(0).getLastName();
-        String employeeName=employeeDao.getEmployees().get(0).getFirstName()+" "+employeeDao.getEmployees().get(0).getLastName();
-        users.add(supervisorDao.getSupervisorByName(supervisorName));
-        users.add(employeeDao.getEmployeeByName(employeeName));
-        users.add(managerDao.getManagerByName(managerName));
+        supervisorDao.getSupervisorByName(supervisor.getFirstName() + " " + supervisor.getLastName())
+                .ifPresent(users::add);
 
+        employeeDao.getEmployeeByName(employee.getFirstName() + " " + employee.getLastName())
+                .ifPresent(users::add);
+
+        managerDao.getManagerByName(manager.getFirstName() + " " + manager.getLastName())
+                .ifPresent(users::add);
     }
 
-   @Override
+
+    @Override
+    public Optional<User> getByUsername(String username) {
+        return users.stream()
+                .filter(user -> user.getUsername().equals(username))
+                .findFirst();
+    }
+
+    @Override
     public void addUser(User user)
     {
         users.add(user);
@@ -50,18 +66,8 @@ public class UserDaoImpl implements UserDao {
 
     }
     @Override
-    public boolean userExist(String userName)
-    {
-        for(User user:users)
-        {
-            if(user.getUsername().equals(userName))
-            {
-                return true;
-
-            }
-
-        }
-        return false;
-
+    public boolean userExist(String userName) {
+        return users.stream().anyMatch(user -> user.getUsername().equals(userName));
     }
+
 }

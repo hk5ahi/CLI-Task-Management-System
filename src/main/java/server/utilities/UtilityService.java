@@ -78,14 +78,17 @@ public class UtilityService {
         Map<String, String> usernamePassword = getUsernamePassword(authorizationHeader);
         String username = usernamePassword.get("username");
         String password = usernamePassword.get("password");
-        return employeeDao.findEmployee(username, password);
+        Optional<Employee> optionalEmployee=employeeDao.findEmployee(username, password);
+        return optionalEmployee.orElse(null);
     }
 
     public Manager getActiveManager(String authorizationHeader) {
         Map<String, String> usernamePassword = getUsernamePassword(authorizationHeader);
         String username = usernamePassword.get("username");
         String password = usernamePassword.get("password");
-        return managerDao.findManager(username, password);
+        Optional<Manager> optionalManager=managerDao.findManager(username, password);
+        return optionalManager.orElse(null);
+
     }
 
 

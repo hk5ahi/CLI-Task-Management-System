@@ -1,6 +1,7 @@
 package server.service.Implementation;
 
 import org.springframework.stereotype.Service;
+import server.dao.TaskDao;
 import server.domain.Task;
 import server.domain.TaskHistory;
 import server.dto.TaskHistoryDTO;
@@ -11,20 +12,23 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.util.Optional;
+
 @Service
 public class TaskHistoryServiceImpl implements TaskHistoryService {
 
+    private final TaskDao taskDao;
 
-private final TaskService taskService;
+    public TaskHistoryServiceImpl(TaskDao taskDao) {
+        this.taskDao = taskDao;
 
-    public TaskHistoryServiceImpl(TaskService taskService) {
-        this.taskService = taskService;
     }
 
     @Override
     public TaskHistoryDTO viewTaskHistory(String title) {
-        Task task = taskService.getTaskByTitle(title);
-        if (task != null) {
+        Optional<Task> optionalTask = taskDao.getTaskByTitle(title);
+        if (optionalTask.isPresent()) {
+            Task task=optionalTask.get();
             TaskHistory history = task.getHistory();
 
             Instant timestamp = history.getTimestamp();
@@ -42,7 +46,6 @@ private final TaskService taskService;
             taskHistoryDTO.setNewStatus(Task.Status.valueOf(newStatus));
             taskHistoryDTO.setMovedAt(formattedDateTime);
             return taskHistoryDTO;
-
 
         }
 

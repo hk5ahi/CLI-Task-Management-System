@@ -4,6 +4,7 @@ import server.domain.Employee;
 import server.domain.User;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface EmployeeDao {
 
@@ -14,7 +15,7 @@ public interface EmployeeDao {
 
      Employee createEmployee(String firstname, String lastname, String username, String password);
 
-     User getEmployeeByName(String name);
-     Employee findEmployee(String providedUsername, String providedPassword);
+     Optional<Employee> getEmployeeByName(String name);
+     Optional<Employee> findEmployee(String providedUsername, String providedPassword);
 
 }

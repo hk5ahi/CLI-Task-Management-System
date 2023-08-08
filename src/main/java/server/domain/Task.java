@@ -30,7 +30,7 @@ public class Task {
         this.setTotal_time(total_time);
     }
 
-    // Getters and Setters for the properties
+
     public Status getTaskStatus() {
         return taskStatus;
     }

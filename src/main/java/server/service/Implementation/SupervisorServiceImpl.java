@@ -7,6 +7,8 @@ import server.dao.implementation.SupervisorDaoImpl;
 import server.domain.Supervisor;
 import server.service.SupervisorService;
 
+import java.util.Optional;
+
 @Service
 public class SupervisorServiceImpl implements SupervisorService {
 
@@ -16,32 +18,17 @@ public class SupervisorServiceImpl implements SupervisorService {
     public SupervisorServiceImpl(SupervisorDao supervisorDao) {
         this.supervisorDao=supervisorDao;
 
-
     }
 
     @Override
     public Supervisor getAndVerify(String providedUsername, String providedPassword) {
+        Optional<Supervisor> optionalSupervisor = supervisorDao.getByUserName(providedUsername);
 
-        String supervisorName=supervisorDao.getSupervisors().get(0).getFirstName()+" "+supervisorDao.getSupervisors().get(0).getLastName();
-
-        Supervisor supervisor=supervisorDao.getSupervisorByName(supervisorName);
-        String storedUsername = supervisor.getUsername();
-        String storedPassword = supervisor.getPassword();
-
-        if (storedUsername.equals(providedUsername) && storedPassword.equals(providedPassword)) {
-            return supervisor; // Return the current Supervisor object
-        } else {
-            return null; // If the credentials don't match, return null
+        if (optionalSupervisor.isPresent() && optionalSupervisor.get().getPassword().equals(providedPassword)) {
+            return optionalSupervisor.get();
         }
-    }
 
-
-    @Override
-    public void viewSupervisor() {
-
-        Supervisor supervisor=supervisorDao.getSupervisorByName("Muhammad Asif");
-        System.out.println("The Supervisor of the System is: ");
-        System.out.println(supervisor.getFirstName() + " " + supervisor.getLastName());
+        return null;
     }
 
 

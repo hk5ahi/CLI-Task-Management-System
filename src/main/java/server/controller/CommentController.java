@@ -43,8 +43,11 @@ public class CommentController {
 
         if (authenticatedUserRole != null) {
             if (authenticatedUserRole.equals(User.UserRole.Supervisor.toString())) {
-                Supervisor supervisor = supervisorDao.getSupervisorByName("Muhammad Asif");
-                return commentService.addComments(comment.getMessage(), supervisor, comment.getTitle());
+                Optional<Supervisor> optionalSupervisor = supervisorDao.getSupervisorByName("Muhammad Asif");
+                return optionalSupervisor.map(supervisor ->
+                        commentService.addComments(comment.getMessage(), supervisor, comment.getTitle())
+                ).orElse(null);
+
             } else if (authenticatedUserRole.equals(User.UserRole.Manager.toString())) {
                 Manager activeManager = utilityService.getActiveManager(authorizationHeader);
                 return commentService.addComments(comment.getMessage(), activeManager, comment.getTitle());

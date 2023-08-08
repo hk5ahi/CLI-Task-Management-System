@@ -9,6 +9,8 @@ import server.domain.User;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+
 @Repository
 public class EmployeeDaoImpl implements EmployeeDao {
 
@@ -33,24 +35,24 @@ public class EmployeeDaoImpl implements EmployeeDao {
 
     }
     @Override
-    public Employee findEmployee(String providedUsername, String providedPassword) {
+    public Optional<Employee> findEmployee(String providedUsername, String providedPassword) {
         return employees.stream()
                 .filter(employee -> employee.getUsername().equals(providedUsername) && employee.getPassword().equals(providedPassword))
-                .findFirst()
-                .orElse(null);
+                .findFirst();
     }
+
     @Override
-    public User getEmployeeByName(String name) {
+    public Optional<Employee> getEmployeeByName(String name) {
         if(name!=null) {
             for (Employee employee : employees) {
                 String employeeName = employee.getFirstName() + " " + employee.getLastName();
-                if (employeeName.equalsIgnoreCase(name)) {
+                if (employeeName.equalsIgnoreCase(name)) { // can't search on basis of username as full name will be passed in input
 
-                    return employee;
+                    return Optional.of(employee);
                 }
             }
         }
-        return null; // Employee not found
+        return Optional.empty(); // Employee not found
     }
 
 

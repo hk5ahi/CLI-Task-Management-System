@@ -13,13 +13,11 @@ import server.service.UserService;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-
 @Service
 public class UserServiceImpl implements UserService {
 
     private final EmployeeDao employeeDao;
     private final ManagerDao managerDao;
-
     private final UserDao userDao;
 
 
@@ -29,19 +27,21 @@ public class UserServiceImpl implements UserService {
         this.userDao = userDao;
     }
 
-
+    //getByUsername(): Optional<> 
     @Override
     public Optional<String> verifyUser(String providedUsername, String providedPassword) {
-        List<User> users = userDao.getAllUsers();
+        Optional<User> userOptional = userDao.getByUsername(providedUsername);
 
-        for (User user : users) {
-            if (user.getUsername().equals(providedUsername) && user.getPassword().equals(providedPassword)) {
+        if (userOptional.isPresent()) {
+            User user = userOptional.get(); // Get the User object from the Optional
+            if (user.getPassword().equals(providedPassword)) {
                 return Optional.of(user.getUserRole()); // Return the current user's role
             }
         }
 
-        return Optional.empty(); // Return an empty Optional if user is not found
+        return Optional.empty(); // Return an empty Optional if user is not found or password doesn't match
     }
+
 
 
     @Override
@@ -104,12 +104,3 @@ public class UserServiceImpl implements UserService {
 
     }
 }
-
-
-
-
-
-
-
-
-

@@ -3,6 +3,7 @@ package server.dao;
 import server.domain.User;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface UserDao {
 
@@ -13,6 +14,8 @@ public interface UserDao {
     void initializeUsers();
 
     boolean userExist(String userName);
+
+    Optional<User> getByUsername(String username);
 
 }
 

@@ -27,7 +27,7 @@ public interface TaskService {
 
     List<TaskDTO> viewAllTasksCreatedByManager(Manager activeManager,Task.Status status);
 
-    Task getTaskByTitle(String title);
+
 
     ResponseEntity<String > archiveTask(String title);
 

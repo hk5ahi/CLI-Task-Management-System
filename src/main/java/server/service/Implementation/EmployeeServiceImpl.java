@@ -13,6 +13,8 @@ import server.exception.ForbiddenAccessException;
 import server.service.EmployeeService;
 
 import java.util.List;
+import java.util.Optional;
+
 @Service
 public class EmployeeServiceImpl implements EmployeeService {
 
@@ -27,32 +29,25 @@ public class EmployeeServiceImpl implements EmployeeService {
 
 
     @Override
-    public ResponseEntity<String> addTotalTime(double time, String title, Employee employee) {
+    public ResponseEntity<String> updateTotalTime(double time, String title, Employee employee) {
+        Optional<Task> optionalTask = taskDao.getTaskByTitle(title);
 
-        Task providedtask=null;
-        if (title != null) {
-            for (Task task : taskDao.getAll()) {
-                if (task != null && task.getTitle() != null && task.getTitle().equalsIgnoreCase(title)) {
-                    providedtask=task;
-                }
-            }
-        }
-
-        if (providedtask == null) {
+        if (optionalTask.isEmpty()) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
-
         }
-        String assigneeName=providedtask.getAssignee().getFirstName()+" "+providedtask.getAssignee().getLastName();
-        String employeeName=employee.getFirstName()+" "+employee.getLastName();
-        if(assigneeName.equals(employeeName)) {
-            providedtask.setTotal_time(time);
+
+        Task providedTask = optionalTask.get();
+        String assigneeUserName = providedTask.getAssignee().getUsername();
+        String employeeUserName = employee.getUsername();
+
+        if (assigneeUserName.equals(employeeUserName)) {
+            providedTask.setTotal_time(time);
             return ResponseEntity.status(HttpStatus.OK).body(null);
-        }
-        else {
-
+        } else {
             throw new ForbiddenAccessException();
         }
     }
+
 
     @Override
     public List<Employee> getAllEmployees() {
