@@ -27,7 +27,7 @@ public class UserServiceImpl implements UserService {
         this.userDao = userDao;
     }
 
-    //getByUsername(): Optional<> 
+    //getByUsernameAndPassword(): Optional<User> 
     @Override
     public Optional<String> verifyUser(String providedUsername, String providedPassword) {
         Optional<User> userOptional = userDao.getByUsername(providedUsername);
@@ -74,11 +74,13 @@ public class UserServiceImpl implements UserService {
         }
         return userDTOS;
     }
+    //method return type might be void
     @Override
     public String createUser(String userRole, String firstname, String lastname, String username, String password) {
 
         if(userDao.userExist(username))
         {
+            //throw exception here
             return "error";
         }
         if (userRole.equals("Employee")) {
@@ -96,6 +98,7 @@ public class UserServiceImpl implements UserService {
 
 
         }
+        //throw exception here
         else {
             return "error";
         }

@@ -32,13 +32,16 @@ public class UserController {
         this.utilityService=utilityService;
     }
 
+    //here you can add
+    //POST users/init
     @PostMapping ()
     public ResponseEntity<String> initialize() {
         userService.initializeUsers();
         return ResponseEntity.status(HttpStatus.CREATED).body(null);
     }
 
-
+    // POST users is sufficed
+    // POST users/new is verbose
     @PostMapping("/new")
     public ResponseEntity<String> create(
             @RequestBody User newUser,
@@ -46,7 +49,7 @@ public class UserController {
     ) {
         String authenticatedUserRole = utilityService.isAuthenticated(authorizationHeader);
         String supervisorRole = User.UserRole.Supervisor.toString();
-
+        //check how null is removed in server.controller.UserController.getAllUsers
         if (authenticatedUserRole != null && authenticatedUserRole.equals(supervisorRole)) {
             String creationStatus = userService.createUser(
                     newUser.getUserRole(),
@@ -55,29 +58,34 @@ public class UserController {
                     newUser.getUsername(),
                     newUser.getPassword()
             );
-
             if ("success".equals(creationStatus)) {
                 return ResponseEntity.status(HttpStatus.CREATED).body(null);
             } else {
+                //exception should be handled at controller advice
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
             }
         } else {
+            //handled at utility service getAuthenticatedUser
             throw new ForbiddenAccessException();
         }
     }
 
+    // GET users is sufficed
+    // GET users/list is verbose
 
     @GetMapping("/list")
     public ResponseEntity<List<UserDTO>> getAllUsers(
             @RequestHeader("Authorization") String authorizationHeader
     ) {
+        //this method will return Optional<AuthenticatedUser>
         String authenticatedUserRole = utilityService.isAuthenticated(authorizationHeader);
         String supervisorRole = User.UserRole.Supervisor.toString();
-
+        //this condition will become UserRole.Supervisor.equals(authenticationUser.getRole())
         if (authenticatedUserRole != null && authenticatedUserRole.equals(supervisorRole)) {
             List<UserDTO> userDTOS = userService.viewAllUsers();
             return ResponseEntity.status(HttpStatus.OK).body(userDTOS);
         } else {
+            //utility service getAuthenticatedUser will handle this exception
             throw new ForbiddenAccessException();
         }
     }

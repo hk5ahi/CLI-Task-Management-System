@@ -14,7 +14,7 @@ import server.utilities.UtilityService;
 
 import java.util.Map;
 import java.util.Optional;
-
+//remove this controller
 @RestController
 @RequestMapping("/employees")
 public class EmployeeController {
@@ -32,6 +32,7 @@ public class EmployeeController {
     }
 
 
+    //transfer this endpoint to taskController
     @PatchMapping("/task-time")
     public ResponseEntity<String> updateTotalTime(
             @RequestHeader("Authorization") String authorizationHeader,

@@ -38,7 +38,7 @@ public class TaskController {
     @PostMapping()
     public ResponseEntity<String> createTask(@RequestBody TaskDTO task, @RequestHeader("Authorization") String authorizationHeader) {
         String authenticatedUserRole = utilityService.isAuthenticated(authorizationHeader);
-
+        //move this logic inside createTask
         if (authenticatedUserRole != null && authenticatedUserRole.equals(User.UserRole.Manager.toString())) {
             Map<String, String> usernamePassword = utilityService.getUsernamePassword(authorizationHeader);
 
@@ -72,6 +72,17 @@ public class TaskController {
     ) {
         String authenticatedUserRole = utilityService.isAuthenticated(authorizationHeader);
 
+        //create a DTO of above query params
+        //TaskQueryDTO {
+        // boolean status
+        // boolean employeeRole
+        // .
+        // .
+        // employeeName
+        //}
+        
+        //move all logic inside taskService.getAllTasks(AuthenticateUser, )
+        //same for all endpoints
         if (authenticatedUserRole != null) {
             if (authenticatedUserRole.equals(User.UserRole.Manager.toString())) {
                 Map<String, String> usernamePassword = utilityService.getUsernamePassword(authorizationHeader);

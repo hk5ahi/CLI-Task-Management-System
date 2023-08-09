@@ -18,6 +18,7 @@
 	</properties>
 	<dependencies>
 
+<!--		there is no need of javax.servlet-api-->
 			<dependency>
 				<groupId>javax.servlet</groupId>
 				<artifactId>javax.servlet-api</artifactId>
@@ -25,6 +26,7 @@
 				<scope>provided</scope>
 			</dependency>
 
+<!--		remove duplicate dependency-->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>

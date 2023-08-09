@@ -24,11 +24,14 @@ public class TaskHistoryServiceImpl implements TaskHistoryService {
 
     }
 
+    //getTaskHistory: List<TaskHistory>
     @Override
     public TaskHistoryDTO viewTaskHistory(String title) {
         Optional<Task> optionalTask = taskDao.getTaskByTitle(title);
         if (optionalTask.isPresent()) {
             Task task=optionalTask.get();
+            //get task history from dao
+            //taskHistoryDao.getHistoryByTask(String taskTitle)
             TaskHistory history = task.getHistory();
 
             Instant timestamp = history.getTimestamp();
@@ -51,6 +54,7 @@ public class TaskHistoryServiceImpl implements TaskHistoryService {
 
     else
     {
+        //don't return null
         return null;
     }
 

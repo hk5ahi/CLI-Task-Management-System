@@ -12,6 +12,7 @@ import server.dto.CommentDTO;
 import server.service.CommentService;
 import server.service.TaskService;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
@@ -31,6 +32,9 @@ public class CommentServiceImpl implements CommentService {
     }
 
 
+    //response entity is at controller level thing
+    //don't return response entity
+    //method name -> addComment
     @Override
     public ResponseEntity<String> addComments(String message, User person, String tasktitle) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
@@ -38,6 +42,7 @@ public class CommentServiceImpl implements CommentService {
 
         Optional<Task> optionalTask = taskDao.getTaskByTitle(tasktitle);
         if (optionalTask.isEmpty()) {
+            //throw exception (like BadRequest exception) that should be handled at controller advice level
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
         }
 
@@ -45,13 +50,16 @@ public class CommentServiceImpl implements CommentService {
         String userName = person.getUsername();
         String assignee = task.getAssignee() != null ? task.getAssignee().getUsername() : "N/A";
 
+        //you may refactor following code to a private method add a good name like assertSomething and throw exception inside the method 
         if (!person.getUserRole().equals(User.UserRole.Supervisor.toString())) {
             if (person.getUserRole().equals(User.UserRole.Manager.toString())) {
                 if (!task.getCreatedBy().getUsername().equals(userName)) {
+                    //throw exception
                     return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
                 }
             } else if (person.getUserRole().equals(User.UserRole.Employee.toString())) {
                 if (task.getAssignee() != null && !assignee.equals(userName)) {
+                    //throw exception
                     return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
                 }
             }
@@ -60,6 +68,9 @@ public class CommentServiceImpl implements CommentService {
         comment.setBody(message);
         String formattedDateTime = LocalDateTime.now().format(formatter);
         LocalDateTime dateTime = LocalDateTime.parse(formattedDateTime, formatter);
+        //you just add Instant
+        //Instant.now();
+        //instead of adding formatting
         comment.setCreatedAt(dateTime);
         comment.setCreatedBy(person);
         comment.addTaskForComment(task);
@@ -68,6 +79,7 @@ public class CommentServiceImpl implements CommentService {
         return ResponseEntity.status(HttpStatus.OK).body(null);
     }
 
+    //getComment
     @Override
     public List<CommentDTO> viewComments(String title) {
         Optional<Task> optionalTask=taskDao.getTaskByTitle(title);
@@ -92,6 +104,8 @@ public class CommentServiceImpl implements CommentService {
             return viewCommentDTOList;
         }
         else {
+            //don't return null
+            //return empty list
             return null;
         }
     }

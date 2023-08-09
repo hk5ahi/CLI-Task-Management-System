@@ -12,6 +12,8 @@ public class Task {
     }
 
     private Status taskStatus;
+    
+    //a task can have multiple instances of histories 
     private TaskHistory history;
     private String title;
     private String description;

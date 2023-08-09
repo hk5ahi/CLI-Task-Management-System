@@ -24,6 +24,13 @@ public class UtilityService {
         this.employeeDao = employeeDao;
     }
 
+    //this method name might be getAuthenticatedUser,
+    //and it returns the AuthenticatedUser
+    // might be having UserRole and its name
+    //class AuthenticatedUser {
+    // UserRole role
+    // String username
+    //}
     public String isAuthenticated(String authorizationHeader) {
         if (authorizationHeader != null && authorizationHeader.startsWith("Basic ")) {
             // Extract the Base64-encoded credentials from the header
@@ -45,7 +52,7 @@ public class UtilityService {
                 return authenticatedUser.get();
             }
         }
-
+        //don't return null throw ForbiddenException
         return null;
     }
 

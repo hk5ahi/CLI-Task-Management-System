@@ -34,15 +34,21 @@ public class CommentController {
 
     }
 
+    //POST comments is sufficed
     @PostMapping("/add")
     public ResponseEntity<String> create(
             @RequestHeader("Authorization") String authorizationHeader,
             @RequestBody CommentDTO comment
     ) {
+        //check how auth should be handled -> server.controller.UserController.getAllUsers
         String authenticatedUserRole = utilityService.isAuthenticated(authorizationHeader);
-
+        //check server.controller.UserController.getAllUsers to remove null
         if (authenticatedUserRole != null) {
+            //you may add following logic in addComment method (till line 63) 
+            //you may pass authenticated user in comment user and check its roles inside the service
             if (authenticatedUserRole.equals(User.UserRole.Supervisor.toString())) {
+                //why hard coding supervisor name
+                //always use username to get/fetch user
                 Optional<Supervisor> optionalSupervisor = supervisorDao.getSupervisorByName("Muhammad Asif");
                 return optionalSupervisor.map(supervisor ->
                         commentService.addComments(comment.getMessage(), supervisor, comment.getTitle())
@@ -61,16 +67,20 @@ public class CommentController {
             throw new ForbiddenAccessException();
         }
     }
+    
+    //GET comments is sufficed
 
     @GetMapping("/view")
     public ResponseEntity<List<CommentDTO>> getComments(
             @RequestHeader("Authorization") String authorizationHeader,
             @RequestParam("title") String title
     ) {
+        //check how auth should be handled -> server.controller.UserController.getAllUsers
         Optional<String> authenticatedUserRole = Optional.ofNullable(utilityService.isAuthenticated(authorizationHeader));
         String supervisorRole = User.UserRole.Supervisor.toString();
 
         if (authenticatedUserRole.isPresent() && authenticatedUserRole.get().equals(supervisorRole)) {
+            //avoid null
             if (title == null) {
                 return ResponseEntity.notFound().build();
             }

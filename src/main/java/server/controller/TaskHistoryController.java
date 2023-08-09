@@ -11,7 +11,7 @@ import server.utilities.UtilityService;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/task-histories")
+@RequestMapping("/task-histories")//IMO, task-history is sufficed
 public class TaskHistoryController {
 
     private final TaskHistoryService taskHistoryService;
@@ -25,6 +25,7 @@ public class TaskHistoryController {
     @GetMapping()
     public ResponseEntity<TaskHistoryDTO> getTaskHistory(@RequestHeader("Authorization") String authorizationHeader, @RequestParam("title") String title) {
 
+        //check how auth should be handled -> server.controller.UserController.getAllUsers
         Optional<String> authenticatedUserRole = Optional.ofNullable(utilityService.isAuthenticated(authorizationHeader));
         String supervisorRole = User.UserRole.Supervisor.toString();
 
