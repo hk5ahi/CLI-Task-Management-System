@@ -2,56 +2,82 @@ package server.service.Implementation;
 
 import org.springframework.stereotype.Service;
 import server.dao.TaskDao;
+import server.dao.TaskHistoryDao;
 import server.domain.Task;
 import server.domain.TaskHistory;
 import server.dto.TaskHistoryDTO;
+import server.exception.ForbiddenAccessException;
 import server.service.TaskHistoryService;
-import server.service.TaskService;
+import server.utilities.UtilityService;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 @Service
 public class TaskHistoryServiceImpl implements TaskHistoryService {
 
     private final TaskDao taskDao;
+    private final TaskHistoryDao taskHistoryDao;
+    private final UtilityService utilityService;
 
-    public TaskHistoryServiceImpl(TaskDao taskDao) {
+    public TaskHistoryServiceImpl(TaskDao taskDao, TaskHistoryDao taskHistoryDao, UtilityService utilityService) {
         this.taskDao = taskDao;
 
+        this.taskHistoryDao = taskHistoryDao;
+        this.utilityService = utilityService;
+    }
+
+
+    @Override
+    public Optional<List<TaskHistoryDTO>> getTaskHistoryByController(String title, String header) {
+        if (utilityService.isAuthenticatedSupervisor(header)) {
+            return getTaskHistory(title);
+        } else {
+            throw new ForbiddenAccessException();
+        }
     }
 
     @Override
-    public TaskHistoryDTO viewTaskHistory(String title) {
+    public Optional<List<TaskHistoryDTO>> getTaskHistory(String title) {
         Optional<Task> optionalTask = taskDao.getTaskByTitle(title);
+
         if (optionalTask.isPresent()) {
-            Task task=optionalTask.get();
-            TaskHistory history = task.getHistory();
+            Task task = optionalTask.get();
+            Optional<List<TaskHistory>> histories = taskHistoryDao.getTaskHistory(task.getTitle());
 
-            Instant timestamp = history.getTimestamp();
-            LocalDateTime localDateTime = timestamp.atZone(ZoneId.systemDefault()).toLocalDateTime();
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-            String formattedDateTime = localDateTime.format(formatter);
+            if (histories.isPresent()) {
+                List<TaskHistoryDTO> taskHistoryDTOS = new ArrayList<>();
 
-            String oldStatus = history.getOldStatus().toString();
-            String newStatus = history.getNewStatus().toString();
-            String movedBy = history.getMovedBy().getFirstName() + " " + history.getMovedBy().getLastName();
+                for (TaskHistory history : histories.get()) {
+                    TaskHistoryDTO taskHistoryDTO = createTaskHistoryDTOFromHistory(history);
+                    taskHistoryDTOS.add(taskHistoryDTO);
+                }
 
-            TaskHistoryDTO taskHistoryDTO = new TaskHistoryDTO();
-            taskHistoryDTO.setMovedBy(movedBy);
-            taskHistoryDTO.setOldStatus(Task.Status.valueOf(oldStatus));
-            taskHistoryDTO.setNewStatus(Task.Status.valueOf(newStatus));
-            taskHistoryDTO.setMovedAt(formattedDateTime);
-            return taskHistoryDTO;
-
+                return taskHistoryDTOS.isEmpty() ? Optional.empty() : Optional.of(taskHistoryDTOS);
+            }
         }
 
-    else
-    {
-        return null;
+        return Optional.empty();
     }
 
-}}
+    private TaskHistoryDTO createTaskHistoryDTOFromHistory(TaskHistory history) {
+        Instant timestamp = history.getTimestamp();
+        String oldStatus = history.getOldStatus().toString();
+        String newStatus = history.getNewStatus().toString();
+        String movedBy = history.getMovedBy().getFirstName() + " " + history.getMovedBy().getLastName();
+
+        TaskHistoryDTO taskHistoryDTO = new TaskHistoryDTO();
+        taskHistoryDTO.setMovedBy(movedBy);
+        taskHistoryDTO.setOldStatus(Task.Status.valueOf(oldStatus));
+        taskHistoryDTO.setNewStatus(Task.Status.valueOf(newStatus));
+        taskHistoryDTO.setMovedAt(timestamp);
+
+        return taskHistoryDTO;
+    }
+
+}

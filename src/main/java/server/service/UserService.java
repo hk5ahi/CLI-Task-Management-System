@@ -8,11 +8,9 @@ import java.util.Optional;
 
 public interface UserService {
 
-   void createUser(User.UserRole type, String firstname, String lastname, String username, String password);
+    void createUser(User.UserRole type, String firstname, String lastname, String username, String password);
 
     List<User> allUsers();
-
-    Optional<User> getUserByNameAndPassword(String username, String pass);
 
     List<UserDTO> viewAllUsers();
 

@@ -1,7 +1,4 @@
 package server.dao.implementation;
-
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Repository;
 import server.dao.TaskDao;
 import server.domain.Employee;
@@ -10,8 +7,10 @@ import server.domain.Task;
 import server.domain.User;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Repository
 public class TaskDaoImpl implements TaskDao {
@@ -30,21 +29,10 @@ public class TaskDaoImpl implements TaskDao {
     }
 
     @Override
-
-    public boolean isTaskExist(Task task)
-    {
-        for(Task givenTask:tasks)
-        {
-            if(givenTask.getTitle().equals(task.getTitle()))
-            {
-
-                return true;
-            }
-
-        }
-        return false;
-
+    public boolean isTaskExist(Task task) {
+        return tasks.stream().anyMatch(givenTask -> givenTask.getTitle().equals(task.getTitle()));
     }
+
 
     @Override
     public Optional<Task> getTaskByTitle(String title) {
@@ -60,113 +48,60 @@ public class TaskDaoImpl implements TaskDao {
 
 
     @Override
-    public List<Task> getAllTasksByManager(Manager manager, Employee employee)
-    {
-        List<Task> returnedTasks=new ArrayList<>();
-        for(Task task:tasks)
-        {
-            String assigneeName = "N/A"; // Default value in case assignee is null
-            if (task.getAssignee() != null) {
-                assigneeName = task.getAssignee().getUsername();
-            }
-            String creatorUserName = task.getCreatedBy().getUsername();
-            if (manager.getUsername().equals(creatorUserName) && employee.getUsername().equals(assigneeName))
-            {
-                returnedTasks.add(task);
-            }
-        }
-        return  returnedTasks;
+    public List<Task> getAllTasksByManager(Manager manager, Employee employee) {
+        return tasks.stream()
+                .filter(task -> {
+                    String assigneeName = task.getAssignee() != null ? task.getAssignee().getUsername() : "N/A";
+                    String creatorUserName = task.getCreatedBy().getUsername();
+                    return manager.getUsername().equals(creatorUserName) && employee.getUsername().equals(assigneeName);
+                })
+                .collect(Collectors.toList());
+    }
 
+
+    @Override
+    public List<Task> getAllTasksByManager(Manager manager, Employee employee, Task.Status status) {
+        return tasks.stream()
+                .filter(task -> {
+                    String createdUserName = task.getCreatedBy() != null ? task.getCreatedBy().getUsername() : "N/A";
+                    String assigneeUserName = task.getAssignee() != null ? task.getAssignee().getUsername() : "N/A";
+                    return manager.getUsername().equals(createdUserName)
+                            && employee.getUsername().equals(assigneeUserName)
+                            && task.getTaskStatus().equals(status);
+                })
+                .collect(Collectors.toList());
     }
 
     @Override
-    public List<Task> getAllTasksByManager(Manager manager, Employee employee,Task.Status status)
-    {
-        List<Task> returnedTasks=new ArrayList<>();
-        for(Task task:tasks)
-        {
-            String createdUserName = "N/A"; // Default value in case createdBy is null
-            String assigneeUserName = "N/A"; // Default value in case assignee is null
-
-            if (task.getCreatedBy() != null) {
-                createdUserName = task.getCreatedBy().getUsername();
-            }
-
-            if (task.getAssignee() != null) {
-                assigneeUserName = task.getAssignee().getUsername();
-            }
-            if (manager.getUsername().equals(createdUserName) && employee.getUsername().equals(assigneeUserName) && (task.getTaskStatus().equals(status)))
-            {
-                returnedTasks.add(task);
-            }
-        }
-        return  returnedTasks;
-
+    public List<Task> getTasksByStatus(Manager manager, Task.Status status) {
+        return tasks.stream()
+                .filter(task -> task.getCreatedBy().getUsername().equals(manager.getUsername())
+                        && task.getTaskStatus().equals(status))
+                .collect(Collectors.toList());
     }
+
+
     @Override
-    public List<Task> getTasksByStatus(Manager manager,Task.Status status)
-    {
-
-        List<Task> returnedTasks=new ArrayList<>();
-        for(Task task:tasks)
-        {
-            String createdBy = task.getCreatedBy().getUsername();
-
-            if (createdBy.equals(manager.getUsername()) && task.getTaskStatus().equals(status))
-            {
-                returnedTasks.add(task);
-            }
+    public List<Task> getAllTasksByUserRole(User.UserRole userRole) {
+        if (userRole.equals(User.UserRole.Employee)) {
+            return tasks.stream()
+                    .filter(task -> task.getAssignee() != null)
+                    .collect(Collectors.toList());
+        } else if (userRole.equals(User.UserRole.Manager)) {
+            return tasks;
+        } else {
+            return Collections.emptyList(); // Return an empty list instead of null
         }
-        return  returnedTasks;
-
-
-
     }
 
     @Override
-    public List<Task> getAllTasksByUserRole(String userRole)
-
-    {
-        List<Task> returnedTasks=new ArrayList<>();
-        if(userRole.equals(User.UserRole.Employee.toString()))
-        {
-            for(Task task:tasks)
-            {
-                if (task.getAssignee() != null) {
-
-                    returnedTasks.add(task);
-                }
-            }
-            return returnedTasks;
-
-        } else if (userRole.equals(User.UserRole.Manager.toString())) {
-
-                return tasks;
-        }
-        else
-        {
-            return null;
-        }
-
-    }
-    @Override
-    public List<Task> getAllTasksByEmployee( Employee employee)
-    {
-        List<Task> returnedTasks=new ArrayList<>();
-        for(Task task:tasks)
-        {
-            String assigneeName = "N/A"; // Default value in case assignee is null
-            if (task.getAssignee() != null) {
-                assigneeName = task.getAssignee().getUsername();
-            }
-
-            if (employee.getUsername().equals(assigneeName))
-            {
-                returnedTasks.add(task);
-            }
-        }
-        return  returnedTasks;
-
+    public List<Task> getAllTasksByEmployee(Employee employee) {
+        return tasks.stream()
+                .filter(task -> {
+                    String assigneeName = task.getAssignee() != null ? task.getAssignee().getUsername() : "N/A";
+                    return employee.getUsername().equals(assigneeName);
+                })
+                .collect(Collectors.toList());
     }
 
 }

@@ -2,7 +2,7 @@ package server.dao.implementation;
 
 import org.springframework.stereotype.Repository;
 import server.dao.ManagerDao;
-import server.dao.UserDao;
+
 import server.domain.Manager;
 import server.domain.User;
 
@@ -44,14 +44,10 @@ public class ManagerDaoImpl implements ManagerDao {
     }
     @Override
     public Optional<Manager> getManagerByName(String name) {
-        for (Manager manager : managers) {
-            String managerName = manager.getFirstName() + " " + manager.getLastName();
-            if (managerName.equalsIgnoreCase(name)) {
-
-                return Optional.of(manager);
-            }
-        }
-        return Optional.empty();
+        return managers.stream()
+                .filter(manager -> (manager.getFirstName() + " " + manager.getLastName()).equalsIgnoreCase(name))
+                .findFirst();
     }
+
 
 }

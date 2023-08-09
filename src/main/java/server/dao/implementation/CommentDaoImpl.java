@@ -1,6 +1,4 @@
 package server.dao.implementation;
-
-
 import org.springframework.stereotype.Repository;
 import server.dao.CommentDao;
 import server.domain.Comment;
@@ -15,18 +13,19 @@ public class CommentDaoImpl implements CommentDao {
     private final List<Comment> comments = new ArrayList<>();
 
     @Override
-    public List<Comment> getComments(Task task) {
+    public List<Comment> getComment(Task task) {
         List<Comment> commentsForTask = new ArrayList<>();
 
-            for (Comment comment : comments) {
-                Task commentTask = comment.getTasks();
-                if (commentTask != null && commentTask.getTitle() != null && commentTask.getTitle().equals(task.getTitle())) {
-                    commentsForTask.add(comment);
-                }
+        for (Comment comment : comments) {
+            Task commentTask = comment.getTasks();
+            if (commentTask != null && task.getTitle().equals(commentTask.getTitle())) {
+                commentsForTask.add(comment);
             }
-
-            return commentsForTask.isEmpty() ? null : commentsForTask;
         }
+
+        return commentsForTask.isEmpty() ? null : commentsForTask;
+    }
+
 
 
     @Override

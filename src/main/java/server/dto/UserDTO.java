@@ -1,6 +1,5 @@
 package server.dto;
 
-import server.dao.UserDao;
 import server.domain.User;
 
 public class UserDTO {

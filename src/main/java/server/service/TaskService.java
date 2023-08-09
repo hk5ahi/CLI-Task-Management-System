@@ -8,33 +8,37 @@ import server.domain.User;
 import server.dto.*;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface TaskService {
 
-    ResponseEntity<String> assignTask(String title,String fullName,Manager manager);
+    void assignTask(String title,String fullName,Manager manager);
 
-    List<Task> getAllTasks();
-    List<TaskDTO> viewAllTasksCreatedByManager(Manager manager,String employeeName);
-    List<TaskDTO> viewAllTasksByUser(String employeeName);
+    Optional<List<Task>> getAllTasks();
+    Optional<List<TaskDTO>> getAllTasksCreatedByManager(Manager manager, String employeeName);
+    Optional<List<TaskDTO>> getAllTasksByUser(String employeeName);
 
-    List<TaskDTO> viewTasksByStatus(Employee employee);
+    Optional<List<TaskDTO>> getTasksByStatus(Employee employee);
 
-    List<TaskDTO> viewAllTasksByStatus();
+    Optional<List<TaskDTO>> getAllTasksByStatus();
 
-    List<TaskDTO> viewTasksByUser(String userRole);
+    Optional<List<TaskDTO>> getTasksByUser(User.UserRole userRole);
 
-    ResponseEntity<String> changeTaskStatus(String task, Task.Status status, User person);
+    void changeTaskStatus(String task, Task.Status status, User person);
 
-    List<TaskDTO> viewAllTasksCreatedByManager(Manager activeManager,Task.Status status);
+    Optional<List<TaskDTO>> getAllTasksCreatedByManager(Manager activeManager,Task.Status status);
 
+    void createTaskByController(TaskDTO task,String header);
 
+    Optional<List<TaskDTO>> getTasksByController( boolean status,boolean employeeRole, boolean assigned, User.UserRole userRole,boolean manager,boolean noCriteria,Task.Status task_status,String employeeName,String header);
+    void archiveTask(String title);
 
-    ResponseEntity<String > archiveTask(String title);
+    Optional<List<TaskDTO>> getAssignedTasks(Employee employee);
 
-    List<TaskDTO> viewAssignedTasks(Employee employee);
+    Optional<List<TaskDTO>> getAllTasksCreatedByManager(Manager activeManager,Task.Status status,String employeeName);
 
-    List<TaskDTO> viewAllTasksCreatedByManager(Manager activeManager,Task.Status status,String employeeName);
+    void createTask(Manager activeManager, String title, String description, double total_time);
 
-    ResponseEntity<String> createTask(Manager activeManager, String title, String description, double total_time);
+    void updateTasksByController(boolean status,boolean archive,boolean assign,boolean time, double timeValue,String authorizationHeader,TaskDTO taskDTO);
 
 }

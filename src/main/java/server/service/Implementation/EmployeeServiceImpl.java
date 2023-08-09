@@ -1,14 +1,10 @@
 package server.service.Implementation;
-
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import server.dao.EmployeeDao;
 import server.dao.TaskDao;
-import server.dao.UserDao;
 import server.domain.Employee;
 import server.domain.Task;
-import server.domain.User;
+import server.exception.BadRequestException;
 import server.exception.ForbiddenAccessException;
 import server.service.EmployeeService;
 
@@ -29,11 +25,11 @@ public class EmployeeServiceImpl implements EmployeeService {
 
 
     @Override
-    public ResponseEntity<String> updateTotalTime(double time, String title, Employee employee) {
+    public void updateTotalTime(double time, String title, Employee employee) {
         Optional<Task> optionalTask = taskDao.getTaskByTitle(title);
 
         if (optionalTask.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+            throw new BadRequestException();
         }
 
         Task providedTask = optionalTask.get();
@@ -42,7 +38,7 @@ public class EmployeeServiceImpl implements EmployeeService {
 
         if (assigneeUserName.equals(employeeUserName)) {
             providedTask.setTotal_time(time);
-            return ResponseEntity.status(HttpStatus.OK).body(null);
+
         } else {
             throw new ForbiddenAccessException();
         }

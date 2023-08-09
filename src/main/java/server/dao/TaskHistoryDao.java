@@ -3,10 +3,13 @@ package server.dao;
 import server.domain.Task;
 import server.domain.TaskHistory;
 
-public interface TaskHistoryDao {
-    TaskHistory getTaskHistory(Task task) ;
+import java.util.List;
+import java.util.Optional;
 
-    void setTaskHistory(TaskHistory taskHistory, Task task) ;
+public interface TaskHistoryDao {
+    Optional<List<TaskHistory>> getTaskHistory(String title) ;
+
+    void setTaskHistory(TaskHistory taskHistory, String title) ;
 
 
 }

@@ -1,8 +1,6 @@
 package server.service.Implementation;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import server.dao.EmployeeDao;
 import server.dao.ManagerDao;
@@ -11,10 +9,11 @@ import server.dao.TaskDao;
 import server.dao.TaskHistoryDao;
 import server.domain.*;
 import server.dto.*;
-import server.exception.ForbiddenAccessException;
+import server.exception.*;
 import server.service.EmployeeService;
-import server.service.ManagerService;
 import server.service.TaskService;
+import server.utilities.UtilityService;
+
 import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -31,204 +30,313 @@ public class TaskServiceImpl implements TaskService {
     private final EmployeeDao employeeDao;
     private final ManagerDao managerDao;
     private final TaskHistoryDao taskHistoryDao;
+    private final UtilityService utilityService;
+    private final EmployeeService employeeService;
 
 
     @Autowired
-    public TaskServiceImpl(TaskDao taskDao, EmployeeDao employeeDao, ManagerDao managerDao, TaskHistoryDao taskHistoryDao) {
+    public TaskServiceImpl(TaskDao taskDao, EmployeeDao employeeDao, ManagerDao managerDao, TaskHistoryDao taskHistoryDao, UtilityService utilityService, EmployeeService employeeService) {
 
         this.taskDao = taskDao;
         this.employeeDao = employeeDao;
         this.managerDao = managerDao;
         this.taskHistoryDao = taskHistoryDao;
-    }
-
-
-    @Override
-    public List<Task> getAllTasks() {
-
-        return taskDao.getAll();
+        this.utilityService = utilityService;
+        this.employeeService = employeeService;
     }
 
     @Override
-    public List<TaskDTO> viewAllTasksCreatedByManager(Manager manager, String employeeName) {
+    public Optional<List<Task>> getAllTasks() {
+
+        return taskDao.getAll().isEmpty() ? Optional.empty() : Optional.of(taskDao.getAll());
+    }
+
+    @Override
+    public Optional<List<TaskDTO>> getAllTasksCreatedByManager(Manager manager, String employeeName) {
         Optional<Employee> optionalEmployee = employeeDao.getEmployeeByName(employeeName);
 
-        if (optionalEmployee.isPresent()) {
-
-            Employee employee = optionalEmployee.get();
-
-            List<TaskDTO> taskByEmployees = new ArrayList<>();
-            List<Task> tasks = taskDao.getAllTasksByManager(manager, employee);
-
-            for (Task task : tasks) {
-
-                String creatorName = task.getCreatedBy().getFirstName() + " " + task.getCreatedBy().getLastName();
-                String assigneeName = "N/A"; // Default value in case assignee is null
-                if (task.getAssignee() != null) {
-                    assigneeName = task.getAssignee().getFirstName() + " " + task.getAssignee().getLastName();
-                }
-                Instant timestamp = task.getCreatedAt();
-                LocalDateTime localDateTime = timestamp.atZone(ZoneId.systemDefault()).toLocalDateTime();
-
-                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-                String formattedDateTime = localDateTime.format(formatter);
-                TaskDTO taskByEmployee = new TaskDTO();
-                taskByEmployee.setTitle(task.getTitle());
-                taskByEmployee.setDescription(task.getDescription());
-                taskByEmployee.setAssignee(assigneeName);
-                taskByEmployee.setCreatedAt(formattedDateTime);
-                taskByEmployee.setCreatedBy(creatorName);
-
-                taskByEmployees.add(taskByEmployee);
-            }
-
-            return taskByEmployees;
-        } else {
-
-            return null;
+        if (!optionalEmployee.isPresent()) {
+            return Optional.empty();
         }
+
+        Employee employee = optionalEmployee.get();
+        List<TaskDTO> taskByEmployees = new ArrayList<>();
+        List<Task> tasks = taskDao.getAllTasksByManager(manager, employee);
+
+        for (Task task : tasks) {
+            TaskDTO taskByEmployee = createTaskDTOFromTask(task);
+            taskByEmployees.add(taskByEmployee);
+        }
+
+        return Optional.of(taskByEmployees);
+    }
+
+    private TaskDTO createTaskDTOFromTask(Task task) {
+        String creatorName = task.getCreatedBy().getFirstName() + " " + task.getCreatedBy().getLastName();
+        String assigneeName = "N/A"; // Default value in case assignee is null
+        if (task.getAssignee() != null) {
+            assigneeName = task.getAssignee().getFirstName() + " " + task.getAssignee().getLastName();
+        }
+        Instant timestamp = task.getCreatedAt();
+
+        TaskDTO taskByEmployee = new TaskDTO();
+        taskByEmployee.setTitle(task.getTitle());
+        taskByEmployee.setDescription(task.getDescription());
+        taskByEmployee.setAssignee(assigneeName);
+        taskByEmployee.setCreatedAt(timestamp);
+        taskByEmployee.setCreatedBy(creatorName);
+
+        return taskByEmployee;
     }
 
 
     @Override
-    public List<TaskDTO> viewAllTasksByUser(String employeeName) {
-
+    public Optional<List<TaskDTO>> getAllTasksByUser(String employeeName) {
         Optional<Employee> optionalEmployee = employeeDao.getEmployeeByName(employeeName);
-        if (optionalEmployee.isPresent()) {
-            Employee employee = optionalEmployee.get();
-            List<TaskDTO> taskByEmployees = new ArrayList<>();
-            List<Task> tasks = taskDao.getAllTasksByEmployee(employee);
 
-            for (Task task : tasks) {
-                String assigneeName = "N/A"; // Default value in case assignee is null
-                if (task.getAssignee() != null) {
-                    assigneeName = task.getAssignee().getFirstName() + " " + task.getAssignee().getLastName();
-                }
-
-                String creatorName = task.getCreatedBy().getFirstName() + " " + task.getCreatedBy().getLastName();
-                Instant timestamp = task.getCreatedAt();
-                LocalDateTime localDateTime = timestamp.atZone(ZoneId.systemDefault()).toLocalDateTime();
-
-                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-                String formattedDateTime = localDateTime.format(formatter);
-                TaskDTO taskByEmployee = new TaskDTO();
-
-
-                taskByEmployee.setTitle(task.getTitle());
-                taskByEmployee.setDescription(task.getDescription());
-                taskByEmployee.setAssignee(assigneeName);
-                taskByEmployee.setCreatedAt(formattedDateTime);
-                taskByEmployee.setCreatedBy(creatorName);
-                taskByEmployee.setTaskStatus(task.getTaskStatus());
-                taskByEmployee.setTotal_time(task.getTotal_time());
-
-                taskByEmployees.add(taskByEmployee);
-
-            }
-            return taskByEmployees;
-        } else {
-
-            return null;
+        if (!optionalEmployee.isPresent()) {
+            return Optional.empty();
         }
+
+        Employee employee = optionalEmployee.get();
+        List<TaskDTO> taskByEmployees = new ArrayList<>();
+        List<Task> tasks = taskDao.getAllTasksByEmployee(employee);
+
+        for (Task task : tasks) {
+            TaskDTO taskByEmployee = createTaskDTOFromTaskByUser(task);
+            taskByEmployees.add(taskByEmployee);
+        }
+
+        return taskByEmployees.isEmpty() ? Optional.empty() : Optional.of(taskByEmployees);
     }
 
+    private TaskDTO createTaskDTOFromTaskByUser(Task task) {
+        String assigneeName = task.getAssignee() != null ? task.getAssignee().getFirstName() + " " + task.getAssignee().getLastName() : "N/A";
+        String creatorName = task.getCreatedBy().getFirstName() + " " + task.getCreatedBy().getLastName();
+        Instant timestamp = task.getCreatedAt();
+
+        TaskDTO taskByEmployee = new TaskDTO();
+        taskByEmployee.setTitle(task.getTitle());
+        taskByEmployee.setDescription(task.getDescription());
+        taskByEmployee.setAssignee(assigneeName);
+        taskByEmployee.setCreatedAt(timestamp);
+        taskByEmployee.setCreatedBy(creatorName);
+        taskByEmployee.setTaskStatus(task.getTaskStatus());
+        taskByEmployee.setTotal_time(task.getTotal_time());
+
+        return taskByEmployee;
+    }
 
     @Override
-    public ResponseEntity<String> createTask(Manager activeManager, String title, String description, double total_time) {
+    public void createTask(Manager activeManager, String title, String description, double total_time) {
         Task task = new Task(title, description, total_time);
         task.setCreatedBy(activeManager);
         Instant currentInstant = Instant.now();
-        task.setCreatedAt(currentInstant); // Store the formatted timestamp
+        task.setCreatedAt(currentInstant);
         if (taskDao.isTaskExist(task)) {
 
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+           throw new BadRequestException();
         } else {
             taskDao.addTask(task);
-            return ResponseEntity.status(HttpStatus.CREATED).body(null);
+
         }
+    }
+    @Override
+    public Optional<List<TaskDTO>> getTasksByController(boolean status, boolean employeeRole, boolean assigned, User.UserRole userRole,
+                                                        boolean manager, boolean noCriteria, Task.Status taskStatus,
+                                                        String employeeName, String header) {
+
+        if (utilityService.isAuthenticatedSupervisor(header) && User.UserRole.Supervisor.equals(userRole)) {
+            return handleSupervisorTasks(status, assigned, employeeRole, noCriteria, manager, employeeName);
+        } else if (utilityService.isAuthenticatedManager(header) && User.UserRole.Manager.equals(userRole)) {
+            return handleManagerTasks(status, assigned, employeeRole, noCriteria, manager, employeeName, taskStatus,header);
+        } else if (utilityService.isAuthenticatedEmployee(header) && User.UserRole.Employee.equals(userRole)) {
+            return handleEmployeeTasks(assigned, status, employeeRole, noCriteria,header);
+        }
+
+        throw new ForbiddenAccessException();
+    }
+
+    private Optional<List<TaskDTO>> handleSupervisorTasks(boolean status, boolean assigned, boolean employeeRole,
+                                                          boolean noCriteria, boolean manager, String employeeName) {
+        if (!assigned && noCriteria && !manager && !employeeRole && !status) {
+            return getAllTasksByUser(employeeName);
+        } else if (!assigned && status && !manager && !employeeRole && !noCriteria) {
+            return getAllTasksByStatus();
+        } else if (!assigned && status && employeeRole && !noCriteria && !manager) {
+            return getTasksByUser(User.UserRole.Employee);
+        } else if (!assigned && status && manager && !noCriteria && !employeeRole) {
+            return getTasksByUser(User.UserRole.Manager);
+        }
+        return Optional.empty();
+    }
+
+    private Optional<List<TaskDTO>> handleManagerTasks(boolean status, boolean assigned, boolean employeeRole,
+                                                       boolean noCriteria, boolean manager, String employeeName,
+                                                       Task.Status taskStatus,String header) {
+        Manager activeManager = utilityService.getActiveManager(header)
+                .orElseThrow(BadRequestException::new);
+
+        if (status && !employeeRole && !noCriteria && !assigned && manager) {
+            return getAllTasksCreatedByManager(activeManager, taskStatus);
+        } else if (!status && employeeRole && !noCriteria && !assigned && manager && employeeName != null) {
+            return getAllTasksCreatedByManager(activeManager, employeeName);
+        } else if (status && employeeRole && !noCriteria && !assigned && manager) {
+            return getAllTasksCreatedByManager(activeManager, taskStatus, employeeName);
+        }
+        return Optional.empty();
+    }
+
+    private Optional<List<TaskDTO>> handleEmployeeTasks(boolean assigned, boolean status, boolean employeeRole,
+                                                        boolean noCriteria,String header) {
+        Employee activeEmployee = utilityService.getActiveEmployee(header)
+                .orElseThrow(BadRequestException::new);
+
+        if (assigned && !status && !employeeRole && !noCriteria) {
+            return getAssignedTasks(activeEmployee);
+        } else if (!assigned && status && !employeeRole && !noCriteria) {
+            return getTasksByStatus(activeEmployee);
+        }
+        return Optional.empty();
     }
 
     @Override
-    public ResponseEntity<String> changeTaskStatus(String title, Task.Status status, User person) {
-        Optional<Task> optionalTask = taskDao.getTaskByTitle(title);
+    public void updateTasksByController(boolean status, boolean archive, boolean assign, boolean time, double timeValue,
+                                        String authorizationHeader, TaskDTO taskDTO) {
 
-        if (optionalTask.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+        if (utilityService.isAuthenticatedSupervisor(authorizationHeader)) {
+            handleSupervisorUpdate(status, archive, assign, time, taskDTO);
+        } else if (utilityService.isAuthenticatedManager(authorizationHeader)) {
+            handleManagerUpdate(status, archive, assign, time, timeValue, taskDTO,authorizationHeader);
+        } else if (utilityService.isAuthenticatedEmployee(authorizationHeader)) {
+            handleEmployeeUpdate(status, archive, assign, time, timeValue, taskDTO,authorizationHeader);
         } else {
-            Task task = optionalTask.get();
-            Task.Status currentStatus = task.getTaskStatus();
+            throw new BadRequestException();
+        }
+    }
 
-            if (currentStatus == Task.Status.COMPLETED) {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
-            }
+    private void handleSupervisorUpdate(boolean status, boolean archive, boolean assign, boolean time, TaskDTO taskDTO) {
+        if (!status && archive && !assign && !time) {
+            archiveTask(taskDTO.getTitle());
+        } else {
+            throw new ForbiddenAccessException();
+        }
+    }
 
-            if (task.getAssignee() == null) {
-                throw new ForbiddenAccessException();
-            }
+    private void handleManagerUpdate(boolean status, boolean archive, boolean assign, boolean time, double timeValue,
+                                     TaskDTO taskDTO,String header) {
+        Manager activeManager = utilityService.getActiveManager(header)
+                .orElseThrow(BadRequestException::new);
 
-            String assigneeUserName = task.getAssignee().getUsername();
-            String personUserName = person.getUsername();
-            String createdUserName = task.getCreatedBy().getUsername();
+        if (status && !archive && !assign && !time) {
+            changeTaskStatus(taskDTO.getTitle(), taskDTO.getTaskStatus(), activeManager);
+        } else if (!status && !archive && assign && !time) {
+            assignTask(taskDTO.getTitle(), taskDTO.getAssignee(), activeManager);
+        } else {
+            throw new ForbiddenAccessException();
+        }
+    }
 
-            boolean isValidChange = false;
+    private void handleEmployeeUpdate(boolean status, boolean archive, boolean assign, boolean time, double timeValue,
+                                      TaskDTO taskDTO,String header) {
+        Employee activeEmployee = utilityService.getActiveEmployee(header)
+                .orElseThrow(BadRequestException::new);
 
-            switch (person.getUserRole()) {
-                case Employee -> {
-                    if (!assigneeUserName.equals(personUserName)) {
-                        throw new ForbiddenAccessException();
-                    } else if (status == Task.Status.IN_REVIEW && currentStatus == Task.Status.IN_PROGRESS) {
-                        Instant endTime = Instant.now();
-                        Instant startInstant = task.getStartTime().atZone(ZoneId.systemDefault()).toInstant();
-                        Instant endInstant = endTime.atZone(ZoneId.systemDefault()).toInstant();
-                        Duration duration = Duration.between(startInstant, endInstant);
-                        long minutes = duration.toMinutes();
-
-                        if (minutes >= task.getTotal_time()) {
-                            isValidChange = true;
-                        }
-
-                    } else if (status == Task.Status.IN_PROGRESS && currentStatus == Task.Status.CREATED) {
-                        task.setStartTime(Instant.now());
-                        isValidChange = true;
-                    } else {
-                        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
-                    }
-                }
-                case Manager -> {
-                    if (!createdUserName.equals(personUserName)) {
-                        throw new ForbiddenAccessException();
-                    } else if (status == Task.Status.COMPLETED && currentStatus == Task.Status.IN_REVIEW) {
-                        isValidChange = true;
-                    } else {
-                        throw new ForbiddenAccessException();
-                    }
-                }
-                default -> {
-                    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
-                }
-            }
-
-            if (isValidChange) {
-                task.setTaskStatus(status);
-                TaskHistory history = new TaskHistory();
-                User user = new User();
-                user.setFirstName(person.getFirstName());
-                user.setLastName(person.getLastName());
-                history.setTimestamp(Instant.now());
-                history.setOldStatus(currentStatus);
-                history.setNewStatus(status);
-                history.setMovedBy(user);
-                taskHistoryDao.setTaskHistory(history, task);
-
-                return ResponseEntity.status(HttpStatus.OK).body(null);
-            } else {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
-            }
+        if (status && !archive && !assign && !time) {
+            changeTaskStatus(taskDTO.getTitle(), taskDTO.getTaskStatus(), activeEmployee);
+        } else if (!status && !archive && !assign && time) {
+            employeeService.updateTotalTime(timeValue, taskDTO.getTitle(), activeEmployee);
+        } else {
+            throw new ForbiddenAccessException();
         }
     }
 
     @Override
-    public List<TaskDTO> viewAllTasksCreatedByManager(Manager activeManager, Task.Status status) {
+    public void createTaskByController(TaskDTO task, String header) {
+        if (utilityService.isAuthenticatedManager(header)) {
+            Manager activeManager = utilityService.getActiveManager(header)
+                    .orElseThrow(ForbiddenAccessException::new);
+
+            createTask(activeManager, task.getTitle(), task.getDescription(), task.getTotal_time());
+        } else {
+            throw new ForbiddenAccessException();
+        }
+    }
+
+    @Override
+    public void changeTaskStatus(String title, Task.Status status, User person) {
+        Task task = getValidatedTask(title);
+
+        Task.Status currentStatus = task.getTaskStatus();
+        String assigneeUserName = task.getAssignee().getUsername();
+        String personUserName = person.getUsername();
+        String createdUserName = task.getCreatedBy().getUsername();
+
+        boolean isValidChange = false;
+
+        switch (person.getUserRole()) {
+            case Employee:
+                isValidChange = handleEmployeeChangeStatus(status, currentStatus, task);
+                break;
+            case Manager:
+                isValidChange = handleManagerChangeStatus(status, currentStatus, createdUserName, task);
+                break;
+        }
+
+        if (isValidChange) {
+            updateTaskStatusAndHistory(status, currentStatus, task, person);
+        } else {
+            throw new BadRequestException();
+        }
+    }
+
+    private Task getValidatedTask(String title) {
+        Optional<Task> optionalTask = taskDao.getTaskByTitle(title);
+        if (optionalTask.isEmpty()) {
+            throw new BadRequestException();
+        }
+        return optionalTask.get();
+    }
+
+    private boolean handleEmployeeChangeStatus(Task.Status status, Task.Status currentStatus, Task task) {
+        if (currentStatus == Task.Status.COMPLETED || task.getAssignee() == null) {
+            return false;
+        }
+
+        if (status == Task.Status.IN_REVIEW && currentStatus == Task.Status.IN_PROGRESS) {
+            Instant endTime = Instant.now();
+            Instant startInstant = task.getStartTime().atZone(ZoneId.systemDefault()).toInstant();
+            Instant endInstant = endTime.atZone(ZoneId.systemDefault()).toInstant();
+            Duration duration = Duration.between(startInstant, endInstant);
+            long minutes = duration.toMinutes();
+
+            return minutes >= task.getTotal_time();
+        } else if (status == Task.Status.IN_PROGRESS && currentStatus == Task.Status.CREATED) {
+            task.setStartTime(Instant.now());
+            return true;
+        }
+        return false;
+    }
+
+    private boolean handleManagerChangeStatus(Task.Status status, Task.Status currentStatus, String createdUserName, Task task) {
+        return status == Task.Status.COMPLETED && currentStatus == Task.Status.IN_REVIEW && createdUserName.equals(task.getCreatedBy().getUsername());
+    }
+
+    private void updateTaskStatusAndHistory(Task.Status newStatus, Task.Status oldStatus, Task task, User person) {
+        task.setTaskStatus(newStatus);
+        TaskHistory history = new TaskHistory();
+        User user = new User();
+        user.setFirstName(person.getFirstName());
+        user.setLastName(person.getLastName());
+        history.setTimestamp(Instant.now());
+        history.setOldStatus(oldStatus);
+        history.setNewStatus(newStatus);
+        history.setMovedBy(user);
+        taskHistoryDao.setTaskHistory(history, task.getTitle());
+    }
+
+    @Override
+    public Optional<List<TaskDTO>> getAllTasksCreatedByManager(Manager activeManager, Task.Status status) {
 
         List<Task> tasks = taskDao.getTasksByStatus(activeManager, status);
         List<TaskDTO> taskInfoList = new ArrayList<>();
@@ -240,56 +348,55 @@ public class TaskServiceImpl implements TaskService {
             taskInfo.setDescription(task.getDescription());
             taskInfo.setTaskStatus(task.getTaskStatus());
             Instant timestamp = task.getCreatedAt();
-            LocalDateTime localDateTime = timestamp.atZone(ZoneId.systemDefault()).toLocalDateTime();
 
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-
-            String formattedDateTime = localDateTime.format(formatter);
-            taskInfo.setCreatedAt(formattedDateTime);
+            taskInfo.setCreatedAt(timestamp);
             taskInfoList.add(taskInfo);
         }
+        return taskInfoList.isEmpty() ? Optional.empty() : Optional.of(taskInfoList);
 
-        return taskInfoList;
     }
 
     @Override
-    public List<TaskDTO> viewAllTasksCreatedByManager(Manager activeManager, Task.Status status, String employeeName) {
-
+    public Optional<List<TaskDTO>> getAllTasksCreatedByManager(Manager activeManager, Task.Status status, String employeeName) {
         Optional<Employee> optionalEmployee = employeeDao.getEmployeeByName(employeeName);
+
         if (optionalEmployee.isPresent()) {
             Employee employee = optionalEmployee.get();
-            List<TaskDTO> taskByEmployeeAndStatuses = new ArrayList<>();
+            List<TaskDTO> taskByEmployeeAndStatuses = getTaskDTOsByManagerAndStatus(activeManager, employee, status);
 
-            for (Task task : taskDao.getAllTasksByManager(activeManager, employee, status)) {
-                String assigneeName = "N/A";
-
-                if (task.getAssignee() != null) {
-                    assigneeName = task.getAssignee().getFirstName() + " " + task.getAssignee().getLastName();
-                }
-                Instant timestamp = task.getCreatedAt();
-                LocalDateTime localDateTime = timestamp.atZone(ZoneId.systemDefault()).toLocalDateTime();
-
-                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-                String formattedDateTime = localDateTime.format(formatter);
-                TaskDTO taskByEmployeeAndStatus = new TaskDTO();
-                taskByEmployeeAndStatus.setTitle(task.getTitle());
-                taskByEmployeeAndStatus.setDescription(task.getDescription());
-                taskByEmployeeAndStatus.setAssignee(assigneeName);
-                taskByEmployeeAndStatus.setTaskStatus(task.getTaskStatus());
-                taskByEmployeeAndStatus.setCreatedAt(formattedDateTime);
-
-                taskByEmployeeAndStatuses.add(taskByEmployeeAndStatus);
-            }
-            return (taskByEmployeeAndStatuses);
+            return taskByEmployeeAndStatuses.isEmpty() ? Optional.empty() : Optional.of(taskByEmployeeAndStatuses);
         } else {
-
-            return null;
+            return Optional.empty();
         }
     }
 
+    private List<TaskDTO> getTaskDTOsByManagerAndStatus(Manager activeManager, Employee employee, Task.Status status) {
+        List<TaskDTO> taskByEmployeeAndStatuses = new ArrayList<>();
+        List<Task> taskDTOs = taskDao.getAllTasksByManager(activeManager, employee, status);
+
+        for (Task task : taskDTOs) {
+            String assigneeName = getAssigneeName(task);
+            Instant timestamp = task.getCreatedAt();
+
+            TaskDTO taskByEmployeeAndStatus = new TaskDTO();
+            taskByEmployeeAndStatus.setTitle(task.getTitle());
+            taskByEmployeeAndStatus.setDescription(task.getDescription());
+            taskByEmployeeAndStatus.setAssignee(assigneeName);
+            taskByEmployeeAndStatus.setTaskStatus(task.getTaskStatus());
+            taskByEmployeeAndStatus.setCreatedAt(timestamp);
+
+            taskByEmployeeAndStatuses.add(taskByEmployeeAndStatus);
+        }
+        return taskByEmployeeAndStatuses;
+    }
+
+    private String getAssigneeName(Task task) {
+        return task.getAssignee() != null ? task.getAssignee().getFirstName() + " " + task.getAssignee().getLastName() : "N/A";
+    }
+
 
     @Override
-    public List<TaskDTO> viewTasksByStatus(Employee employee) {
+    public Optional<List<TaskDTO>> getTasksByStatus(Employee employee) {
         List<TaskDTO> allTasks = new ArrayList<>();
         List<Task> tasks = taskDao.getAllTasksByEmployee(employee);
 
@@ -298,11 +405,11 @@ public class TaskServiceImpl implements TaskService {
             allTasks.add(createTaskDTO(task));
         }
 
-        return allTasks;
+        return allTasks.isEmpty() ? Optional.empty() : Optional.of(allTasks);
     }
 
     @Override
-    public List<TaskDTO> viewAllTasksByStatus() {
+    public Optional<List<TaskDTO>> getAllTasksByStatus() {
         List<TaskDTO> allTasks = new ArrayList<>();
         List<Task> tasks = taskDao.getAll();
 
@@ -310,7 +417,7 @@ public class TaskServiceImpl implements TaskService {
             allTasks.add(createTaskDTO(task));
         }
 
-        return allTasks;
+        return allTasks.isEmpty() ? Optional.empty() : Optional.of(allTasks);
     }
 
     private TaskDTO createTaskDTO(Task task) {
@@ -318,55 +425,48 @@ public class TaskServiceImpl implements TaskService {
         taskDTO.setTaskStatus(task.getTaskStatus());
         taskDTO.setDescription(task.getDescription());
         taskDTO.setTitle(task.getTitle());
-
         Instant timestamp = task.getCreatedAt();
-        LocalDateTime localDateTime = timestamp.atZone(ZoneId.systemDefault()).toLocalDateTime();
-
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-        String formattedDateTime = localDateTime.format(formatter);
-        taskDTO.setCreatedAt(formattedDateTime);
+        taskDTO.setCreatedAt(timestamp);
 
         return taskDTO;
     }
 
 
     @Override
-    public ResponseEntity<String> assignTask(String title, String fullName, Manager manager) {
+    public void assignTask(String title, String fullName, Manager manager) {
+        Task task = getTaskByTitle(title);
+        validateTaskAssignment(task, fullName, manager);
+
+        Employee assignee = getAssigneeByName(fullName);
+        task.setAssignee(assignee);
+        task.setAssigned(true);
+    }
+
+    private Task getTaskByTitle(String title) {
         Optional<Task> optionalTask = taskDao.getTaskByTitle(title);
-        if (optionalTask.isPresent()) {
-            Task task = optionalTask.get();
-            String assignerName = manager.getFirstName() + " " + manager.getLastName();
-            if (!(assignerName.equals(task.getCreatedBy().getFirstName() + " " + task.getCreatedBy().getLastName()))) {
-                throw new ForbiddenAccessException();
+        return optionalTask.orElseThrow(BadRequestException::new);
+    }
 
-            }
+    private void validateTaskAssignment(Task task, String fullName, Manager manager) {
+        String assignerName = manager.getFirstName() + " " + manager.getLastName();
+        String createdByFullName = task.getCreatedBy().getFirstName() + " " + task.getCreatedBy().getLastName();
 
-            Optional<Manager> optionalManager = managerDao.getManagerByName(fullName);
+        if (!assignerName.equals(createdByFullName)) {
+            throw new ForbiddenAccessException();
+        }
 
-            if (optionalManager.isPresent()) {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
-            }
-            Optional<Employee> optionalEmployee = employeeDao.getEmployeeByName(fullName);
-            if (optionalEmployee.isEmpty()) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
-            }
-
-            if (task.isAssigned()) {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
-            } else {
-                task.setAssignee(optionalEmployee.get());
-                task.setAssigned(true);
-                return ResponseEntity.status(HttpStatus.OK).body(null);
-            }
-        } else {
-
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+        if (task.isAssigned()) {
+            throw new BadRequestException();
         }
     }
 
+    private Employee getAssigneeByName(String fullName) {
+        Optional<Employee> optionalEmployee = employeeDao.getEmployeeByName(fullName);
+        return optionalEmployee.orElseThrow(NotFoundException::new);
+    }
 
     @Override
-    public List<TaskDTO> viewTasksByUser(String userRole) {
+    public Optional<List<TaskDTO>> getTasksByUser(User.UserRole userRole) {
         List<TaskDTO> taskByEmployeeAndStatusDTOS = new ArrayList<>();
 
         List<Task> tasks = taskDao.getAllTasksByUserRole(userRole);
@@ -374,7 +474,7 @@ public class TaskServiceImpl implements TaskService {
         for (Task task : tasks) {
             taskByEmployeeAndStatusDTOS.add(createTaskByEmployeeAndStatusDTO(task));
         }
-        return taskByEmployeeAndStatusDTOS;
+        return taskByEmployeeAndStatusDTOS.isEmpty() ? Optional.empty() : Optional.of(taskByEmployeeAndStatusDTOS);
     }
 
     private TaskDTO createTaskByEmployeeAndStatusDTO(Task task) {
@@ -388,10 +488,7 @@ public class TaskServiceImpl implements TaskService {
             taskByEmployeeAndStatusDTO.setAssignee("N/A");
         }
         Instant timestamp = task.getCreatedAt();
-        LocalDateTime localDateTime = timestamp.atZone(ZoneId.systemDefault()).toLocalDateTime();
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-        String formattedDateTime = localDateTime.format(formatter);
-        taskByEmployeeAndStatusDTO.setCreatedAt(formattedDateTime);
+        taskByEmployeeAndStatusDTO.setCreatedAt(timestamp);
 
         taskByEmployeeAndStatusDTO.setCreatedBy(task.getCreatedBy().getFirstName() + " " + task.getCreatedBy().getLastName());
 
@@ -400,7 +497,7 @@ public class TaskServiceImpl implements TaskService {
 
 
     @Override
-    public List<TaskDTO> viewAssignedTasks(Employee employee) {
+    public Optional<List<TaskDTO>> getAssignedTasks(Employee employee) {
 
         List<TaskDTO> assignedTasks = new ArrayList<>();
         List<Task> tasks = taskDao.getAllTasksByEmployee(employee);
@@ -408,10 +505,7 @@ public class TaskServiceImpl implements TaskService {
             TaskDTO assignTask = new TaskDTO();
             assignTask.setTaskStatus(task.getTaskStatus());
             Instant timestamp = task.getCreatedAt();
-            LocalDateTime localDateTime = timestamp.atZone(ZoneId.systemDefault()).toLocalDateTime();
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-            String formattedDateTime = localDateTime.format(formatter);
-            assignTask.setCreatedAt(formattedDateTime);
+            assignTask.setCreatedAt(timestamp);
             assignTask.setDescription(task.getDescription());
             assignTask.setTitle(task.getTitle());
             assignTask.setTotal_time(task.getTotal_time());
@@ -419,25 +513,22 @@ public class TaskServiceImpl implements TaskService {
 
         }
 
-        return assignedTasks;
-
+        return assignedTasks.isEmpty() ? Optional.empty() : Optional.of(assignedTasks);
 
     }
 
     @Override
-    public ResponseEntity<String> archiveTask(String title) {
+    public void archiveTask(String title) {
         Optional<Task> optionalTask = taskDao.getTaskByTitle(title);
         if (optionalTask.isPresent()) {
             Task task = optionalTask.get();
             task.setAssigned(false);
             task.setAssignee(null);
 
-            return ResponseEntity.status(HttpStatus.OK).body(null);
         } else {
 
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+            throw new BadRequestException();
         }
-
 
     }
 }

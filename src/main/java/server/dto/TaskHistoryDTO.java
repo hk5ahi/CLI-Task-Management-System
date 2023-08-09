@@ -2,6 +2,8 @@ package server.dto;
 
 import server.domain.Task;
 
+import java.time.Instant;
+
 
 public class TaskHistoryDTO {
 
@@ -31,16 +33,16 @@ public class TaskHistoryDTO {
         this.movedBy = movedBy;
     }
 
-    public String getMovedAt() {
+    public Instant getMovedAt() {
         return movedAt;
     }
 
-    public void setMovedAt(String movedAt) {
+    public void setMovedAt(Instant movedAt) {
         this.movedAt = movedAt;
     }
 
     private Task.Status newStatus;
 
     private String movedBy;
-    private String movedAt;
+    private Instant movedAt;
 }

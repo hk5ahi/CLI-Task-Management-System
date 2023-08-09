@@ -16,38 +16,24 @@ public class SupervisorDaoImpl implements SupervisorDao {
 
 
     @Override
-    public Optional<Supervisor> getSupervisorByName(String name)
-    {
-        for(Supervisor supervisor:supervisors)
-        {
-            String fullName=supervisor.getFirstName()+" "+supervisor.getLastName();
-            if(fullName.equals(name))
-            {
-                return Optional.of(supervisor);
-            }
-
-        }
-
-        return Optional.empty();
-
+    public Optional<Supervisor> getSupervisorByName(String name) {
+        return supervisors.stream()
+                .filter(supervisor -> {
+                    String fullName = supervisor.getFirstName() + " " + supervisor.getLastName();
+                    return fullName.equals(name);
+                })
+                .findFirst();
     }
+
     public List<Supervisor> getSupervisors() {
         return supervisors;
     }
 
     @Override
-    public Optional<Supervisor> getByUserName(String username)
-    {
-        for(Supervisor supervisor:supervisors)
-        {
-            if(supervisor.getUsername().equals(username))
-            {
-                return Optional.of(supervisor);
-            }
-
-        }
-        return Optional.empty();
-
+    public Optional<Supervisor> getByUserName(String username) {
+        return supervisors.stream()
+                .filter(supervisor -> supervisor.getUsername().equals(username))
+                .findFirst();
     }
 
 }

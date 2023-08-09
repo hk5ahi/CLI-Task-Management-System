@@ -1,7 +1,7 @@
 package server.dao;
 
 import server.domain.Manager;
-import server.domain.User;
+
 
 import java.util.List;
 import java.util.Optional;

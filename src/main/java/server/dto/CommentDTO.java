@@ -1,6 +1,7 @@
 package server.dto;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
+
 
 public class CommentDTO {
     public String getTitle() {
@@ -14,7 +15,7 @@ public class CommentDTO {
     private String message;
     private String Title;
 
-    private String createdAt;
+    private Instant createdAt;
 
     public String getMessage() {
         return message;
@@ -24,11 +25,11 @@ public class CommentDTO {
         this.message = message;
     }
 
-    public String getCreatedAt() {
+    public Instant getCreatedAt() {
         return createdAt;
     }
 
-    public void setCreatedAt(String createdAt) {
+    public void setCreatedAt(Instant createdAt) {
         this.createdAt = createdAt;
     }
 

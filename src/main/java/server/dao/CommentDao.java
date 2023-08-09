@@ -6,7 +6,7 @@ import server.domain.Task;
 import java.util.List;
 
 public interface CommentDao {
-    List<Comment> getComments(Task task);
+    List<Comment> getComment(Task task);
 
     void addComment(Comment comment);
 }

@@ -1,21 +1,21 @@
 package server.domain;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 public class Comment {
 
-    private LocalDateTime createdAt;
+    private Instant createdAt;
     private User createdBy;
     private String body;
 
     private Task tasks;
 
 
-    public LocalDateTime getCreatedAt() {
+    public Instant getCreatedAt() {
         return createdAt;
     }
 
-    public void setCreatedAt(LocalDateTime createdAt) {
+    public void setCreatedAt(Instant createdAt) {
         this.createdAt = createdAt;
     }
 

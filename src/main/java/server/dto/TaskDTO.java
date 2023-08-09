@@ -2,6 +2,8 @@ package server.dto;
 
 import server.domain.Task;
 
+import java.time.Instant;
+
 
 public class TaskDTO {
 
@@ -13,7 +15,7 @@ public class TaskDTO {
             this.description = null;
             this.createdAt = null;
             this.createdBy = null;
-            this.total_time = 0;
+            this.total_time = 0.0;
             this.assignee = null;
         }
 
@@ -42,11 +44,11 @@ public class TaskDTO {
         this.description = description;
     }
 
-    public String getCreatedAt() {
+    public Instant getCreatedAt() {
         return createdAt;
     }
 
-    public void setCreatedAt(String createdAt) {
+    public void setCreatedAt(Instant createdAt) {
         this.createdAt = createdAt;
     }
 
@@ -78,7 +80,7 @@ public class TaskDTO {
     private String title;
 
     private String description;
-    private String createdAt;
+    private Instant createdAt;
     private String createdBy;
     private double total_time;
 

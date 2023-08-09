@@ -1,22 +1,13 @@
 package server.controller;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
 import server.domain.User;
 import server.dto.UserDTO;
-import server.service.EmployeeService;
-import server.service.ManagerService;
-import server.service.SupervisorService;
 import server.service.UserService;
-import server.exception.ForbiddenAccessException;
-
-import server.utilities.UtilityService;
-
 import java.util.List;
-import java.util.Optional;
+
 
 @RestController
 @RequestMapping("/users")
@@ -47,7 +38,7 @@ public class UserController {
     }
 
 
-    @GetMapping("/list")
+    @GetMapping()
     public ResponseEntity<List<UserDTO>> getAllUsers(
             @RequestHeader("Authorization") String authorizationHeader
     ) {

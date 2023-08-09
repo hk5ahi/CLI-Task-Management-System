@@ -2,9 +2,7 @@ package server.dao.implementation;
 
 import org.springframework.stereotype.Repository;
 import server.dao.EmployeeDao;
-import server.dao.UserDao;
 import server.domain.Employee;
-import server.domain.Supervisor;
 import server.domain.User;
 
 import java.util.ArrayList;
@@ -43,17 +41,12 @@ public class EmployeeDaoImpl implements EmployeeDao {
 
     @Override
     public Optional<Employee> getEmployeeByName(String name) {
-        if(name!=null) {
-            for (Employee employee : employees) {
-                String employeeName = employee.getFirstName() + " " + employee.getLastName();
-                if (employeeName.equalsIgnoreCase(name)) { // can't search on basis of username as full name will be passed in input
-
-                    return Optional.of(employee);
-                }
-            }
+        if (!name.isEmpty()) {
+            return employees.stream()
+                    .filter(employee -> (employee.getFirstName() + " " + employee.getLastName()).equalsIgnoreCase(name))
+                    .findFirst();
         }
         return Optional.empty(); // Employee not found
     }
-
 
 }

@@ -41,4 +41,7 @@ public class TaskHistory {
     public void setMovedBy(User movedBy) {
         this.movedBy = movedBy;
     }
+
+    public void add(TaskHistory history) {
+    }
 }

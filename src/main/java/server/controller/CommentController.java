@@ -1,21 +1,12 @@
 package server.controller;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import server.dao.SupervisorDao;
-import server.domain.*;
-
 import server.dto.CommentDTO;
-import server.exception.ForbiddenAccessException;
 import server.service.CommentService;
-import server.service.EmployeeService;
-import server.service.ManagerService;
-
-import server.service.TaskService;
-import server.utilities.UtilityService;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 @RestController
@@ -23,64 +14,36 @@ import java.util.Optional;
 public class CommentController {
 
     private final CommentService commentService;
-    private final UtilityService utilityService;
-    private final SupervisorDao supervisorDao;
 
 
-    public CommentController(CommentService commentService, UtilityService utilityService, SupervisorDao supervisorDao) {
+
+    public CommentController(CommentService commentService) {
         this.commentService = commentService;
-        this.utilityService = utilityService;
-        this.supervisorDao = supervisorDao;
+
 
     }
 
-    @PostMapping("/add")
+    @PostMapping()
     public ResponseEntity<String> create(
             @RequestHeader("Authorization") String authorizationHeader,
             @RequestBody CommentDTO comment
     ) {
-        Optional<User.UserRole> optionalUserRole = utilityService.getUserRole(authorizationHeader);
 
-        if (optionalUserRole.isPresent()) {
-                User.UserRole authenticatedUserRole=optionalUserRole.get();
-            if (authenticatedUserRole.equals(User.UserRole.Supervisor)) {
-                Optional<Supervisor> optionalSupervisor = supervisorDao.getSupervisorByName("Muhammad Asif");
-                return optionalSupervisor.map(supervisor ->
-                        commentService.addComments(comment.getMessage(), supervisor, comment.getTitle())
-                ).orElse(null);
+        commentService.addCommentByUser(comment,authorizationHeader);
+        return ResponseEntity.ok(null);
 
-            } else if (authenticatedUserRole.equals(User.UserRole.Manager)) {
-                Manager activeManager = utilityService.getActiveManager(authorizationHeader);
-                return commentService.addComments(comment.getMessage(), activeManager, comment.getTitle());
-            } else if (authenticatedUserRole.equals(User.UserRole.Employee)) {
-                Employee activeEmployee = utilityService.getActiveEmployee(authorizationHeader);
-                return commentService.addComments(comment.getMessage(), activeEmployee, comment.getTitle());
-            } else {
-                throw new ForbiddenAccessException();
-            }
-        } else {
-            throw new ForbiddenAccessException();
-        }
     }
 
-    @GetMapping("/view")
-    public ResponseEntity<List<CommentDTO>> getComments(
+    @GetMapping()
+    public ResponseEntity<Optional<List<CommentDTO>>> getComments(
             @RequestHeader("Authorization") String authorizationHeader,
             @RequestParam("title") String title
     ) {
-        Optional<User.UserRole> authenticatedUserRole = utilityService.getUserRole(authorizationHeader);
-        User.UserRole supervisorRole = User.UserRole.Supervisor;
+        return ResponseEntity.status(HttpStatus.OK).body(commentService.getCommentByController(title,authorizationHeader));
 
-        if (authenticatedUserRole.isPresent() && authenticatedUserRole.get().equals(supervisorRole)) {
-            if (title == null) {
-                return ResponseEntity.notFound().build();
-            }
-            List<CommentDTO> comments = commentService.viewComments(title);
-            return ResponseEntity.ok(comments);
-        } else {
-            throw new ForbiddenAccessException();
-        }
-    }
+
+
+}
 
 
 }

@@ -5,5 +5,5 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 
 @ResponseStatus(value = HttpStatus.OK)
 public class StatusOKMessage extends RuntimeException {
-    // Add any additional constructors or messages if needed
+
 }

@@ -1,6 +1,8 @@
 package server.domain;
 
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Task {
 
@@ -11,8 +13,7 @@ public class Task {
         IN_REVIEW
     }
 
-    private Status taskStatus;
-    private TaskHistory history;
+    private List<TaskHistory> taskHistory=new ArrayList<>();
     private String title;
     private String description;
     private Instant createdAt;
@@ -30,7 +31,15 @@ public class Task {
         this.setTotal_time(total_time);
     }
 
+    private Status taskStatus;
 
+    public List<TaskHistory> getHistory(Task task) {
+        return task.taskHistory;
+    }
+
+    public void setHistory(TaskHistory history) {
+        taskHistory.add(history);
+    }
     public Status getTaskStatus() {
         return taskStatus;
     }
@@ -39,13 +48,7 @@ public class Task {
         this.taskStatus = taskStatus;
     }
 
-    public TaskHistory getHistory() {
-        return history;
-    }
 
-    public void setHistory(TaskHistory history) {
-        this.history = history;
-    }
 
     public String getTitle() {
         return title;

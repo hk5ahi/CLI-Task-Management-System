@@ -1,7 +1,5 @@
 package server.service.Implementation;
 
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import server.dao.EmployeeDao;
 import server.dao.ManagerDao;
@@ -12,13 +10,13 @@ import server.domain.User;
 import server.dto.UserDTO;
 import server.exception.BadRequestException;
 import server.exception.ForbiddenAccessException;
-import server.exception.StatusCREATEDMessage;
+
 import server.service.UserService;
 import server.utilities.UtilityService;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
+
 @Service
 public class UserServiceImpl implements UserService {
 
@@ -35,22 +33,6 @@ public class UserServiceImpl implements UserService {
         this.userDao = userDao;
         this.utilityService = utilityService;
     }
-
-    //getByUsername(): Optional<> 
-    @Override
-    public Optional<User> getUserByNameAndPassword(String providedUsername, String providedPassword) {
-        Optional<User> userOptional = userDao.getByUsername(providedUsername);
-
-        if (userOptional.isPresent()) {
-            User user = userOptional.get(); // Get the User object from the Optional
-            if (user.getPassword().equals(providedPassword)) {
-                return Optional.of(user); // Return the current user's role
-            }
-        }
-
-        return Optional.empty(); // Return an empty Optional if user is not found or password doesn't match
-    }
-
 
 
     @Override
@@ -76,7 +58,6 @@ public class UserServiceImpl implements UserService {
         } else {
             throw new ForbiddenAccessException();
         }
-
 
     }
     @Override
