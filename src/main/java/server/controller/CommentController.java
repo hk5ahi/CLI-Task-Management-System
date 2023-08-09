@@ -39,19 +39,20 @@ public class CommentController {
             @RequestHeader("Authorization") String authorizationHeader,
             @RequestBody CommentDTO comment
     ) {
-        String authenticatedUserRole = utilityService.isAuthenticated(authorizationHeader);
+        Optional<User.UserRole> optionalUserRole = utilityService.getUserRole(authorizationHeader);
 
-        if (authenticatedUserRole != null) {
-            if (authenticatedUserRole.equals(User.UserRole.Supervisor.toString())) {
+        if (optionalUserRole.isPresent()) {
+                User.UserRole authenticatedUserRole=optionalUserRole.get();
+            if (authenticatedUserRole.equals(User.UserRole.Supervisor)) {
                 Optional<Supervisor> optionalSupervisor = supervisorDao.getSupervisorByName("Muhammad Asif");
                 return optionalSupervisor.map(supervisor ->
                         commentService.addComments(comment.getMessage(), supervisor, comment.getTitle())
                 ).orElse(null);
 
-            } else if (authenticatedUserRole.equals(User.UserRole.Manager.toString())) {
+            } else if (authenticatedUserRole.equals(User.UserRole.Manager)) {
                 Manager activeManager = utilityService.getActiveManager(authorizationHeader);
                 return commentService.addComments(comment.getMessage(), activeManager, comment.getTitle());
-            } else if (authenticatedUserRole.equals(User.UserRole.Employee.toString())) {
+            } else if (authenticatedUserRole.equals(User.UserRole.Employee)) {
                 Employee activeEmployee = utilityService.getActiveEmployee(authorizationHeader);
                 return commentService.addComments(comment.getMessage(), activeEmployee, comment.getTitle());
             } else {
@@ -67,8 +68,8 @@ public class CommentController {
             @RequestHeader("Authorization") String authorizationHeader,
             @RequestParam("title") String title
     ) {
-        Optional<String> authenticatedUserRole = Optional.ofNullable(utilityService.isAuthenticated(authorizationHeader));
-        String supervisorRole = User.UserRole.Supervisor.toString();
+        Optional<User.UserRole> authenticatedUserRole = utilityService.getUserRole(authorizationHeader);
+        User.UserRole supervisorRole = User.UserRole.Supervisor;
 
         if (authenticatedUserRole.isPresent() && authenticatedUserRole.get().equals(supervisorRole)) {
             if (title == null) {

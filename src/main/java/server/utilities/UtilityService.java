@@ -5,6 +5,7 @@ import server.dao.EmployeeDao;
 import server.dao.ManagerDao;
 import server.domain.Employee;
 import server.domain.Manager;
+import server.domain.User;
 import server.service.UserService;
 
 import java.util.Base64;
@@ -24,7 +25,7 @@ public class UtilityService {
         this.employeeDao = employeeDao;
     }
 
-    public String isAuthenticated(String authorizationHeader) {
+    public Optional<User.UserRole> getUserRole(String authorizationHeader) {
         if (authorizationHeader != null && authorizationHeader.startsWith("Basic ")) {
             // Extract the Base64-encoded credentials from the header
             String encodedCredentials = authorizationHeader.substring("Basic ".length());
@@ -39,14 +40,14 @@ public class UtilityService {
             String password = usernameAndPassword[1];
 
             // Now, you can perform the authentication based on the obtained username and password.
-            Optional<String> authenticatedUser = userService.verifyUser(username, password);
+            Optional<User> authenticatedUser = userService.getUserByNameAndPassword(username, password);
 
             if (authenticatedUser.isPresent()) {
-                return authenticatedUser.get();
+                return Optional.of(authenticatedUser.get().getUserRole());
             }
         }
 
-        return null;
+        return Optional.empty();
     }
 
 
@@ -74,11 +75,12 @@ public class UtilityService {
 
         return null;
     }
+
     public Employee getActiveEmployee(String authorizationHeader) {
         Map<String, String> usernamePassword = getUsernamePassword(authorizationHeader);
         String username = usernamePassword.get("username");
         String password = usernamePassword.get("password");
-        Optional<Employee> optionalEmployee=employeeDao.findEmployee(username, password);
+        Optional<Employee> optionalEmployee = employeeDao.findEmployee(username, password);
         return optionalEmployee.orElse(null);
     }
 
@@ -86,10 +88,18 @@ public class UtilityService {
         Map<String, String> usernamePassword = getUsernamePassword(authorizationHeader);
         String username = usernamePassword.get("username");
         String password = usernamePassword.get("password");
-        Optional<Manager> optionalManager=managerDao.findManager(username, password);
+        Optional<Manager> optionalManager = managerDao.findManager(username, password);
         return optionalManager.orElse(null);
 
     }
+
+    public boolean isAuthenticatedSupervisor(String header) {
+        Optional<User.UserRole> authenticatedUserRole = getUserRole(header);
+        User.UserRole supervisorRole = User.UserRole.Supervisor;
+
+        return authenticatedUserRole.isPresent() && authenticatedUserRole.get() == supervisorRole;
+    }
+
 
 
 

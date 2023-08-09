@@ -25,8 +25,8 @@ public class TaskHistoryController {
     @GetMapping()
     public ResponseEntity<TaskHistoryDTO> getTaskHistory(@RequestHeader("Authorization") String authorizationHeader, @RequestParam("title") String title) {
 
-        Optional<String> authenticatedUserRole = Optional.ofNullable(utilityService.isAuthenticated(authorizationHeader));
-        String supervisorRole = User.UserRole.Supervisor.toString();
+        Optional<User.UserRole> authenticatedUserRole = utilityService.getUserRole(authorizationHeader);
+        User.UserRole supervisorRole = User.UserRole.Supervisor;
 
         if (authenticatedUserRole.isPresent() && supervisorRole.equals(authenticatedUserRole.get())) {
             TaskHistoryDTO taskHistoryDTO = taskHistoryService.viewTaskHistory(title);

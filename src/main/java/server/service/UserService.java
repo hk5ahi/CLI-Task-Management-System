@@ -8,14 +8,18 @@ import java.util.Optional;
 
 public interface UserService {
 
-    String createUser(String type, String firstname, String lastname, String username, String password);
+   void createUser(User.UserRole type, String firstname, String lastname, String username, String password);
 
     List<User> allUsers();
 
-    Optional<String> verifyUser(String username, String pass);
+    Optional<User> getUserByNameAndPassword(String username, String pass);
 
     List<UserDTO> viewAllUsers();
 
     void initializeUsers();
+
+    void postCreateUser(User user,String header);
+
+    List<UserDTO> getAllUserForController(String header);
 
 }

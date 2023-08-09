@@ -2,7 +2,7 @@ package server.domain;
 
 public class Employee extends User {
 
-    public Employee(String firstname, String lastname, String username, String password,String userRole) {
+    public Employee(String firstname, String lastname, String username, String password,User.UserRole userRole) {
         this.setUsername(username);
         this.setPassword(password);
         this.setFirstName(firstname);

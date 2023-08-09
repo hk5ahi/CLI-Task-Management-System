@@ -15,7 +15,7 @@ import java.util.Optional;
 public class EmployeeDaoImpl implements EmployeeDao {
 
 
-    private List<Employee> employees = new ArrayList<>(List.of(new Employee("Muhammad", "Hanan", "m.hanan", "Ts12", "Employee")));
+    private List<Employee> employees = new ArrayList<>(List.of(new Employee("Muhammad", "Hanan", "m.hanan", "Ts12", User.UserRole.Employee)));
 
     @Override
     public List<Employee> getEmployees() {
@@ -29,7 +29,7 @@ public class EmployeeDaoImpl implements EmployeeDao {
 
     @Override
     public Employee createEmployee(String firstname, String lastname, String username, String password) {
-        Employee employee = new Employee(firstname, lastname, username, password,"Employee");
+        Employee employee = new Employee(firstname, lastname, username, password,User.UserRole.Employee);
         addEmployee(employee);
         return employee;
 

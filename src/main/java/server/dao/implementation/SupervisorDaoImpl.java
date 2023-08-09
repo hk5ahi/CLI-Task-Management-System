@@ -12,7 +12,7 @@ import java.util.Optional;
 @Repository
 public class SupervisorDaoImpl implements SupervisorDao {
 
-    private final List<Supervisor> supervisors=new ArrayList<>(List.of(new Supervisor("Muhammad", "Asif", "m.asif", "Ts12", "Supervisor")));
+    private final List<Supervisor> supervisors=new ArrayList<>(List.of(new Supervisor("Muhammad", "Asif", "m.asif", "Ts12", User.UserRole.Supervisor)));
 
 
     @Override

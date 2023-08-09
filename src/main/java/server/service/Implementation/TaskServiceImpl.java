@@ -173,7 +173,7 @@ public class TaskServiceImpl implements TaskService {
             boolean isValidChange = false;
 
             switch (person.getUserRole()) {
-                case "Employee" -> {
+                case Employee -> {
                     if (!assigneeUserName.equals(personUserName)) {
                         throw new ForbiddenAccessException();
                     } else if (status == Task.Status.IN_REVIEW && currentStatus == Task.Status.IN_PROGRESS) {
@@ -194,7 +194,7 @@ public class TaskServiceImpl implements TaskService {
                         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
                     }
                 }
-                case "Manager" -> {
+                case Manager -> {
                     if (!createdUserName.equals(personUserName)) {
                         throw new ForbiddenAccessException();
                     } else if (status == Task.Status.COMPLETED && currentStatus == Task.Status.IN_REVIEW) {

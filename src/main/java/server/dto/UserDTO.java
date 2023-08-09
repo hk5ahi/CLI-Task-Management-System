@@ -1,5 +1,8 @@
 package server.dto;
 
+import server.dao.UserDao;
+import server.domain.User;
+
 public class UserDTO {
 
 
@@ -21,14 +24,14 @@ public class UserDTO {
         this.lastName = lastName;
     }
 
-    public String getUserRole() {
+    public User.UserRole getUserRole() {
         return userRole;
     }
 
-    public void setUserRole(String userRole) {
+    public void setUserRole(User.UserRole userRole) {
         this.userRole = userRole;
     }
 
     private String lastName;
-    private String userRole;
+    private User.UserRole userRole;
 }

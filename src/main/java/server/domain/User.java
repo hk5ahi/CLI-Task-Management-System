@@ -4,7 +4,7 @@ public class User {
     private String username;
     private String firstName;
     private String lastName;
-    private String userRole;
+    private UserRole userRole;
     private String password;
 
     public enum UserRole{
@@ -39,11 +39,11 @@ public class User {
         this.lastName = lastName;
     }
 
-    public String getUserRole() {
+    public UserRole getUserRole() {
         return userRole;
     }
 
-    public void setUserRole(String userRole) {
+    public void setUserRole(UserRole userRole) {
         this.userRole = userRole;
     }
 

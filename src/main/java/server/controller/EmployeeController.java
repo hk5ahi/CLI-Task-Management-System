@@ -38,9 +38,9 @@ public class EmployeeController {
             @RequestParam String title,
             @RequestParam double time
     ) {
-        String authenticatedUserRole = utilityService.isAuthenticated(authorizationHeader);
+       Optional<User.UserRole> authenticatedUserRole = utilityService.getUserRole(authorizationHeader);
 
-        if (authenticatedUserRole.equals(User.UserRole.Employee.toString())) {
+        if (authenticatedUserRole.isPresent() && authenticatedUserRole.get().equals(User.UserRole.Employee)) {
             Map<String, String> usernamePassword = utilityService.getUsernamePassword(authorizationHeader);
 
             String username = usernamePassword.get("username");

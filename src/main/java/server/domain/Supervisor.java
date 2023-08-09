@@ -2,7 +2,7 @@ package server.domain;
 
 public class Supervisor extends User {
 
-    public Supervisor(String firstName,String lastName,String userName,String password,String userRole) {
+    public Supervisor(String firstName,String lastName,String userName,String password,UserRole userRole) {
 
         this.setFirstName(firstName);
         this.setLastName(lastName);

@@ -37,9 +37,9 @@ public class TaskController {
 
     @PostMapping()
     public ResponseEntity<String> createTask(@RequestBody TaskDTO task, @RequestHeader("Authorization") String authorizationHeader) {
-        String authenticatedUserRole = utilityService.isAuthenticated(authorizationHeader);
+        Optional<User.UserRole> authenticatedUserRole = utilityService.getUserRole(authorizationHeader);
 
-        if (authenticatedUserRole != null && authenticatedUserRole.equals(User.UserRole.Manager.toString())) {
+        if (authenticatedUserRole.isPresent() && authenticatedUserRole.get().equals(User.UserRole.Manager)) {
             Map<String, String> usernamePassword = utilityService.getUsernamePassword(authorizationHeader);
 
             String username = usernamePassword.get("username");
@@ -70,10 +70,10 @@ public class TaskController {
             @RequestParam(name = "employeeName", defaultValue = " ") String employeeName,
             @RequestHeader("Authorization") String authorizationHeader
     ) {
-        String authenticatedUserRole = utilityService.isAuthenticated(authorizationHeader);
+        Optional<User.UserRole> authenticatedUserRole = utilityService.getUserRole(authorizationHeader);
 
-        if (authenticatedUserRole != null) {
-            if (authenticatedUserRole.equals(User.UserRole.Manager.toString())) {
+        if (authenticatedUserRole.isPresent()) {
+            if (authenticatedUserRole.get().equals(User.UserRole.Manager)) {
                 Map<String, String> usernamePassword = utilityService.getUsernamePassword(authorizationHeader);
                 String username = usernamePassword.get("username");
                 String password = usernamePassword.get("password");
@@ -100,7 +100,7 @@ public class TaskController {
                 }
 
 
-            } else if (authenticatedUserRole.equals(User.UserRole.Employee.toString())) {
+            } else if (authenticatedUserRole.get().equals(User.UserRole.Employee)) {
                 Map<String, String> usernamePassword = utilityService.getUsernamePassword(authorizationHeader);
                 String username = usernamePassword.get("username");
                 String password = usernamePassword.get("password");
@@ -124,7 +124,7 @@ public class TaskController {
                 }
 
 
-            } else if (authenticatedUserRole.equals(User.UserRole.Supervisor.toString())) {
+            } else if (authenticatedUserRole.get().equals(User.UserRole.Supervisor)) {
                 if (!assigned && noCriteria && !manager && !employeeRole && !status && User.UserRole.Supervisor.toString().equals(userRole)) {
                     return ResponseEntity.ok(taskService.viewAllTasksByUser(employeeName));
                 } else if (!assigned && status && !manager && !employeeRole && User.UserRole.Supervisor.toString().equals(userRole) && !noCriteria) {
@@ -152,24 +152,24 @@ public class TaskController {
             @RequestHeader("Authorization") String authorizationHeader,
             @RequestBody TaskDTO taskDTO
     ) {
-        String authenticatedUserRole = utilityService.isAuthenticated(authorizationHeader);
+        Optional<User.UserRole> authenticatedUserRole = utilityService.getUserRole(authorizationHeader);
 
         if (status && !archive && !assign) {
-            if (authenticatedUserRole != null) {
-                if (authenticatedUserRole.equals(User.UserRole.Employee.toString())) {
+            if (authenticatedUserRole.isPresent()) {
+                if (authenticatedUserRole.get().equals(User.UserRole.Employee)) {
                     Employee activeEmployee = utilityService.getActiveEmployee(authorizationHeader);
                     return taskService.changeTaskStatus(taskDTO.getTitle(), taskDTO.getTaskStatus(), activeEmployee);
-                } else if (authenticatedUserRole.equals(User.UserRole.Manager.toString())) {
+                } else if (authenticatedUserRole.get().equals(User.UserRole.Manager)) {
                     Manager manager = utilityService.getActiveManager(authorizationHeader);
                     return taskService.changeTaskStatus(taskDTO.getTitle(), taskDTO.getTaskStatus(), manager);
                 }
             }
         } else if (!status && archive && !assign) {
-            if (authenticatedUserRole != null && authenticatedUserRole.equals(User.UserRole.Supervisor.toString())) {
+            if (authenticatedUserRole.isPresent() && authenticatedUserRole.get().equals(User.UserRole.Supervisor)) {
                 return taskService.archiveTask(taskDTO.getTitle());
             }
         } else if (!status && !archive && assign) {
-            if (authenticatedUserRole != null && authenticatedUserRole.equals(User.UserRole.Manager.toString())) {
+            if (authenticatedUserRole.isPresent() && authenticatedUserRole.get().equals(User.UserRole.Manager)) {
                 Manager activeManager = utilityService.getActiveManager(authorizationHeader);
                 return taskService.assignTask(taskDTO.getTitle(), taskDTO.getAssignee(), activeManager);
             }

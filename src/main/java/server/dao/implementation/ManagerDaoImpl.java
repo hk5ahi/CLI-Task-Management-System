@@ -13,7 +13,7 @@ import java.util.Optional;
 @Repository
 public class ManagerDaoImpl implements ManagerDao {
 
-    private List<Manager> managers = new ArrayList<>(List.of(new Manager("Muhammad", "Ubaid", "m.ubaid", "Ts12", "Manager")));
+    private List<Manager> managers = new ArrayList<>(List.of(new Manager("Muhammad", "Ubaid", "m.ubaid", "Ts12", User.UserRole.Manager)));
 
 
     @Override
@@ -28,7 +28,7 @@ public class ManagerDaoImpl implements ManagerDao {
 
     @Override
     public Manager createManager(String firstName, String lastName, String username, String password) {
-        Manager manager = new Manager(firstName, lastName, username, password,"Manager");
+        Manager manager = new Manager(firstName, lastName, username, password, User.UserRole.Manager);
         managers.add(manager);
         return manager;
     }
