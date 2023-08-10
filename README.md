@@ -16,3 +16,6 @@ Relationships:
   Comment (n) - (1) Task
   Task (1) - (n) TaskHistory
   User (1) - (n) TaskHistory
+
+The ERD Diagram is attecahed.
+![ERD Diagram](https://github.com/hk5ahi/CLI-Task-Management-System/assets/75085428/a55845ce-50d5-4204-8a8b-4501b73c56b8)
