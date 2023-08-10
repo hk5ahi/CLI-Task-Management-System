@@ -1,14 +1,33 @@
 package server.domain;
 
-import java.time.Instant;
+import jakarta.persistence.*;
 
+import java.time.Instant;
+@Entity
+@Table(name = "comments")
 public class Comment {
 
-    private Instant createdAt;
-    private User createdBy;
-    private String body;
+    public long getCommentId() {
+        return commentId;
+    }
 
-    private Task tasks;
+    public void setCommentId(long commentId) {
+        this.commentId = commentId;
+    }
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "comment_Id")
+    private long commentId;
+    @Column(name = "created_at")
+    private Instant createdAt;
+    @ManyToOne
+    @JoinColumn(name = "created_by",nullable = false)
+    private User createdBy;
+    @Column(name = "body",nullable = false)
+    private String body;
+    @ManyToOne
+    @JoinColumn(name = "task_Id")
+    private Task task;
 
 
     public Instant getCreatedAt() {
@@ -36,12 +55,12 @@ public class Comment {
     }
 
     public Task getTasks() {
-        return tasks;
+        return task;
     }
 
-    
+
     public void addTaskForComment(Task task) {
-        this.tasks = task;
+        this.task = task;
     }
 
 }

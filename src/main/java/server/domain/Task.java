@@ -1,9 +1,12 @@
 package server.domain;
 
+import jakarta.persistence.*;
+
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
-
+@Entity
+@Table(name = "tasks")
 public class Task {
 
     public enum Status {
@@ -13,15 +16,55 @@ public class Task {
         IN_REVIEW
     }
 
-    private List<TaskHistory> taskHistory=new ArrayList<>();
+    public Long getTaskId() {
+        return taskId;
+    }
+
+    public void setTaskId(Long taskId) {
+        this.taskId = taskId;
+    }
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "task_Id")
+    private Long taskId;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "task_status",nullable = false)
+    private Status taskStatus;
+
+    @Column(name = "title",nullable = false,length = 25,columnDefinition = "TEXT",unique = true)
     private String title;
+
+    @Column(name = "description",columnDefinition = "TEXT")
     private String description;
+
+    @Column(name = "created_at",nullable = false)
     private Instant createdAt;
+
+    @ManyToOne
+    @JoinColumn(name = "created_by",nullable = false)
     private User createdBy;
+
+    @Column(name = "total_time",length = 10)
     private double total_time;
+
+    @ManyToOne
+    @JoinColumn(name = "assignee")
     private User assignee;
+
+    @Column(name = "assigned",nullable = false)
     private boolean assigned;
+
+    @Column(name = "start_time")
     private Instant startTime;
+
+
+    @OneToMany
+    @JoinColumn(name = "task_id")
+    private List<TaskHistory> taskHistory = new ArrayList<>();
+
+
 
     public Task(String title, String description, double total_time) {
         this.setTaskStatus(Status.CREATED);
@@ -31,7 +74,7 @@ public class Task {
         this.setTotal_time(total_time);
     }
 
-    private Status taskStatus;
+
 
     public List<TaskHistory> getHistory(Task task) {
         return task.taskHistory;

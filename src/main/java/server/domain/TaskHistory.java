@@ -1,13 +1,36 @@
 package server.domain;
 
-import java.time.Instant;
+import jakarta.persistence.*;
 
+import java.time.Instant;
+@Entity
+@Table(name = "task_history")
 public class TaskHistory {
 
+    @Column(name = "timestamp")
     private Instant timestamp;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "old_status",nullable = false)
     private Task.Status oldStatus;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "new_status",nullable = false)
     private Task.Status newStatus;
+    @ManyToOne
+    @JoinColumn(name = "moved_by")
     private User movedBy;
+
+    public Long getTaskHistoryId() {
+        return taskHistoryId;
+    }
+
+    public void setTaskHistoryId(Long taskHistoryId) {
+        this.taskHistoryId = taskHistoryId;
+    }
+    @Id
+    @Column(name = "taskHistory_id")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long taskHistoryId;
 
 
     public Instant getTimestamp() {
@@ -42,6 +65,5 @@ public class TaskHistory {
         this.movedBy = movedBy;
     }
 
-    public void add(TaskHistory history) {
-    }
+
 }
