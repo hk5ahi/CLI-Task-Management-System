@@ -44,11 +44,11 @@ public class TaskHistoryServiceImpl implements TaskHistoryService {
 
     @Override
     public Optional<List<TaskHistoryDTO>> getTaskHistory(String title) {
-        Optional<Task> optionalTask = taskDao.getTaskByTitle(title);
+        Optional<Task> optionalTask = taskDao.findByTitle(title);
 
         if (optionalTask.isPresent()) {
             Task task = optionalTask.get();
-            Optional<List<TaskHistory>> histories = taskHistoryDao.getTaskHistory(task.getTitle());
+            Optional<List<TaskHistory>> histories = taskHistoryDao.findByTitle(task.getTitle());
 
             if (histories.isPresent()) {
                 List<TaskHistoryDTO> taskHistoryDTOS = new ArrayList<>();

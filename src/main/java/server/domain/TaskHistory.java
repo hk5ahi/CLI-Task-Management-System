@@ -32,6 +32,16 @@ public class TaskHistory {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long taskHistoryId;
 
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    @Column(name = "title")
+    private String title;
 
     public Instant getTimestamp() {
         return timestamp;

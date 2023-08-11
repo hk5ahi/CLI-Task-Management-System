@@ -26,7 +26,7 @@ public class EmployeeServiceImpl implements EmployeeService {
 
     @Override
     public void updateTotalTime(double time, String title, Employee employee) {
-        Optional<Task> optionalTask = taskDao.getTaskByTitle(title);
+        Optional<Task> optionalTask = taskDao.findByTitle(title);
 
         if (optionalTask.isEmpty()) {
             throw new BadRequestException();
@@ -38,18 +38,13 @@ public class EmployeeServiceImpl implements EmployeeService {
 
         if (assigneeUserName.equals(employeeUserName)) {
             providedTask.setTotal_time(time);
+            taskDao.saveAndFlush(providedTask);
 
         } else {
             throw new ForbiddenAccessException();
         }
     }
 
-
-    @Override
-    public List<Employee> getAllEmployees() {
-
-        return employeeDao.getEmployees();
-    }
 
 
 }

@@ -14,7 +14,7 @@ public interface TaskService {
 
     void assignTask(String title,String fullName,Manager manager);
 
-    Optional<List<Task>> getAllTasks();
+//    Optional<List<Task>> getAllTasks();
     Optional<List<TaskDTO>> getAllTasksCreatedByManager(Manager manager, String employeeName);
     Optional<List<TaskDTO>> getAllTasksByUser(String employeeName);
 

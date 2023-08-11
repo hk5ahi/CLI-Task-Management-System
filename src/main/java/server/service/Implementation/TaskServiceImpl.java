@@ -45,15 +45,19 @@ public class TaskServiceImpl implements TaskService {
         this.employeeService = employeeService;
     }
 
-    @Override
-    public Optional<List<Task>> getAllTasks() {
-
-        return taskDao.getAll().isEmpty() ? Optional.empty() : Optional.of(taskDao.getAll());
-    }
+//    @Override
+//    public Optional<List<Task>> getAllTasks() {
+//
+//        return taskDao.getAll().isEmpty() ? Optional.empty() : Optional.of(taskDao.getAll());
+//    }
 
     @Override
     public Optional<List<TaskDTO>> getAllTasksCreatedByManager(Manager manager, String employeeName) {
-        Optional<Employee> optionalEmployee = employeeDao.getEmployeeByName(employeeName);
+        String[] nameParts = employeeName.split(" ");
+
+        String firstName = nameParts[0];
+        String lastName = nameParts.length > 1 ? nameParts[1] : "";
+        Optional<Employee> optionalEmployee = employeeDao.getEmployeeByFirstNameAndLastName(firstName,lastName);
 
         if (!optionalEmployee.isPresent()) {
             return Optional.empty();
@@ -61,7 +65,7 @@ public class TaskServiceImpl implements TaskService {
 
         Employee employee = optionalEmployee.get();
         List<TaskDTO> taskByEmployees = new ArrayList<>();
-        List<Task> tasks = taskDao.getAllTasksByManager(manager, employee);
+        List<Task> tasks = taskDao.getTasksByCreatedByUsernameAndAssignee_Username(manager.getUsername(), employee.getUsername());
 
         for (Task task : tasks) {
             TaskDTO taskByEmployee = createTaskDTOFromTask(task);
@@ -92,7 +96,11 @@ public class TaskServiceImpl implements TaskService {
 
     @Override
     public Optional<List<TaskDTO>> getAllTasksByUser(String employeeName) {
-        Optional<Employee> optionalEmployee = employeeDao.getEmployeeByName(employeeName);
+        String[] nameParts = employeeName.split(" ");
+
+        String firstName = nameParts[0];
+        String lastName = nameParts.length > 1 ? nameParts[1] : "";
+        Optional<Employee> optionalEmployee = employeeDao.getEmployeeByFirstNameAndLastName(firstName,lastName);
 
         if (!optionalEmployee.isPresent()) {
             return Optional.empty();
@@ -100,7 +108,7 @@ public class TaskServiceImpl implements TaskService {
 
         Employee employee = optionalEmployee.get();
         List<TaskDTO> taskByEmployees = new ArrayList<>();
-        List<Task> tasks = taskDao.getAllTasksByEmployee(employee);
+        List<Task> tasks = taskDao.getTasksByAssignee_Username(employee.getUsername());
 
         for (Task task : tasks) {
             TaskDTO taskByEmployee = createTaskDTOFromTaskByUser(task);
@@ -133,11 +141,11 @@ public class TaskServiceImpl implements TaskService {
         task.setCreatedBy(activeManager);
         Instant currentInstant = Instant.now();
         task.setCreatedAt(currentInstant);
-        if (taskDao.isTaskExist(task)) {
+        if (taskDao.existsByTitle(task.getTitle())) {
 
            throw new BadRequestException();
         } else {
-            taskDao.addTask(task);
+            taskDao.saveAndFlush(task);
 
         }
     }
@@ -291,7 +299,7 @@ public class TaskServiceImpl implements TaskService {
     }
 
     private Task getValidatedTask(String title) {
-        Optional<Task> optionalTask = taskDao.getTaskByTitle(title);
+        Optional<Task> optionalTask = taskDao.findByTitle(title);
         if (optionalTask.isEmpty()) {
             throw new BadRequestException();
         }
@@ -332,13 +340,14 @@ public class TaskServiceImpl implements TaskService {
         history.setOldStatus(oldStatus);
         history.setNewStatus(newStatus);
         history.setMovedBy(user);
-        taskHistoryDao.setTaskHistory(history, task.getTitle());
+        history.setTitle(task.getTitle());
+        taskHistoryDao.save(history);
     }
 
     @Override
     public Optional<List<TaskDTO>> getAllTasksCreatedByManager(Manager activeManager, Task.Status status) {
 
-        List<Task> tasks = taskDao.getTasksByStatus(activeManager, status);
+        List<Task> tasks = taskDao.getTasksByCreatedByUsernameAndTaskStatus(activeManager.getUsername(), status);
         List<TaskDTO> taskInfoList = new ArrayList<>();
 
         for (Task task : tasks) {
@@ -358,7 +367,12 @@ public class TaskServiceImpl implements TaskService {
 
     @Override
     public Optional<List<TaskDTO>> getAllTasksCreatedByManager(Manager activeManager, Task.Status status, String employeeName) {
-        Optional<Employee> optionalEmployee = employeeDao.getEmployeeByName(employeeName);
+        String[] nameParts = employeeName.split(" ");
+
+        String firstName = nameParts[0];
+        String lastName = nameParts.length > 1 ? nameParts[1] : "";
+        Optional<Employee> optionalEmployee = employeeDao.getEmployeeByFirstNameAndLastName(firstName,lastName);
+
 
         if (optionalEmployee.isPresent()) {
             Employee employee = optionalEmployee.get();
@@ -372,7 +386,7 @@ public class TaskServiceImpl implements TaskService {
 
     private List<TaskDTO> getTaskDTOsByManagerAndStatus(Manager activeManager, Employee employee, Task.Status status) {
         List<TaskDTO> taskByEmployeeAndStatuses = new ArrayList<>();
-        List<Task> taskDTOs = taskDao.getAllTasksByManager(activeManager, employee, status);
+        List<Task> taskDTOs = taskDao.getTasksByCreatedByUsernameAndAssignee_UsernameAndTaskStatus(activeManager.getUsername(), employee.getUsername(), status);
 
         for (Task task : taskDTOs) {
             String assigneeName = getAssigneeName(task);
@@ -398,7 +412,7 @@ public class TaskServiceImpl implements TaskService {
     @Override
     public Optional<List<TaskDTO>> getTasksByStatus(Employee employee) {
         List<TaskDTO> allTasks = new ArrayList<>();
-        List<Task> tasks = taskDao.getAllTasksByEmployee(employee);
+        List<Task> tasks = taskDao.getTasksByAssignee_Username(employee.getUsername());
 
         for (Task task : tasks) {
 
@@ -411,7 +425,7 @@ public class TaskServiceImpl implements TaskService {
     @Override
     public Optional<List<TaskDTO>> getAllTasksByStatus() {
         List<TaskDTO> allTasks = new ArrayList<>();
-        List<Task> tasks = taskDao.getAll();
+        List<Task> tasks = taskDao.findAll();
 
         for (Task task : tasks) {
             allTasks.add(createTaskDTO(task));
@@ -434,16 +448,24 @@ public class TaskServiceImpl implements TaskService {
 
     @Override
     public void assignTask(String title, String fullName, Manager manager) {
-        Task task = getTaskByTitle(title);
-        validateTaskAssignment(task, fullName, manager);
+        Optional<Task> optionalTask = taskDao.findByTitle(title);
+        if(optionalTask.isPresent()) {
+            Task task=optionalTask.get();
+            validateTaskAssignment(task, fullName, manager);
 
-        Employee assignee = getAssigneeByName(fullName);
-        task.setAssignee(assignee);
-        task.setAssigned(true);
+            Employee assignee = getAssigneeByName(fullName);
+            task.setAssignee(assignee);
+            task.setAssigned(true);
+            taskDao.saveAndFlush(task);
+        }
+        else {
+
+            throw new BadRequestException();
+        }
     }
 
     private Task getTaskByTitle(String title) {
-        Optional<Task> optionalTask = taskDao.getTaskByTitle(title);
+        Optional<Task> optionalTask = taskDao.findByTitle(title);
         return optionalTask.orElseThrow(BadRequestException::new);
     }
 
@@ -461,7 +483,11 @@ public class TaskServiceImpl implements TaskService {
     }
 
     private Employee getAssigneeByName(String fullName) {
-        Optional<Employee> optionalEmployee = employeeDao.getEmployeeByName(fullName);
+        String[] nameParts = fullName.split(" ");
+
+        String firstName = nameParts[0];
+        String lastName = nameParts.length > 1 ? nameParts[1] : "";
+        Optional<Employee> optionalEmployee = employeeDao.getEmployeeByFirstNameAndLastName(firstName,lastName);
         return optionalEmployee.orElseThrow(NotFoundException::new);
     }
 
@@ -469,7 +495,7 @@ public class TaskServiceImpl implements TaskService {
     public Optional<List<TaskDTO>> getTasksByUser(User.UserRole userRole) {
         List<TaskDTO> taskByEmployeeAndStatusDTOS = new ArrayList<>();
 
-        List<Task> tasks = taskDao.getAllTasksByUserRole(userRole);
+        List<Task> tasks = taskDao.getTasksByUserRole(userRole);
 
         for (Task task : tasks) {
             taskByEmployeeAndStatusDTOS.add(createTaskByEmployeeAndStatusDTO(task));
@@ -500,7 +526,7 @@ public class TaskServiceImpl implements TaskService {
     public Optional<List<TaskDTO>> getAssignedTasks(Employee employee) {
 
         List<TaskDTO> assignedTasks = new ArrayList<>();
-        List<Task> tasks = taskDao.getAllTasksByEmployee(employee);
+        List<Task> tasks = taskDao.getTasksByAssignee_Username(employee.getUsername());
         for (Task task : tasks) {
             TaskDTO assignTask = new TaskDTO();
             assignTask.setTaskStatus(task.getTaskStatus());
@@ -519,11 +545,12 @@ public class TaskServiceImpl implements TaskService {
 
     @Override
     public void archiveTask(String title) {
-        Optional<Task> optionalTask = taskDao.getTaskByTitle(title);
+        Optional<Task> optionalTask = taskDao.findByTitle(title);
         if (optionalTask.isPresent()) {
             Task task = optionalTask.get();
             task.setAssigned(false);
             task.setAssignee(null);
+            taskDao.saveAndFlush(task);
 
         } else {
 

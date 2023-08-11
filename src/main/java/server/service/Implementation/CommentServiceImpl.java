@@ -4,6 +4,7 @@ import org.springframework.stereotype.Service;
 import server.dao.CommentDao;
 import server.dao.SupervisorDao;
 import server.dao.TaskDao;
+import server.dao.UserDao;
 import server.domain.*;
 import server.dto.CommentDTO;
 import server.exception.BadRequestException;
@@ -23,14 +24,15 @@ public class CommentServiceImpl implements CommentService {
     private final CommentDao commentDao;
     private final UtilityService utilityService;
     private final TaskDao taskDao;
-    private final SupervisorDao supervisorDao;
+    private final UserDao userDao;
 
 
-    public CommentServiceImpl(CommentDao commentDao, UtilityService utilityService, TaskDao taskDao, SupervisorDao supervisorDao) {
+    public CommentServiceImpl(CommentDao commentDao, UtilityService utilityService, TaskDao taskDao, SupervisorDao supervisorDao, UserDao userDao) {
         this.commentDao = commentDao;
         this.utilityService = utilityService;
         this.taskDao = taskDao;
-        this.supervisorDao = supervisorDao;
+
+        this.userDao = userDao;
     }
 
     @Override
@@ -49,7 +51,7 @@ public class CommentServiceImpl implements CommentService {
     }
 
     private User getUserFromHeader(String header) {
-        Optional<Supervisor> optionalSupervisor = supervisorDao.getByUserName(supervisorDao.getSupervisors().get(0).getUsername());
+        Optional<User> optionalSupervisor =userDao.getUserByUserRole(User.UserRole.Supervisor);
         if (utilityService.isAuthenticatedSupervisor(header) && optionalSupervisor.isPresent()) {
             return optionalSupervisor.get();
         }
@@ -86,7 +88,7 @@ public class CommentServiceImpl implements CommentService {
     public void addComment(String message, User person, String taskTitle) {
         Comment comment = new Comment();
 
-        Task task = taskDao.getTaskByTitle(taskTitle)
+        Task task = taskDao.findByTitle(taskTitle)
                 .orElseThrow(BadRequestException::new);
 
         String userName = person.getUsername();
@@ -105,20 +107,19 @@ public class CommentServiceImpl implements CommentService {
         comment.setCreatedAt(Instant.now());
         comment.setCreatedBy(person);
         comment.addTaskForComment(task);
-
-        commentDao.addComment(comment);
+        commentDao.saveAndFlush(comment);
     }
 
     @Override
     public Optional<List<CommentDTO>> getComment(String title) {
-        Optional<Task> optionalTask = taskDao.getTaskByTitle(title);
+        Optional<Task> optionalTask = taskDao.findByTitle(title);
 
         if (optionalTask.isEmpty()) {
             return Optional.empty();
         }
 
         Task task = optionalTask.get();
-        List<Comment> comments = commentDao.getComment(task);
+        List<Comment> comments = commentDao.getCommentByTask(task);
         List<CommentDTO> viewCommentDTOList = new ArrayList<>();
 
         for (Comment comment : comments) {

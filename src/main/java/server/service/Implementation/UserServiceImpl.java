@@ -6,6 +6,7 @@ import server.dao.ManagerDao;
 import server.dao.UserDao;
 import server.domain.Employee;
 import server.domain.Manager;
+import server.domain.Supervisor;
 import server.domain.User;
 import server.dto.UserDTO;
 import server.exception.BadRequestException;
@@ -15,6 +16,7 @@ import server.service.UserService;
 import server.utilities.UtilityService;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 @Service
@@ -36,16 +38,30 @@ public class UserServiceImpl implements UserService {
 
 
     @Override
-    public List<User> allUsers()
-    {
-        return userDao.getAllUsers();
+    public List<User> allUsers() {
+
+            return userDao.findAll();
 
     }
 
     @Override
     public void initializeUsers()
     {
-        userDao.initializeUsers();
+        List<User> usersList = Arrays.asList(
+                new Supervisor("Muhammad", "Asif", "m.asif", "Ts12", User.UserRole.Supervisor),
+                new Employee("Muhammad", "Hanan", "m.hanan", "Ts12", User.UserRole.Employee),
+                new Manager("Muhammad", "Ubaid", "m.ubaid", "Ts12", User.UserRole.Manager)
+        );
+
+
+        for (User user : usersList) {
+            if (!userDao.existsByUsername(user.getUsername())) {
+
+                userDao.saveAndFlush(user);
+            } else {
+               throw new BadRequestException();
+            }
+        }
 
     }
 
@@ -96,19 +112,19 @@ public class UserServiceImpl implements UserService {
     @Override
     public void createUser(User.UserRole userRole, String firstname, String lastname, String username, String password) {
 
-        if(userDao.userExist(username))
+        if(userDao.existsByUsername(username))
         {
             throw new BadRequestException();
         }
         else if (userRole.equals(User.UserRole.Employee)) {
 
             Employee employee=employeeDao.createEmployee(firstname, lastname, username, password);
-            userDao.addUser(employee);
+            userDao.saveAndFlush(employee);
 
         } else if (userRole.equals(User.UserRole.Manager)) {
 
            Manager manager= managerDao.createManager(firstname, lastname, username, password);
-           userDao.addUser(manager);
+           userDao.saveAndFlush(manager);
 
         }
         else {

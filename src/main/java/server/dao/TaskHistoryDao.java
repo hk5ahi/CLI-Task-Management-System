@@ -1,15 +1,16 @@
 package server.dao;
 
-import server.domain.Task;
+
+import org.springframework.data.jpa.repository.JpaRepository;
 import server.domain.TaskHistory;
 
 import java.util.List;
 import java.util.Optional;
 
-public interface TaskHistoryDao {
-    Optional<List<TaskHistory>> getTaskHistory(String title) ;
+public interface TaskHistoryDao extends JpaRepository<TaskHistory,String> {
+    Optional<List<TaskHistory>> findByTitle(String title) ;
 
-    void setTaskHistory(TaskHistory taskHistory, String title) ;
+    void updateByTitle(TaskHistory taskHistory, String title) ;
 
 
 }

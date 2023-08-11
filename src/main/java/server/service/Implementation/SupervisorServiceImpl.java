@@ -2,8 +2,7 @@ package server.service.Implementation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import server.dao.SupervisorDao;
-import server.dao.UserDao;
-import server.dao.implementation.SupervisorDaoImpl;
+
 import server.domain.Supervisor;
 import server.service.SupervisorService;
 
@@ -20,16 +19,16 @@ public class SupervisorServiceImpl implements SupervisorService {
 
     }
 
-    @Override
-    public Supervisor getAndVerify(String providedUsername, String providedPassword) {
-        Optional<Supervisor> optionalSupervisor = supervisorDao.getByUserName(providedUsername);
-
-        if (optionalSupervisor.isPresent() && optionalSupervisor.get().getPassword().equals(providedPassword)) {
-            return optionalSupervisor.get();
-        }
-
-        return null;
-    }
+//    @Override
+//    public Supervisor getAndVerify(String providedUsername, String providedPassword) {
+//        Optional<Supervisor> optionalSupervisor = supervisorDao.getByUserName(providedUsername);
+//
+//        if (optionalSupervisor.isPresent() && optionalSupervisor.get().getPassword().equals(providedPassword)) {
+//            return optionalSupervisor.get();
+//        }
+//
+//        return null;
+//    }
 
 
 

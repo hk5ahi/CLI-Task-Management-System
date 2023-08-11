@@ -1,21 +1,25 @@
 package server.dao;
-
+import org.springframework.data.jpa.repository.JpaRepository;
 import server.domain.User;
 
-import java.util.List;
+
 import java.util.Optional;
 
-public interface UserDao {
+public interface UserDao extends JpaRepository<User,String> {
+    Optional<User> getUserByUsernameAndPassword(String Username, String Password);
 
-    List<User> getAllUsers();
+    boolean existsByUsername(String Username);
 
-    void addUser(User user);
+    Optional<User> getUserByUserRole(User.UserRole userRole);
 
-    void initializeUsers();
+//
 
-    boolean userExist(String userName);
+//
 
-    Optional<User> getByUsername(String username);
+//
+
+//
+//    Optional<User> getByUsername(String username);
 
 }
 

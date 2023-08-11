@@ -10,7 +10,6 @@ public interface EmployeeService {
 
     void updateTotalTime(double time, String title, Employee employee);
 
-    List<Employee> getAllEmployees();
 
 
 }

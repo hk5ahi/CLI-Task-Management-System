@@ -1,21 +1,21 @@
 package server.dao;
 
+import org.springframework.data.jpa.repository.JpaRepository;
 import server.domain.Employee;
 
 
 import java.util.List;
 import java.util.Optional;
 
-public interface EmployeeDao {
+public interface EmployeeDao extends JpaRepository<Employee,String> {
 
 
-     List<Employee> getEmployees();
 
      void addEmployee(Employee employee);
 
      Employee createEmployee(String firstname, String lastname, String username, String password);
 
-     Optional<Employee> getEmployeeByName(String name);
-     Optional<Employee> findEmployee(String providedUsername, String providedPassword);
+     Optional<Employee> getEmployeeByFirstNameAndLastName(String FirstName, String LastName);
+     Optional<Employee> findEmployeeByUsernameAndPassword(String providedUsername, String providedPassword);
 
 }

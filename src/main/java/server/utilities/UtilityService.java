@@ -43,12 +43,14 @@ public class UtilityService {
             String username = usernameAndPassword[0];
             String password = usernameAndPassword[1];
 
-            // Now, you can perform the authentication based on the obtained username and password.
-            Optional<User> authenticatedUser = getUserByNameAndPassword(username, password);
 
-            if (authenticatedUser.isPresent()) {
+
+            Optional<User> authenticatedUser = userDao.getUserByUsernameAndPassword(username, password);
+
+            if ( authenticatedUser.isPresent()) {
                 return Optional.of(authenticatedUser.get().getUserRole());
             }
+
         }
 
         return Optional.empty();
@@ -87,7 +89,7 @@ public class UtilityService {
             Map<String, String> usernamePassword = optionalMap.get();
             String username = usernamePassword.get("username");
             String password = usernamePassword.get("password");
-            return employeeDao.findEmployee(username, password);
+            return employeeDao.findEmployeeByUsernameAndPassword(username, password);
         }
 
         return Optional.empty();
@@ -103,7 +105,7 @@ public class UtilityService {
             Map<String, String> usernamePassword = optionalMap.get();
             String username = usernamePassword.get("username");
             String password = usernamePassword.get("password");
-            return managerDao.findManager(username, password);
+            return managerDao.findManagerByUsernameAndPassword(username, password);
         }
 
         return Optional.empty();
@@ -131,18 +133,20 @@ public class UtilityService {
         return authenticatedUserRole.isPresent() && authenticatedUserRole.get() == employeeRole;
     }
 
-    public  Optional<User> getUserByNameAndPassword(String providedUsername, String providedPassword) {
-        Optional<User> userOptional = userDao.getByUsername(providedUsername);
-
-        if (userOptional.isPresent()) {
-            User user = userOptional.get(); // Get the User object from the Optional
-            if (user.getPassword().equals(providedPassword)) {
-                return Optional.of(user); // Return the current user's role
-            }
-        }
-
-        return Optional.empty(); // Return an empty Optional if user is not found or password doesn't match
-    }
+//    public  Optional<User> getUserByNameAndPassword(String providedUsername, String providedPassword) {
+//        return null;
+//    }
+//        Optional<User> userOptional = userDao.getByUsername(providedUsername);
+//
+//        if (userOptional.isPresent()) {
+//            User user = userOptional.get(); // Get the User object from the Optional
+//            if (user.getPassword().equals(providedPassword)) {
+//                return Optional.of(user); // Return the current user's role
+//            }
+//        }
+//
+//        return Optional.empty(); // Return an empty Optional if user is not found or password doesn't match
+//    }
 
 
 }
