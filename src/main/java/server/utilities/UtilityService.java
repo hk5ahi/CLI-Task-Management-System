@@ -47,7 +47,7 @@ public class UtilityService {
 
             Optional<User> authenticatedUser = userDao.getUserByUsernameAndPassword(username, password);
 
-            if ( authenticatedUser.isPresent()) {
+            if (authenticatedUser.isPresent()) {
                 return Optional.of(authenticatedUser.get().getUserRole());
             }
 

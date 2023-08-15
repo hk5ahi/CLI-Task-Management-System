@@ -118,12 +118,12 @@ public class UserServiceImpl implements UserService {
         }
         else if (userRole.equals(User.UserRole.Employee)) {
 
-            Employee employee=employeeDao.createEmployee(firstname, lastname, username, password);
+            Employee employee=new Employee(firstname,lastname,username,password,userRole);
             userDao.saveAndFlush(employee);
 
         } else if (userRole.equals(User.UserRole.Manager)) {
 
-           Manager manager= managerDao.createManager(firstname, lastname, username, password);
+           Manager manager= new Manager(firstname,lastname,username,password,userRole);
            userDao.saveAndFlush(manager);
 
         }

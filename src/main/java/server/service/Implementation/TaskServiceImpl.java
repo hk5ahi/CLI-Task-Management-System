@@ -2,11 +2,8 @@ package server.service.Implementation;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import server.dao.EmployeeDao;
-import server.dao.ManagerDao;
-import server.dao.TaskDao;
+import server.dao.*;
 
-import server.dao.TaskHistoryDao;
 import server.domain.*;
 import server.dto.*;
 import server.exception.*;
@@ -16,30 +13,27 @@ import server.utilities.UtilityService;
 
 import java.time.Duration;
 import java.time.Instant;
-import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 public class TaskServiceImpl implements TaskService {
 
     private final TaskDao taskDao;
     private final EmployeeDao employeeDao;
-    private final ManagerDao managerDao;
+    private final UserDao userDao;
     private final TaskHistoryDao taskHistoryDao;
     private final UtilityService utilityService;
     private final EmployeeService employeeService;
 
 
     @Autowired
-    public TaskServiceImpl(TaskDao taskDao, EmployeeDao employeeDao, ManagerDao managerDao, TaskHistoryDao taskHistoryDao, UtilityService utilityService, EmployeeService employeeService) {
+    public TaskServiceImpl(TaskDao taskDao, EmployeeDao employeeDao, UserDao userDao, TaskHistoryDao taskHistoryDao, UtilityService utilityService, EmployeeService employeeService) {
 
         this.taskDao = taskDao;
         this.employeeDao = employeeDao;
-        this.managerDao = managerDao;
+        this.userDao = userDao;
+
         this.taskHistoryDao = taskHistoryDao;
         this.utilityService = utilityService;
         this.employeeService = employeeService;
@@ -276,20 +270,19 @@ public class TaskServiceImpl implements TaskService {
         Task task = getValidatedTask(title);
 
         Task.Status currentStatus = task.getTaskStatus();
-        String assigneeUserName = task.getAssignee().getUsername();
+        String assigneeUserName = "N/A";
+        if (task.getAssignee() != null) {
+            assigneeUserName = task.getAssignee().getUsername();
+        }
+
         String personUserName = person.getUsername();
         String createdUserName = task.getCreatedBy().getUsername();
 
-        boolean isValidChange = false;
-
-        switch (person.getUserRole()) {
-            case Employee:
-                isValidChange = handleEmployeeChangeStatus(status, currentStatus, task);
-                break;
-            case Manager:
-                isValidChange = handleManagerChangeStatus(status, currentStatus, createdUserName, task);
-                break;
-        }
+        boolean isValidChange = switch (person.getUserRole()) {
+            case Employee -> handleEmployeeChangeStatus(status, currentStatus, task);
+            case Manager -> handleManagerChangeStatus(status, currentStatus, createdUserName, task);
+            default -> false;
+        };
 
         if (isValidChange) {
             updateTaskStatusAndHistory(status, currentStatus, task, person);
@@ -333,15 +326,22 @@ public class TaskServiceImpl implements TaskService {
     private void updateTaskStatusAndHistory(Task.Status newStatus, Task.Status oldStatus, Task task, User person) {
         task.setTaskStatus(newStatus);
         TaskHistory history = new TaskHistory();
-        User user = new User();
-        user.setFirstName(person.getFirstName());
-        user.setLastName(person.getLastName());
-        history.setTimestamp(Instant.now());
-        history.setOldStatus(oldStatus);
-        history.setNewStatus(newStatus);
-        history.setMovedBy(user);
-        history.setTitle(task.getTitle());
-        taskHistoryDao.save(history);
+        Optional<User> optionalUser=userDao.getUserByUsername(person.getUsername());
+        if(optionalUser.isPresent())
+        {
+            User user=optionalUser.get();
+            history.setTimestamp(Instant.now());
+            history.setOldStatus(oldStatus);
+            history.setNewStatus(newStatus);
+            history.setMovedBy(user);
+            history.setTask(task);
+            taskHistoryDao.saveAndFlush(history);
+        }
+        else {
+
+            throw new ForbiddenAccessException();
+        }
+
     }
 
     @Override
@@ -495,7 +495,21 @@ public class TaskServiceImpl implements TaskService {
     public Optional<List<TaskDTO>> getTasksByUser(User.UserRole userRole) {
         List<TaskDTO> taskByEmployeeAndStatusDTOS = new ArrayList<>();
 
-        List<Task> tasks = taskDao.getTasksByUserRole(userRole);
+        List<Task> tasks =new ArrayList<>();
+        if(userRole.equals(User.UserRole.Manager))
+        {
+             tasks=taskDao.findAll();
+        }
+        else if(userRole.equals(User.UserRole.Employee))
+        {
+            tasks = taskDao.getTasksByAssigneeNotNull();
+
+        }
+        else {
+
+            tasks= Collections.emptyList();
+
+        }
 
         for (Task task : tasks) {
             taskByEmployeeAndStatusDTOS.add(createTaskByEmployeeAndStatusDTO(task));

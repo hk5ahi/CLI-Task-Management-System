@@ -9,6 +9,10 @@ import java.util.List;
 @Table(name = "tasks")
 public class Task {
 
+    public Task() {
+
+    }
+
     public enum Status {
         CREATED,
         IN_PROGRESS,

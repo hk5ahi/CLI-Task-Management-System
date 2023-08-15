@@ -16,7 +16,7 @@ public interface ManagerDao extends JpaRepository<Manager,String> {
 //    Optional<Manager> getManagerByName(String name);
 //    void addManager(Manager manager);
 
-    Manager createManager(String firstname, String lastname, String username, String password);
+//    Manager createManager(String firstname, String lastname, String username, String password);
 
 
 }

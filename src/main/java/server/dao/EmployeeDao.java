@@ -11,9 +11,9 @@ public interface EmployeeDao extends JpaRepository<Employee,String> {
 
 
 
-     void addEmployee(Employee employee);
+//     void addEmployee(Employee employee);
 
-     Employee createEmployee(String firstname, String lastname, String username, String password);
+//     Employee createEmployee(String firstname, String lastname, String username, String password);
 
      Optional<Employee> getEmployeeByFirstNameAndLastName(String FirstName, String LastName);
      Optional<Employee> findEmployeeByUsernameAndPassword(String providedUsername, String providedPassword);

@@ -20,7 +20,7 @@ public interface TaskDao extends JpaRepository<Task,String> {
 
     List<Task> getTasksByAssignee_Username(String Username);
 
-    List<Task> getTasksByUserRole(User.UserRole userRole);
+    List<Task> getTasksByAssigneeNotNull();
     List<Task> getTasksByCreatedByUsernameAndTaskStatus(String CreatedBy,Task.Status status);
 
     boolean existsByTitle(String title);

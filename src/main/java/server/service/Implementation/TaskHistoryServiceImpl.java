@@ -48,7 +48,7 @@ public class TaskHistoryServiceImpl implements TaskHistoryService {
 
         if (optionalTask.isPresent()) {
             Task task = optionalTask.get();
-            Optional<List<TaskHistory>> histories = taskHistoryDao.findByTitle(task.getTitle());
+            Optional<List<TaskHistory>> histories = taskHistoryDao.findByTask(task);
 
             if (histories.isPresent()) {
                 List<TaskHistoryDTO> taskHistoryDTOS = new ArrayList<>();

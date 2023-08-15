@@ -12,6 +12,8 @@ public interface UserDao extends JpaRepository<User,String> {
 
     Optional<User> getUserByUserRole(User.UserRole userRole);
 
+    Optional<User> getUserByUsername(String Username);
+
 //
 
 //
