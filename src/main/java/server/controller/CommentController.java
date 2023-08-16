@@ -30,7 +30,7 @@ public class CommentController {
     ) {
 
         commentService.addCommentByUser(comment,authorizationHeader);
-        return ResponseEntity.ok(null);
+        return ResponseEntity.status(HttpStatus.OK).build();
 
     }
 

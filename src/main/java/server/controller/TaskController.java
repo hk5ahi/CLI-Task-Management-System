@@ -2,12 +2,10 @@ package server.controller;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
 import server.domain.Task;
 import server.domain.User;
 import server.dto.*;
 import server.service.TaskService;
-import java.util.Collections;
 import java.util.List;
 
 
@@ -27,7 +25,7 @@ public class TaskController {
     public ResponseEntity<String> createTask(@RequestBody TaskDTO task, @RequestHeader("Authorization") String authorizationHeader) {
 
         taskService.createTaskByController(task, authorizationHeader);
-        return ResponseEntity.status(HttpStatus.CREATED).body(null);
+        return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
     @GetMapping()
@@ -43,29 +41,23 @@ public class TaskController {
             @RequestHeader("Authorization") String authorizationHeader
     ) {
         List<TaskDTO> tasks = taskService.getTasksByController(status, employeeRole, assigned, userRole,
-                        manager, noCriteria, taskStatus, employeeName,
-                        authorizationHeader)
-                .orElse(Collections.emptyList());
+                manager, noCriteria, taskStatus, employeeName,
+                authorizationHeader);
 
         return ResponseEntity.ok(tasks);
     }
 
 
-    @PatchMapping()
+
+    @PutMapping()
     public ResponseEntity<String> update(
-            @RequestParam(name = "status", defaultValue = "false") boolean status,
-            @RequestParam(name = "archive", defaultValue = "false") boolean archive,
-            @RequestParam(name = "assign", defaultValue = "false") boolean assign,
-            @RequestParam(name = "time", defaultValue = "false") boolean time,
-            @RequestParam(name = "timeValue", defaultValue = "0") double timeValue,
 
             @RequestHeader("Authorization") String authorizationHeader,
             @RequestBody TaskDTO taskDTO
     ) {
 
-
-        taskService.updateTasksByController(status, archive, assign, time, timeValue, authorizationHeader, taskDTO);
-        return ResponseEntity.ok(null);
+        taskService.updateTasksByController(authorizationHeader, taskDTO);
+        return ResponseEntity.status(HttpStatus.OK).build();
 
 
     }

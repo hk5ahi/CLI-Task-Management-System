@@ -5,12 +5,9 @@ import jakarta.persistence.Entity;
 @Entity
 public class Manager extends User {
 
-    public Manager(String firstName, String lastName, String username, String password,UserRole userRole) {
-        this.setUsername(username);
-        this.setPassword(password);
-        this.setFirstName(firstName);
-        this.setLastName(lastName);
-        this.setUserRole(userRole);
+
+    public Manager(String firstName, String lastName, String username, String password, UserRole userRole) {
+        super(firstName, lastName, username, password, userRole);
     }
 
     public Manager() {

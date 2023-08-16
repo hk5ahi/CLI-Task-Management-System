@@ -7,13 +7,6 @@ import java.time.Instant;
 @Table(name = "comments")
 public class Comment {
 
-    public long getCommentId() {
-        return commentId;
-    }
-
-    public void setCommentId(long commentId) {
-        this.commentId = commentId;
-    }
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "comment_Id")

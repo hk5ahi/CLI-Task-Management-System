@@ -60,7 +60,7 @@ public class Task {
     @Column(name = "assigned",nullable = false)
     private boolean assigned;
 
-    @Column(name = "start_time")
+
     private Instant startTime;
 
 

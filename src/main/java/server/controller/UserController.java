@@ -24,7 +24,7 @@ public class UserController {
     @PostMapping ("/init")
     public ResponseEntity<String> initialize() {
         userService.initializeUsers();
-        return ResponseEntity.status(HttpStatus.CREATED).body(null);
+        return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
 
@@ -34,7 +34,7 @@ public class UserController {
             @RequestHeader("Authorization") String authorizationHeader
     ) {
         userService.postCreateUser(newUser,authorizationHeader);
-        return ResponseEntity.status(HttpStatus.CREATED).body(null);
+        return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
 

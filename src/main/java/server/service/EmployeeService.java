@@ -1,6 +1,7 @@
 package server.service;
 
 import server.domain.Employee;
+import server.dto.TaskDTO;
 
 
 import java.util.List;
@@ -8,7 +9,7 @@ import java.util.List;
 public interface EmployeeService {
 
 
-    void updateTotalTime(double time, String title, Employee employee);
+    void updateTotalTime(TaskDTO taskDTO, Employee employee);
 
 
 

@@ -22,16 +22,13 @@ import java.util.List;
 @Service
 public class UserServiceImpl implements UserService {
 
-    private final EmployeeDao employeeDao;
-    private final ManagerDao managerDao;
     private final UserDao userDao;
     private final UtilityService utilityService;
 
 
 
-    public UserServiceImpl(EmployeeDao employeeDao, ManagerDao managerDao, UserDao userDao, UtilityService utilityService) {
-        this.employeeDao = employeeDao;
-        this.managerDao = managerDao;
+    public UserServiceImpl(UserDao userDao, UtilityService utilityService) {
+
         this.userDao = userDao;
         this.utilityService = utilityService;
     }
@@ -119,7 +116,7 @@ public class UserServiceImpl implements UserService {
         else if (userRole.equals(User.UserRole.Employee)) {
 
             Employee employee=new Employee(firstname,lastname,username,password,userRole);
-            userDao.saveAndFlush(employee);
+            userDao.save(employee);
 
         } else if (userRole.equals(User.UserRole.Manager)) {
 
