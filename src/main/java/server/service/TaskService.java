@@ -26,7 +26,7 @@ public interface TaskService {
 
     void createTaskByController(TaskDTO task,String header);
 
-    List<TaskDTO> getTasksByController( boolean status,boolean employeeRole, boolean assigned, User.UserRole userRole,boolean manager,boolean noCriteria,Task.Status task_status,String employeeName,String header);
+    List<TaskDTO> getTasksByController( QueryParameterDTO queryParameterDTO,String header);
     void archiveTask(TaskDTO taskDTO);
 
     List<TaskDTO> getAssignedTasks(Employee employee);

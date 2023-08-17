@@ -30,19 +30,10 @@ public class TaskController {
 
     @GetMapping()
     public ResponseEntity<List<TaskDTO>> getTasks(
-            @RequestParam(name = "status", defaultValue = "false") boolean status,
-            @RequestParam(name = "employeeRole", defaultValue = "false") boolean employeeRole,
-            @RequestParam(name = "assigned", defaultValue = "false") boolean assigned,
-            @RequestParam(name = "userRole", defaultValue = "") User.UserRole userRole,
-            @RequestParam(name = "manager", defaultValue = "false") boolean manager,
-            @RequestParam(name = "no_criteria", defaultValue = "false") boolean noCriteria,
-            @RequestParam(name = "task-status", defaultValue = "CREATED") Task.Status taskStatus,
-            @RequestParam(name = "employeeName", defaultValue = " ") String employeeName,
+            @RequestBody QueryParameterDTO queryParameterDTO,
             @RequestHeader("Authorization") String authorizationHeader
     ) {
-        List<TaskDTO> tasks = taskService.getTasksByController(status, employeeRole, assigned, userRole,
-                manager, noCriteria, taskStatus, employeeName,
-                authorizationHeader);
+        List<TaskDTO> tasks = taskService.getTasksByController(queryParameterDTO, authorizationHeader);
 
         return ResponseEntity.ok(tasks);
     }

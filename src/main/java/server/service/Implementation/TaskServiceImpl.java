@@ -48,7 +48,7 @@ public class TaskServiceImpl implements TaskService {
         String lastName = nameParts.length > 1 ? nameParts[1] : "";
         Optional<Employee> optionalEmployee = employeeDao.getEmployeeByFirstNameAndLastName(firstName,lastName);
 
-        if (!optionalEmployee.isPresent()) {
+        if (optionalEmployee.isEmpty()) {
             return Collections.emptyList();
         }
 
@@ -135,24 +135,28 @@ public class TaskServiceImpl implements TaskService {
 
            throw new BadRequestException();
         } else {
-            taskDao.saveAndFlush(task);
+            taskDao.save(task);
 
         }
     }
     @Override
-    public List<TaskDTO> getTasksByController(boolean status, boolean employeeRole, boolean assigned, User.UserRole userRole,
-                                                        boolean manager, boolean noCriteria, Task.Status taskStatus,
-                                                        String employeeName, String header) {
+    public List<TaskDTO> getTasksByController(QueryParameterDTO queryParameterDTO, String header) {
 
-        if (utilityService.isAuthenticatedSupervisor(header) && User.UserRole.Supervisor.equals(userRole)) {
-            return handleSupervisorTasks(status, assigned, employeeRole, noCriteria, manager, employeeName);
-        } else if (utilityService.isAuthenticatedManager(header) && User.UserRole.Manager.equals(userRole)) {
-            return handleManagerTasks(status, assigned, employeeRole, noCriteria, manager, employeeName, taskStatus,header);
-        } else if (utilityService.isAuthenticatedEmployee(header) && User.UserRole.Employee.equals(userRole)) {
-            return handleEmployeeTasks(assigned, status, employeeRole, noCriteria,header);
+        if (utilityService.isAuthenticatedSupervisor(header) && User.UserRole.Supervisor.equals(queryParameterDTO.getUserRole())) {
+            return handleSupervisorTasks(queryParameterDTO.isStatus(), queryParameterDTO.isAssigned(),queryParameterDTO.isEmployeeRole(), queryParameterDTO.isNoCriteria(),queryParameterDTO.isManagerRole(), queryParameterDTO.getEmployeeName());
+        } else if (utilityService.isAuthenticatedManager(header) && User.UserRole.Manager.equals(queryParameterDTO.getUserRole())) {
+            return handleManagerTasks(queryParameterDTO.isStatus(), queryParameterDTO.isAssigned(),queryParameterDTO.isEmployeeRole(),queryParameterDTO.isNoCriteria(),queryParameterDTO.isManagerRole(), queryParameterDTO.getEmployeeName(),queryParameterDTO.getTaskStatus(),header);
+        } else if (utilityService.isAuthenticatedEmployee(header) && User.UserRole.Employee.equals(queryParameterDTO.getUserRole())) {
+            return handleEmployeeTasks(queryParameterDTO.isAssigned(), queryParameterDTO.isStatus(), queryParameterDTO.isEmployeeRole(),queryParameterDTO.isNoCriteria(),header);
         }
 
         throw new ForbiddenAccessException();
+    }
+
+    private void validateGetAllTasksByUser()
+    {
+
+
     }
 
     private List<TaskDTO> handleSupervisorTasks(boolean status, boolean assigned, boolean employeeRole,
@@ -201,60 +205,73 @@ public class TaskServiceImpl implements TaskService {
     @Override
     public void updateTasksByController(String authorizationHeader, TaskDTO taskDTO) {
 
+        validateTaskArchive(authorizationHeader,taskDTO);
+        validateTaskStatus(authorizationHeader,taskDTO);
+        validateTaskAssign(authorizationHeader,taskDTO);
+        validateUpdateTime(authorizationHeader,taskDTO);
+    }
+
+
+    private void validateTaskAssign(String authorizationHeader, TaskDTO taskDTO)
+    {
+        if (utilityService.isAuthenticatedManager(authorizationHeader)) {
+            Manager activeManager = utilityService.getActiveManager(authorizationHeader)
+                    .orElseThrow(BadRequestException::new);
+            assignTask(taskDTO, activeManager);
+        }
+        else {
+
+            throw new ForbiddenAccessException();
+        }
+
+
+    }
+    private void validateTaskArchive(String authorizationHeader, TaskDTO taskDTO) {
         if (utilityService.isAuthenticatedSupervisor(authorizationHeader)) {
-            handleSupervisorUpdate(taskDTO);
-        } else if (utilityService.isAuthenticatedManager(authorizationHeader)) {
-            handleManagerUpdate(taskDTO,authorizationHeader);
+
+            archiveTask(taskDTO);
+        } else {
+            throw new ForbiddenAccessException();
+        }
+    }
+
+    private void validateTaskStatus(String authorizationHeader, TaskDTO taskDTO) {
+        if (utilityService.isAuthenticatedSupervisor(authorizationHeader)) {
+            throw new ForbiddenAccessException();
+        } else {
+            Optional<User> optionalUser = validateAndGetUser(authorizationHeader);
+            if (optionalUser.isPresent()) {
+                changeTaskStatus(taskDTO, optionalUser.get());
+            } else {
+                throw new BadRequestException();
+            }
+        }
+    }
+
+
+    private Optional<User> validateAndGetUser(String authorizationHeader) {
+        if (utilityService.isAuthenticatedManager(authorizationHeader)) {
+            return Optional.of(utilityService.getActiveManager(authorizationHeader)
+                    .orElseThrow(BadRequestException::new));
         } else if (utilityService.isAuthenticatedEmployee(authorizationHeader)) {
-            handleEmployeeUpdate(taskDTO,authorizationHeader);
+            return Optional.of(utilityService.getActiveEmployee(authorizationHeader)
+                    .orElseThrow(BadRequestException::new));
         } else {
             throw new BadRequestException();
         }
     }
-
-    private void handleSupervisorUpdate(TaskDTO taskDTO) {
-        Task task = taskDao.findByTitle(taskDTO.getTitle())
-                .orElseThrow(BadRequestException::new);
-        assert !(taskDTO.getAssignee().equals(task.getAssignee().getFirstName()+" "+task.getAssignee().getLastName())) : new ForbiddenAccessException();
-
-        archiveTask(taskDTO);
-    }
-
-
-    private void handleManagerUpdate(TaskDTO taskDTO,String header) {
-        Manager activeManager = utilityService.getActiveManager(header)
-                .orElseThrow(BadRequestException::new);
-
-        Task task = taskDao.findByTitle(taskDTO.getTitle())
-                .orElseThrow(BadRequestException::new);
-        if(!task.getTaskStatus().equals(taskDTO.getTaskStatus()))
-        {
-            changeTaskStatus(taskDTO,activeManager);
-
-        } else if (!(taskDTO.getAssignee().equals(task.getAssignee().getFirstName()+" "+task.getAssignee().getLastName()))) {
-
-            assignTask(taskDTO, activeManager);
-
+    private void validateUpdateTime(String header,TaskDTO taskDTO)
+    {
+        if (utilityService.isAuthenticatedEmployee(header)) {
+            Employee activeEmployee = utilityService.getActiveEmployee(header)
+                    .orElseThrow(BadRequestException::new);
+            employeeService.updateTotalTime(taskDTO,activeEmployee);
         }
         else {
+
             throw new ForbiddenAccessException();
         }
-    }
 
-    private void handleEmployeeUpdate(TaskDTO taskDTO, String header) {
-        Employee activeEmployee = utilityService.getActiveEmployee(header)
-                .orElseThrow(BadRequestException::new);
-
-        Task task = taskDao.findByTitle(taskDTO.getTitle())
-                .orElseThrow(BadRequestException::new);
-
-        if (!task.getTaskStatus().equals(taskDTO.getTaskStatus())) {
-            changeTaskStatus(taskDTO, activeEmployee);
-        } else if (task.getTotal_time() != taskDTO.getTotal_time()) {
-            employeeService.updateTotalTime(taskDTO, activeEmployee);
-        } else {
-            throw new ForbiddenAccessException();
-        }
     }
 
     @Override
@@ -273,19 +290,11 @@ public class TaskServiceImpl implements TaskService {
     public void changeTaskStatus(TaskDTO taskDTO, User person) {
         Task task = getValidatedTask(taskDTO.getTitle());
 
-        if(taskStatusDTOMatchesTask(taskDTO,task)) {
-
             Task.Status currentStatus = task.getTaskStatus();
             if(currentStatus.equals(taskDTO.getTaskStatus()))
             {
-
                 throw new BadRequestException();
             }
-//            String assigneeUserName = "N/A";
-//            if (task.getAssignee() != null) {
-//                assigneeUserName = task.getAssignee().getUsername();
-//            }
-
             String createdUserName = task.getCreatedBy().getUsername();
 
             boolean isValidChange = switch (person.getUserRole()) {
@@ -300,11 +309,6 @@ public class TaskServiceImpl implements TaskService {
                 throw new BadRequestException();
             }
         }
-        else {
-            throw new BadRequestException();
-
-        }
-    }
 
     private Task getValidatedTask(String title) {
         Optional<Task> optionalTask = taskDao.findByTitle(title);
@@ -464,17 +468,18 @@ public class TaskServiceImpl implements TaskService {
     public void assignTask(TaskDTO taskDTO, Manager manager) {
         Task task = taskDao.findByTitle(taskDTO.getTitle())
                 .orElseThrow(BadRequestException::new);
+        if (task.getAssignee()==null) {
+            validateTaskAssignment(task, manager);
 
-        if (!taskAssignDTOMatchesTask(taskDTO, task)) {
+            Employee assignee = getAssigneeByName(taskDTO.getAssignee());
+            task.setAssignee(assignee);
+            task.setAssigned(true);
+            taskDao.save(task);
+        }
+        else {
+
             throw new BadRequestException();
         }
-
-        validateTaskAssignment(task, manager);
-
-        Employee assignee = getAssigneeByName(taskDTO.getAssignee());
-        task.setAssignee(assignee);
-        task.setAssigned(true);
-        taskDao.save(task);
     }
 
 
@@ -572,36 +577,38 @@ public class TaskServiceImpl implements TaskService {
         Task task = taskDao.findByTitle(taskDTO.getTitle())
                 .orElseThrow(BadRequestException::new);
 
-        if (!taskDTOMatchesTask(taskDTO, task)) {
-            throw new BadRequestException();
-        }
+        String assigneeFullName = task.getAssignee().getFirstName() + " " + task.getAssignee().getLastName();
+        boolean isSameAssignee = taskDTO.getAssignee().equals(assigneeFullName);
 
+        if (isSameAssignee) {
+            throw new ForbiddenAccessException();
+        }
         task.setAssigned(false);
         task.setAssignee(null);
         taskDao.save(task);
     }
 
 
-    private boolean taskDTOMatchesTask(TaskDTO taskDTO, Task task) {
-        return Objects.equals(taskDTO.getDescription(), task.getDescription())
-                && Objects.equals(taskDTO.getTaskStatus(), task.getTaskStatus())
-                && Objects.equals(taskDTO.getCreatedBy(), task.getCreatedBy().getFirstName()+" "+task.getCreatedBy().getLastName())
-                && Objects.equals(taskDTO.getAssignee(), task.getAssignee().getFirstName()+" "+task.getAssignee().getLastName())
-                && Objects.equals(taskDTO.getTotal_time(), task.getTotal_time());
-    }
-
-    private boolean taskStatusDTOMatchesTask(TaskDTO taskDTO, Task task) {
-        return Objects.equals(taskDTO.getDescription(), task.getDescription())
-                && Objects.equals(taskDTO.getCreatedBy(), task.getCreatedBy().getFirstName()+" "+task.getCreatedBy().getLastName())
-                && Objects.equals(taskDTO.getAssignee(), task.getAssignee().getFirstName()+" "+task.getAssignee().getLastName())
-                && Objects.equals(taskDTO.getTotal_time(), task.getTotal_time());
-    }
-    private boolean taskAssignDTOMatchesTask(TaskDTO taskDTO, Task task) {
-        return Objects.equals(taskDTO.getDescription(), task.getDescription())
-                && Objects.equals(taskDTO.getCreatedBy(), task.getCreatedBy().getFirstName()+" "+task.getCreatedBy().getLastName())
-                && Objects.equals(taskDTO.getTaskStatus(), task.getTaskStatus())
-                && Objects.equals(taskDTO.getTotal_time(), task.getTotal_time());
-    }
+//    private boolean taskDTOMatchesTask(TaskDTO taskDTO, Task task) {
+//        return
+//                Objects.equals(taskDTO.getTaskStatus(), task.getTaskStatus())
+//                && Objects.equals(taskDTO.getCreatedBy(), task.getCreatedBy().getFirstName()+" "+task.getCreatedBy().getLastName())
+//                && Objects.equals(taskDTO.getAssignee(), task.getAssignee().getFirstName()+" "+task.getAssignee().getLastName());
+//
+//    }
+//
+//    private boolean taskStatusDTOMatchesTask(TaskDTO taskDTO, Task task) {
+//        return
+//                Objects.equals(taskDTO.getCreatedBy(), task.getCreatedBy().getFirstName()+" "+task.getCreatedBy().getLastName())
+//                && Objects.equals(taskDTO.getAssignee(), task.getAssignee().getFirstName()+" "+task.getAssignee().getLastName());
+//
+//    }
+//    private boolean taskAssignDTOMatchesTask(TaskDTO taskDTO, Task task) {
+//        return
+//                 Objects.equals(taskDTO.getCreatedBy(), task.getCreatedBy().getFirstName()+" "+task.getCreatedBy().getLastName())
+//                && Objects.equals(taskDTO.getTaskStatus(), task.getTaskStatus());
+//
+//    }
 
 
 }

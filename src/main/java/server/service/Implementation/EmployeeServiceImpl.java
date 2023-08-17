@@ -27,31 +27,32 @@ public class EmployeeServiceImpl implements EmployeeService {
 
     @Override
     public void updateTotalTime(TaskDTO taskDTO, Employee employee) {
-        Task providedTask = taskDao.findByTitle(taskDTO.getTitle())
+        Task task = taskDao.findByTitle(taskDTO.getTitle())
                 .orElseThrow(BadRequestException::new);
+        if(task.getTotal_time() != taskDTO.getTotal_time()) {
+            String assigneeUserName = task.getAssignee().getUsername();
+            String employeeUserName = employee.getUsername();
 
-        if (!taskTimeDTOMatchesTask(taskDTO, providedTask)) {
+            if (!assigneeUserName.equals(employeeUserName)) {
+                throw new ForbiddenAccessException();
+            }
+
+            task.setTotal_time(taskDTO.getTotal_time());
+            taskDao.save(task);
+        }
+        else {
+
             throw new BadRequestException();
         }
-
-        String assigneeUserName = providedTask.getAssignee().getUsername();
-        String employeeUserName = employee.getUsername();
-
-        if (!assigneeUserName.equals(employeeUserName)) {
-            throw new ForbiddenAccessException();
-        }
-
-        providedTask.setTotal_time(taskDTO.getTotal_time());
-        taskDao.save(providedTask);
     }
 
-    private boolean taskTimeDTOMatchesTask(TaskDTO taskDTO, Task task) {
-        return Objects.equals(taskDTO.getDescription(), task.getDescription())
-                && Objects.equals(taskDTO.getTaskStatus(), task.getTaskStatus())
-                && Objects.equals(taskDTO.getCreatedBy(), task.getCreatedBy().getFirstName()+" "+task.getCreatedBy().getLastName())
-                && Objects.equals(taskDTO.getAssignee(), task.getAssignee().getFirstName()+" "+task.getAssignee().getLastName());
-
-    }
+//    private boolean taskTimeDTOMatchesTask(TaskDTO taskDTO, Task task) {
+//        return
+//                Objects.equals(taskDTO.getTaskStatus(), task.getTaskStatus())
+//                && Objects.equals(taskDTO.getCreatedBy(), task.getCreatedBy().getFirstName()+" "+task.getCreatedBy().getLastName())
+//                && Objects.equals(taskDTO.getAssignee(), task.getAssignee().getFirstName()+" "+task.getAssignee().getLastName());
+//
+//    }
 
 
 
