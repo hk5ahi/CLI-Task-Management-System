@@ -17,6 +17,7 @@ public class TaskDTO {
             this.createdBy = null;
             this.total_time = 0.0;
             this.assignee = null;
+
         }
 
 

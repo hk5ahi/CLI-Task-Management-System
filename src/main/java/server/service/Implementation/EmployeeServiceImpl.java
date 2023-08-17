@@ -25,26 +25,6 @@ public class EmployeeServiceImpl implements EmployeeService {
     }
 
 
-    @Override
-    public void updateTotalTime(TaskDTO taskDTO, Employee employee) {
-        Task task = taskDao.findByTitle(taskDTO.getTitle())
-                .orElseThrow(BadRequestException::new);
-        if(task.getTotal_time() != taskDTO.getTotal_time()) {
-            String assigneeUserName = task.getAssignee().getUsername();
-            String employeeUserName = employee.getUsername();
-
-            if (!assigneeUserName.equals(employeeUserName)) {
-                throw new ForbiddenAccessException();
-            }
-
-            task.setTotal_time(taskDTO.getTotal_time());
-            taskDao.save(task);
-        }
-        else {
-
-            throw new BadRequestException();
-        }
-    }
 
 //    private boolean taskTimeDTOMatchesTask(TaskDTO taskDTO, Task task) {
 //        return

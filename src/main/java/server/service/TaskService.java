@@ -9,25 +9,23 @@ import java.util.List;
 
 public interface TaskService {
 
-    void assignTask(TaskDTO taskDTO,Manager manager);
+
 
     List<TaskDTO> getAllTasksCreatedByManager(Manager manager, String employeeName);
-    List<TaskDTO> getAllTasksByUser(String employeeName);
+    List<TaskDTO> getAllTasksByUser(QueryParameterDTO queryParameterDTO);
 
     List<TaskDTO> getTasksByStatus(Employee employee);
 
-    List<TaskDTO> getAllTasksByStatus();
+    List<TaskDTO> getAllTasksByStatus(QueryParameterDTO queryParameterDTO);
 
-    List<TaskDTO> getTasksByUser(User.UserRole userRole);
+    List<TaskDTO> getTasksByUser(User.UserRole userRole,QueryParameterDTO queryParameterDTO);
 
-    void changeTaskStatus(TaskDTO taskDTO, User person);
 
     List<TaskDTO> getAllTasksCreatedByManager(Manager activeManager,Task.Status status);
 
     void createTaskByController(TaskDTO task,String header);
 
     List<TaskDTO> getTasksByController( QueryParameterDTO queryParameterDTO,String header);
-    void archiveTask(TaskDTO taskDTO);
 
     List<TaskDTO> getAssignedTasks(Employee employee);
 

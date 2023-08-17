@@ -33,7 +33,8 @@ public class TaskController {
             @RequestBody QueryParameterDTO queryParameterDTO,
             @RequestHeader("Authorization") String authorizationHeader
     ) {
-        List<TaskDTO> tasks = taskService.getTasksByController(queryParameterDTO, authorizationHeader);
+        List<TaskDTO> tasks = taskService.getTasksByController
+        (queryParameterDTO, authorizationHeader);
 
         return ResponseEntity.ok(tasks);
     }

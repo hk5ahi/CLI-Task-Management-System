@@ -72,10 +72,10 @@ public class Task {
 
     public Task(String title, String description, double total_time) {
         this.setTaskStatus(Status.CREATED);
-        this.setAssigned(false);
         this.setTitle(title);
         this.setDescription(description);
         this.setTotal_time(total_time);
+        this.setArchived(false);
     }
 
 
@@ -145,13 +145,6 @@ public class Task {
         this.assignee = assignee;
     }
 
-    public boolean isAssigned() {
-        return assigned;
-    }
-
-    public void setAssigned(boolean assigned) {
-        this.assigned = assigned;
-    }
 
     public Instant getStartTime() {
         return startTime;
