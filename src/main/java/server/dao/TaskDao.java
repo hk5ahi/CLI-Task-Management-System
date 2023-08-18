@@ -11,9 +11,7 @@ import java.util.Optional;
 
 public interface TaskDao extends JpaRepository<Task,String> {
 
-//    List<Task> getAll();
 
-//    void addTask(Task allTasks);
 
     List<Task> getTasksByCreatedByUsernameAndAssignee_Username(String Username, String Assignee_Username);
     List<Task> getTasksByCreatedByUsernameAndAssignee_UsernameAndTaskStatus(String Username, String Assignee_Username,Task.Status status);

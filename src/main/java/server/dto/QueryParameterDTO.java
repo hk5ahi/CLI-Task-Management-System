@@ -47,13 +47,7 @@ public class QueryParameterDTO {
         isManagerRole = managerRole;
     }
 
-    public boolean isNoCriteria() {
-        return isNoCriteria;
-    }
 
-    public void setNoCriteria(boolean noCriteria) {
-        isNoCriteria = noCriteria;
-    }
 
     public Task.Status getTaskStatus() {
         return taskStatus;
@@ -75,7 +69,7 @@ public class QueryParameterDTO {
     private boolean isAssigned;
     private User.UserRole userRole;
     private boolean isManagerRole;
-    private boolean isNoCriteria;
+
 
     private Task.Status taskStatus;
     private String EmployeeName;

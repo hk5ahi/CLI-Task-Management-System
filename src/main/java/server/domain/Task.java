@@ -60,11 +60,11 @@ public class Task {
     @Column(name = "assigned",nullable = false)
     private boolean assigned;
 
-
+    @Column(name = "start_Time")
     private Instant startTime;
 
 
-    @OneToMany
+    @OneToMany(fetch = FetchType.LAZY)
     @JoinColumn(name = "task_id")
     private List<TaskHistory> taskHistory = new ArrayList<>();
 

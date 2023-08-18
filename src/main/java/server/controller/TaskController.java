@@ -30,16 +30,29 @@ public class TaskController {
 
     @GetMapping()
     public ResponseEntity<List<TaskDTO>> getTasks(
-            @RequestBody QueryParameterDTO queryParameterDTO,
+            @RequestParam(name = "status",required = false,defaultValue = "false") boolean isStatus,
+            @RequestParam(name = "employeeRole",required = false,defaultValue = "false") boolean isEmployeeRole,
+            @RequestParam(name = "assigned",required = false,defaultValue = "false") boolean isAssigned,
+            @RequestParam(name = "userRole",required = false,defaultValue = "N/A") User.UserRole userRole,
+            @RequestParam(name = "managerRole",required = false,defaultValue = "false") boolean isManagerRole,
+            @RequestParam(name = "task-status",required = false) Task.Status taskStatus,
+            @RequestParam(name = "employeeName",required = false,defaultValue = "N/A") String employeeName,
             @RequestHeader("Authorization") String authorizationHeader
     ) {
-        List<TaskDTO> tasks = taskService.getTasksByController
-        (queryParameterDTO, authorizationHeader);
+        QueryParameterDTO queryParameterDTO = new QueryParameterDTO();
+        queryParameterDTO.setStatus(isStatus);
+        queryParameterDTO.setEmployeeRole(isEmployeeRole);
+        queryParameterDTO.setAssigned(isAssigned);
+        queryParameterDTO.setUserRole(userRole);
+        queryParameterDTO.setManagerRole(isManagerRole);
+
+        queryParameterDTO.setTaskStatus(taskStatus);
+        queryParameterDTO.setEmployeeName(employeeName);
+
+        List<TaskDTO> tasks = taskService.getTasksByController(queryParameterDTO, authorizationHeader);
 
         return ResponseEntity.ok(tasks);
     }
-
-
 
     @PutMapping()
     public ResponseEntity<String> update(

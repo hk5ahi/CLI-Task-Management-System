@@ -1,12 +1,22 @@
 package server.domain;
 
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import jakarta.persistence.*;
-
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "user_type")
+@JsonSubTypes({
+        @JsonSubTypes.Type(value = Supervisor.class, name = "Supervisor"),
+        @JsonSubTypes.Type(value = Manager.class, name = "Manager"),
+        @JsonSubTypes.Type(value = Employee.class, name = "Employee")
+})
 @Entity
 @Table(name = "users")
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(name = "user_type", discriminatorType = DiscriminatorType.STRING)
 public abstract class User {
+
+
+
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
