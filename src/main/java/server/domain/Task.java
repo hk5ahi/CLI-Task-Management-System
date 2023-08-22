@@ -1,5 +1,4 @@
 package server.domain;
-
 import jakarta.persistence.*;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -56,7 +55,7 @@ public class Task {
     private Instant startTime;
 
 
-    @OneToMany(fetch = FetchType.LAZY)
+    @OneToMany(cascade = CascadeType.ALL)
     @JoinColumn(name = "task_id")
     private List<TaskHistory> taskHistory = new ArrayList<>();
 
@@ -76,6 +75,7 @@ public class Task {
 
     public void setHistory(TaskHistory history) {
         taskHistory.add(history);
+        history.setTask(this);
     }
     public Status getTaskStatus() {
         return taskStatus;

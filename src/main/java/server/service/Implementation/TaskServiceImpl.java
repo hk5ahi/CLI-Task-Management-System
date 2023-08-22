@@ -241,6 +241,10 @@ public class TaskServiceImpl implements TaskService {
         } else if (isTaskNeedToChangeStatus && isUserManager && (toBeUpdatedStatus.equals(Task.Status.IN_PROGRESS) || toBeUpdatedStatus.equals(Task.Status.IN_REVIEW))) {
             log.error("Only Employee can update Task Status from CREATED to IN_PROGRESS/IN_REVIEW. User {} is not a Employee", authUserDTO);
             throw new ForbiddenAccessException("User is not able to validate the task");
+        }
+            else if (isTaskNeedToChangeStatus && isUserManager && toBeUpdatedStatus.equals(Task.Status.COMPLETED) && currentStatus.equals(Task.Status.IN_PROGRESS)) {
+                log.error("The direct shift of status is not allowed from progress to review.");
+                throw new ForbiddenAccessException("Can not change Status");
 
         } else if (isTaskNeedToChangeStatus && isUserEmployee && toBeUpdatedStatus.equals(Task.Status.COMPLETED)) {
             log.error("Only Manager can update Task Status from IN_REVIEW to COMPLETED. User {} is not a Manager", authUserDTO);
