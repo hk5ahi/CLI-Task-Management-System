@@ -28,12 +28,19 @@ public class TaskController {
 
     @GetMapping()
     public ResponseEntity<List<TaskDTO>> getTasks(
+            //potential query params are: taskStatus, username, 
+            
+            //why status is boolean
             @RequestParam(name = "status",required = false,defaultValue = "false") boolean byStatus,
+            //why there is need to filter by employeeRole
             @RequestParam(name = "employeeRole",required = false,defaultValue = "false") boolean byEmployeeRole,
             @RequestParam(name = "assigned",required = false,defaultValue = "false") boolean byAssigned,
+            //why there is userRole
             @RequestParam(name = "userRole",required = false,defaultValue = "N/A") User.UserRole byUserRole,
+            //why there is manager role
             @RequestParam(name = "managerRole",required = false,defaultValue = "false") boolean byManagerRole,
             @RequestParam(name = "task-status",required = false) Task.Status byTaskStatus,
+            //you may add username
             @RequestParam(name = "employeeName",required = false,defaultValue = "N/A") String byEmployeeName,
             @RequestHeader("Authorization") String authorizationHeader
     ) {

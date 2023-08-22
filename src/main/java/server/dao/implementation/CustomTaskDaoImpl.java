@@ -38,6 +38,23 @@ public class CustomTaskDaoImpl implements CustomTaskDao {
             user= optionalUser.get();
         }
 
+        //if auth user is employee
+        //filter tasks by assignee that is same logged-in user 
+
+        //if auth user is manager
+        //filter tasks by createdBy that is same logged-in user
+
+        //if auth user is supervisor
+        //don't filter tasks by createdBy or assignee
+        
+        //there should be two req query parameters
+        //filter tasks by username (If present) &
+            //if username is manager (then filter by createdBy)
+            //if username is employee (then filter by assignee)
+        //status (if present)
+        
+        
+
         if (!(queryParams.getEmployeeName().equals("N/A")) && queryParams.getByUserRole().equals(User.UserRole.Supervisor)) {
             jpql.append(" AND t.assignee = :assignee");
         }

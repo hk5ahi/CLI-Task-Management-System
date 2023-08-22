@@ -42,6 +42,7 @@ public class TaskServiceImpl implements TaskService {
         if (taskDao.existsByTitle(task.getTitle())) {
 
             log.error("The task already exists with same title {}",task.getTitle());
+            //throw bad request exception
             throw new ForbiddenAccessException("The task can not be created");
         } else {
             taskDao.save(task);
@@ -68,6 +69,9 @@ public class TaskServiceImpl implements TaskService {
         AuthUserDTO authUserDTO = utilityService.getAuthUser(header);
         boolean isUserManager = Objects.equals(authUserDTO.getUserRole(), User.UserRole.Manager);
         boolean allTasksByManager=queryParameterDTO.getByUserRole().equals(User.UserRole.Manager);
+        //manager can not view other manager tasks
+        //if query parameter username (if any) is any other manager, or supervisor
+        //then this validation will fail
         if(allTasksByManager &&!isUserManager)
         {
             log.error("The User {} is not a Manager", authUserDTO.getUsername());
@@ -81,6 +85,7 @@ public class TaskServiceImpl implements TaskService {
         AuthUserDTO authUserDTO = utilityService.getAuthUser(header);
         boolean isUserEmployee = Objects.equals(authUserDTO.getUserRole(), User.UserRole.Employee);
         boolean allTasksByEmployee=queryParameterDTO.getByUserRole().equals(User.UserRole.Employee);
+        //if username (if any) is any other username (than current loggedin user) then this vaildation failed
         if(allTasksByEmployee &&!isUserEmployee)
         {
             log.error("The User {} is not a Employee", authUserDTO.getUsername());
@@ -92,7 +97,7 @@ public class TaskServiceImpl implements TaskService {
     @Override
     public List<TaskDTO> getTasks(QueryParameterDTO queryParameterDTO, String header) {
 
-        validateIfSupervisorCanViewAllTasks(header,queryParameterDTO);
+        validateIfSupervisorCanViewAllTasks(header,queryParameterDTO); //supervisor can view all tasks (no validation needed)
         validateIfManagerCanViewAllTasks(header,queryParameterDTO);
         validateIfEmployeeCanViewAllTasks(header,queryParameterDTO);
         List<Task> filterTasks=taskDao.filterTasksByQueryParameters(queryParameterDTO,header);
@@ -304,6 +309,9 @@ public class TaskServiceImpl implements TaskService {
     @Override
     @Transactional
     public void createTask(TaskDTO task, String header) {
+        //validateLoggedInUserIsManager
+        //utilityService.getActiveManager(header)
+        //store task (you may bring implementation of storeTask here)
         if (utilityService.isAuthenticatedManager(header)) {
             Manager activeManager = utilityService.getActiveManager(header)
                     .orElseThrow(ForbiddenAccessException::new);
