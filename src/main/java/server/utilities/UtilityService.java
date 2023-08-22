@@ -52,6 +52,7 @@ public class UtilityService {
         return Collections.emptyMap();
     }
 
+    //throw exception if user is not present
     public Optional<User> getUser(String authorizationHeader) {
         Map<String, String> credentials = extractCredentials(authorizationHeader);
         return Optional.of(credentials)
@@ -81,6 +82,8 @@ public class UtilityService {
         return Optional.empty();
     }
 
+    //return the Manager
+    //throw exception inside that manager
     public Optional<Manager> getActiveManager(String authorizationHeader) {
 
         Optional<Map<String, String>> optionalMap = getUsernamePassword(authorizationHeader);
