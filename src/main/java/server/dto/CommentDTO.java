@@ -2,7 +2,6 @@ package server.dto;
 
 import java.time.Instant;
 
-
 public class CommentDTO {
     public String getTitle() {
         return Title;

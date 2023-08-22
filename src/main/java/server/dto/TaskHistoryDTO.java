@@ -4,7 +4,6 @@ import server.domain.Task;
 
 import java.time.Instant;
 
-
 public class TaskHistoryDTO {
 
     private Task.Status oldStatus;

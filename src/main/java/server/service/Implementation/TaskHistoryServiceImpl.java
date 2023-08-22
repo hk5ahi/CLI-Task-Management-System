@@ -1,5 +1,6 @@
 package server.service.Implementation;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import server.dao.TaskDao;
 import server.dao.TaskHistoryDao;
@@ -9,12 +10,9 @@ import server.dto.TaskHistoryDTO;
 import server.exception.ForbiddenAccessException;
 import server.service.TaskHistoryService;
 import server.utilities.UtilityService;
-
 import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -24,45 +22,43 @@ public class TaskHistoryServiceImpl implements TaskHistoryService {
     private final TaskDao taskDao;
     private final TaskHistoryDao taskHistoryDao;
     private final UtilityService utilityService;
+    private final Logger log = LoggerFactory.getLogger(TaskHistoryServiceImpl.class);
 
     public TaskHistoryServiceImpl(TaskDao taskDao, TaskHistoryDao taskHistoryDao, UtilityService utilityService) {
         this.taskDao = taskDao;
-
         this.taskHistoryDao = taskHistoryDao;
         this.utilityService = utilityService;
     }
 
 
     @Override
-    public Optional<List<TaskHistoryDTO>> getTaskHistoryByController(String title, String header) {
+    public List<TaskHistoryDTO> getTaskHistory(String title, String header) {
         if (utilityService.isAuthenticatedSupervisor(header)) {
-            return getTaskHistory(title);
+            return retrieveTaskHistory(title);
         } else {
-            throw new ForbiddenAccessException();
+            log.error("The requesting user is not a Supervisor");
+            throw new ForbiddenAccessException("Only Supervisor can view Task History");
         }
     }
 
-    @Override
-    public Optional<List<TaskHistoryDTO>> getTaskHistory(String title) {
+
+    private List<TaskHistoryDTO> retrieveTaskHistory(String title) {
         Optional<Task> optionalTask = taskDao.findByTitle(title);
 
         if (optionalTask.isPresent()) {
             Task task = optionalTask.get();
-            Optional<List<TaskHistory>> histories = taskHistoryDao.findByTask(task);
+            List<TaskHistory> histories = taskHistoryDao.findByTask(task);
 
-            if (histories.isPresent()) {
                 List<TaskHistoryDTO> taskHistoryDTOS = new ArrayList<>();
-
-                for (TaskHistory history : histories.get()) {
+                for (TaskHistory history : histories) {
                     TaskHistoryDTO taskHistoryDTO = createTaskHistoryDTOFromHistory(history);
                     taskHistoryDTOS.add(taskHistoryDTO);
                 }
 
-                return taskHistoryDTOS.isEmpty() ? Optional.empty() : Optional.of(taskHistoryDTOS);
+                return taskHistoryDTOS;
             }
-        }
 
-        return Optional.empty();
+        return Collections.emptyList();
     }
 
     private TaskHistoryDTO createTaskHistoryDTOFromHistory(TaskHistory history) {

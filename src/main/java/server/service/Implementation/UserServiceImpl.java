@@ -1,8 +1,8 @@
 package server.service.Implementation;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
-import server.dao.EmployeeDao;
-import server.dao.ManagerDao;
+import org.springframework.transaction.annotation.Transactional;
 import server.dao.UserDao;
 import server.domain.Employee;
 import server.domain.Manager;
@@ -11,10 +11,8 @@ import server.domain.User;
 import server.dto.UserDTO;
 import server.exception.BadRequestException;
 import server.exception.ForbiddenAccessException;
-
 import server.service.UserService;
 import server.utilities.UtilityService;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -24,24 +22,15 @@ public class UserServiceImpl implements UserService {
 
     private final UserDao userDao;
     private final UtilityService utilityService;
-
-
+    private final Logger log = LoggerFactory.getLogger(UserServiceImpl.class);
 
     public UserServiceImpl(UserDao userDao, UtilityService utilityService) {
 
         this.userDao = userDao;
         this.utilityService = utilityService;
     }
-
-
     @Override
-    public List<User> allUsers() {
-
-            return userDao.findAll();
-
-    }
-
-    @Override
+    @Transactional
     public void initializeUsers()
     {
         List<User> usersList = Arrays.asList(
@@ -49,53 +38,45 @@ public class UserServiceImpl implements UserService {
                 new Employee("Muhammad", "Hanan", "m.hanan", "Ts12", User.UserRole.Employee),
                 new Manager("Muhammad", "Ubaid", "m.ubaid", "Ts12", User.UserRole.Manager)
         );
-
-
         for (User user : usersList) {
             if (!userDao.existsByUsername(user.getUsername())) {
 
-                userDao.saveAndFlush(user);
+                userDao.save(user);
             } else {
-               throw new BadRequestException();
+                log.error("The user {} already exists.",user.getUsername());
+                throw new BadRequestException("The user is not able to initialize");
             }
         }
-
     }
 
     @Override
-    public List<UserDTO> getAllUserForController(String header)
+    public List<UserDTO> getAllUsers(String header)
     {
 
         if (utilityService.isAuthenticatedSupervisor(header)) {
-            return viewAllUsers();
+            return allUsers();
         } else {
-            throw new ForbiddenAccessException();
+            log.error("The requesting user is not Supervisor.");
+            throw new ForbiddenAccessException("Only Supervisor can view all users");
         }
 
     }
     @Override
-
-    public void postCreateUser(User user,String header)
-    {
-
-        if (utilityService.isAuthenticatedSupervisor(header)){
-            createUser(user.getUserRole(),
-                    user.getFirstName(),
-                    user.getLastName(),
-                    user.getUsername(),
-                    user.getPassword());
-        }
-        else {
-            throw new ForbiddenAccessException();
+    @Transactional
+    public void create(User user, String header) {
+        if (!utilityService.isAuthenticatedSupervisor(header)) {
+            log.error("The requesting user is not Supervisor.");
+            throw new ForbiddenAccessException("Only Supervisor can create a User");
         }
 
+        storeUser(user);
     }
-    @Override
-    public List<UserDTO> viewAllUsers()
+
+    private List<UserDTO> allUsers()
     {
         List<UserDTO> userDTOS=new ArrayList<>();
 
-        for(User user:allUsers())
+        for(User user:userDao.findAll())
         {
             UserDTO userDTO=new UserDTO();
             userDTO.setFirstName(user.getFirstName());
@@ -106,26 +87,28 @@ public class UserServiceImpl implements UserService {
         }
         return userDTOS;
     }
-    @Override
-    public void createUser(User.UserRole userRole, String firstname, String lastname, String username, String password) {
 
-        if(userDao.existsByUsername(username))
+    private void storeUser(User user) {
+
+        if(userDao.existsByUsername(user.getUsername()))
         {
-            throw new BadRequestException();
+            log.error("The user {} already exists.",user.getUsername());
+            throw new BadRequestException("The user is not able to create");
         }
-        else if (userRole.equals(User.UserRole.Employee)) {
+        else if (user.getUserRole().equals(User.UserRole.Employee)) {
 
-            Employee employee=new Employee(firstname,lastname,username,password,userRole);
+            Employee employee=new Employee(user.getFirstName(), user.getLastName(), user.getUsername(), user.getPassword(), user.getUserRole());
             userDao.save(employee);
 
-        } else if (userRole.equals(User.UserRole.Manager)) {
+        } else if (user.getUserRole().equals(User.UserRole.Manager)) {
 
-           Manager manager= new Manager(firstname,lastname,username,password,userRole);
-           userDao.saveAndFlush(manager);
+           Manager manager= new Manager(user.getFirstName(), user.getLastName(), user.getUsername(), user.getPassword(), user.getUserRole());
+           userDao.save(manager);
 
         }
         else {
-            throw new BadRequestException();
+            log.error("The User of Type Employee and Manager can only be Created");
+            throw new BadRequestException("The user is not able to create");
         }
 
     }

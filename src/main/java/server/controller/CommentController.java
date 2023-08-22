@@ -5,22 +5,15 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import server.dto.CommentDTO;
 import server.service.CommentService;
-
 import java.util.List;
-import java.util.Optional;
-
 @RestController
 @RequestMapping("/comments")
 public class CommentController {
 
     private final CommentService commentService;
 
-
-
     public CommentController(CommentService commentService) {
         this.commentService = commentService;
-
-
     }
 
     @PostMapping()
@@ -31,19 +24,14 @@ public class CommentController {
 
         commentService.addCommentByUser(comment,authorizationHeader);
         return ResponseEntity.status(HttpStatus.OK).build();
-
     }
 
     @GetMapping()
-    public ResponseEntity<Optional<List<CommentDTO>>> getComments(
+    public ResponseEntity <List<CommentDTO>> getComments(
             @RequestHeader("Authorization") String authorizationHeader,
             @RequestParam("title") String title
     ) {
-        return ResponseEntity.status(HttpStatus.OK).body(commentService.getCommentByController(title,authorizationHeader));
-
-
+        return ResponseEntity.status(HttpStatus.OK).body(commentService.getComment(title,authorizationHeader));
 
 }
-
-
 }

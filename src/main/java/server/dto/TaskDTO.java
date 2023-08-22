@@ -4,9 +4,7 @@ import server.domain.Task;
 
 import java.time.Instant;
 
-
 public class TaskDTO {
-
 
     public TaskDTO() {
 

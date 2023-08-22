@@ -1,5 +1,4 @@
 package server.domain;
-
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import jakarta.persistence.Entity;
 @JsonTypeName("Manager")
@@ -11,7 +10,8 @@ public class Manager extends User {
         super(firstName, lastName, username, password, userRole);
     }
 
-    public Manager() {
+    public Manager()
+    {}
 
     }
-}
+

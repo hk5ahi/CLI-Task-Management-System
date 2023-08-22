@@ -1,9 +1,7 @@
 package server.dto;
-
 import server.domain.User;
 
 public class UserDTO {
-
 
     private String firstName;
 

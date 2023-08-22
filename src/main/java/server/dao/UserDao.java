@@ -8,9 +8,7 @@ public interface UserDao extends JpaRepository<User,String> {
 
     boolean existsByUsername(String Username);
     boolean existsByFirstNameAndLastName(String FirstName,String LastName);
-
     Optional<User> getUserByUserRole(User.UserRole userRole);
-
     Optional<User> getUserByUsername(String Username);
 
 }

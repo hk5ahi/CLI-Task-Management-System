@@ -1,7 +1,6 @@
 package server.domain;
 
 import jakarta.persistence.*;
-
 import java.time.Instant;
 @Entity
 @Table(name = "task_history")
@@ -20,13 +19,6 @@ public class TaskHistory {
     @JoinColumn(name = "moved_by")
     private User movedBy;
 
-    public Long getTaskHistoryId() {
-        return taskHistoryId;
-    }
-
-    public void setTaskHistoryId(Long taskHistoryId) {
-        this.taskHistoryId = taskHistoryId;
-    }
     @Id
     @Column(name = "taskHistory_id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)

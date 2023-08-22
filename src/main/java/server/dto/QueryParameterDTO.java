@@ -4,50 +4,63 @@ import server.domain.User;
 
 public class QueryParameterDTO {
 
+    public static QueryParameterDTO createObjectFromQueryParameters(
+            boolean byStatus, boolean byEmployeeRole, boolean byAssigned,
+            User.UserRole byUserRole, boolean byManagerRole,
+            Task.Status byTaskStatus, String byEmployeeName) {
 
-    private boolean isStatus;
+        QueryParameterDTO queryParameterDTO = new QueryParameterDTO();
+        queryParameterDTO.setByStatus(byStatus);
+        queryParameterDTO.setByEmployeeRole(byEmployeeRole);
+        queryParameterDTO.setByAssigned(byAssigned);
+        queryParameterDTO.setByUserRole(byUserRole);
+        queryParameterDTO.setByManagerRole(byManagerRole);
 
-    public boolean isStatus() {
-        return isStatus;
+        queryParameterDTO.setTaskStatus(byTaskStatus);
+        queryParameterDTO.setEmployeeName(byEmployeeName);
+        return queryParameterDTO;
+    }
+    private boolean byStatus;
+
+    public boolean isByStatus() {
+        return byStatus;
     }
 
-    public void setStatus(boolean status) {
-        isStatus = status;
+    public void setByStatus(boolean byStatus) {
+        this.byStatus = byStatus;
     }
 
-    public boolean isEmployeeRole() {
-        return isEmployeeRole;
+    public boolean isByEmployeeRole() {
+        return byEmployeeRole;
     }
 
-    public void setEmployeeRole(boolean employeeRole) {
-        isEmployeeRole = employeeRole;
+    public void setByEmployeeRole(boolean byEmployeeRole) {
+        this.byEmployeeRole = byEmployeeRole;
     }
 
-    public boolean isAssigned() {
-        return isAssigned;
+    public boolean isByAssigned() {
+        return byAssigned;
     }
 
-    public void setAssigned(boolean assigned) {
-        isAssigned = assigned;
+    public void setByAssigned(boolean byAssigned) {
+        this.byAssigned = byAssigned;
     }
 
-    public User.UserRole getUserRole() {
-        return userRole;
+    public User.UserRole getByUserRole() {
+        return byUserRole;
     }
 
-    public void setUserRole(User.UserRole userRole) {
-        this.userRole = userRole;
+    public void setByUserRole(User.UserRole byUserRole) {
+        this.byUserRole = byUserRole;
     }
 
-    public boolean isManagerRole() {
-        return isManagerRole;
+    public boolean isByManagerRole() {
+        return byManagerRole;
     }
 
-    public void setManagerRole(boolean managerRole) {
-        isManagerRole = managerRole;
+    public void setByManagerRole(boolean byManagerRole) {
+        this.byManagerRole = byManagerRole;
     }
-
-
 
     public Task.Status getTaskStatus() {
         return taskStatus;
@@ -65,12 +78,10 @@ public class QueryParameterDTO {
         EmployeeName = employeeName;
     }
 
-    private boolean isEmployeeRole;
-    private boolean isAssigned;
-    private User.UserRole userRole;
-    private boolean isManagerRole;
-
-
+    private boolean byEmployeeRole;
+    private boolean byAssigned;
+    private User.UserRole byUserRole;
+    private boolean byManagerRole;
     private Task.Status taskStatus;
     private String EmployeeName;
 

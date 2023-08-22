@@ -1,23 +1,11 @@
 package server.service;
-
 import server.domain.User;
 import server.dto.UserDTO;
-
 import java.util.List;
-import java.util.Optional;
 
 public interface UserService {
-
-    void createUser(User.UserRole type, String firstname, String lastname, String username, String password);
-
-    List<User> allUsers();
-
-    List<UserDTO> viewAllUsers();
-
     void initializeUsers();
-
-    void postCreateUser(User user,String header);
-
-    List<UserDTO> getAllUserForController(String header);
+    void create(User user,String header);
+    List<UserDTO> getAllUsers(String header);
 
 }

@@ -1,12 +1,10 @@
 package server.domain;
-
 import jakarta.persistence.*;
 
 import java.time.Instant;
 @Entity
 @Table(name = "comments")
 public class Comment {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "comment_Id")
@@ -21,7 +19,6 @@ public class Comment {
     @ManyToOne
     @JoinColumn(name = "task_Id")
     private Task task;
-
 
     public Instant getCreatedAt() {
         return createdAt;
@@ -50,7 +47,6 @@ public class Comment {
     public Task getTasks() {
         return task;
     }
-
 
     public void addTaskForComment(Task task) {
         this.task = task;

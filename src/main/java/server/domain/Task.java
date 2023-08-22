@@ -1,7 +1,6 @@
 package server.domain;
 
 import jakarta.persistence.*;
-
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
@@ -20,13 +19,6 @@ public class Task {
         IN_REVIEW
     }
 
-    public Long getTaskId() {
-        return taskId;
-    }
-
-    public void setTaskId(Long taskId) {
-        this.taskId = taskId;
-    }
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -78,8 +70,6 @@ public class Task {
         this.setArchived(false);
     }
 
-
-
     public List<TaskHistory> getHistory(Task task) {
         return task.taskHistory;
     }
@@ -94,8 +84,6 @@ public class Task {
     public void setTaskStatus(Status taskStatus) {
         this.taskStatus = taskStatus;
     }
-
-
 
     public String getTitle() {
         return title;
@@ -144,7 +132,6 @@ public class Task {
     public void setAssignee(User assignee) {
         this.assignee = assignee;
     }
-
 
     public Instant getStartTime() {
         return startTime;
