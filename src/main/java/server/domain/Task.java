@@ -131,4 +131,13 @@ public class Task {
     public void setStartTime(Instant startTime) {
         this.startTime = startTime;
     }
+    public boolean getArchived() {
+        return isArchived;
+    }
+
+    public void setArchived(boolean archived) {
+        isArchived = archived;
+    }
+
+
 }

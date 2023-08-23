@@ -38,12 +38,9 @@ public class TaskController {
 
     @PutMapping()
     public ResponseEntity<String> update(
-
             @RequestHeader("Authorization") String authorizationHeader,
             @RequestBody TaskDTO taskDTO) {
         taskService.updateTask(authorizationHeader, taskDTO);
         return ResponseEntity.status(HttpStatus.OK).build();
-
-
     }
 }

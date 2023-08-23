@@ -250,9 +250,6 @@ public class TaskServiceImpl implements TaskService {
         }
 
     }
-    private void validateTaskArchive(String authorizationHeader, TaskDTO taskDTO) {
-        if (utilityService.isAuthenticatedSupervisor(authorizationHeader)) {
-
     private void validateIfUserCanArchiveTask(String authorizationHeader, TaskDTO taskDTO,Task existedTask) {
         AuthUserDTO authUserDTO = utilityService.getAuthUser(authorizationHeader);
         boolean isTaskNeedToArchive = !Objects.equals(taskDTO.getArchived(), existedTask.getArchived());

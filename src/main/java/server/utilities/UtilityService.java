@@ -125,6 +125,7 @@ public class UtilityService {
         User.UserRole authenticatedUserRole = getUserRole(header);
         return authenticatedUserRole.equals(User.UserRole.Supervisor);
     }
+
     public boolean isAuthenticatedManager(String header) {
         User.UserRole authenticatedUserRole = getUserRole(header);
         return authenticatedUserRole.equals(User.UserRole.Manager);
