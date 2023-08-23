@@ -8,8 +8,9 @@ import server.dao.UserDao;
 import server.domain.Employee;
 import server.domain.Manager;
 import server.domain.User;
-
-
+import server.dto.AuthUserDTO;
+import server.exception.NotFoundException;
+import server.exception.UnAuthorizedException;
 import java.util.*;
 
 @Service
@@ -107,17 +108,30 @@ public class UtilityService {
     }
 
 
-    public boolean isAuthenticatedSupervisor(String header) {
-        Optional<User.UserRole> authenticatedUserRole = getUserRole(header);
-        User.UserRole supervisorRole = User.UserRole.Supervisor;
+    public AuthUserDTO getAuthUser(String authorizationHeader) {
+        Map<String,String> credentials=extractCredentials(authorizationHeader);
+        if(!(credentials.isEmpty()))
+        {
 
-        return authenticatedUserRole.isPresent() && authenticatedUserRole.get() == supervisorRole;
+            User authenticatedUser = userDao
+                    .getUserByUsernameAndPassword(credentials.get("username"), credentials.get("password"))
+                    .orElseThrow(() -> new UnAuthorizedException("username/password not matched"));
+            
+            return new AuthUserDTO(authenticatedUser.getUserRole(), authenticatedUser.getUsername());
+            
+        }
+        else {
+            throw new UnAuthorizedException("Auth Header is missing");
+        }
+    }
+
+    public boolean isAuthenticatedSupervisor(String header) {
+        User.UserRole authenticatedUserRole = getUserRole(header);
+        return authenticatedUserRole.equals(User.UserRole.Supervisor);
     }
     public boolean isAuthenticatedManager(String header) {
-        Optional<User.UserRole> authenticatedUserRole = getUserRole(header);
-        User.UserRole managerRole = User.UserRole.Manager;
-
-        return authenticatedUserRole.isPresent() && authenticatedUserRole.get() == managerRole;
+        User.UserRole authenticatedUserRole = getUserRole(header);
+        return authenticatedUserRole.equals(User.UserRole.Manager);
     }
 
     public boolean isAuthenticatedEmployee(String header) {

@@ -84,5 +84,14 @@ public class TaskDTO {
     private double total_time;
 
     private String assignee;
+    
+    private boolean isArchived;
 
+    public boolean getArchived() {
+        return isArchived;
+    }
+
+    public void setArchived(boolean archived) {
+        isArchived = archived;
+    }
 }

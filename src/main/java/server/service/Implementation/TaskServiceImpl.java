@@ -1,5 +1,7 @@
 package server.service.Implementation;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,7 +23,8 @@ public class TaskServiceImpl implements TaskService {
     private final UserDao userDao;
     private final TaskHistoryDao taskHistoryDao;
     private final UtilityService utilityService;
-    private final EmployeeService employeeService;
+
+    private final Logger log = LoggerFactory.getLogger(TaskServiceImpl.class);
 
 
     @Autowired
@@ -94,7 +97,6 @@ public class TaskServiceImpl implements TaskService {
             throw new ForbiddenAccessException("User is not able to see other Manager Tasks");
 
         }
-
 
     }
 
@@ -266,9 +268,36 @@ public class TaskServiceImpl implements TaskService {
     private void validateTaskArchive(String authorizationHeader, TaskDTO taskDTO) {
         if (utilityService.isAuthenticatedSupervisor(authorizationHeader)) {
 
-            archiveTask(taskDTO);
+    private void validateIfUserCanArchiveTask(String authorizationHeader, TaskDTO taskDTO,Task existedTask) {
+        AuthUserDTO authUserDTO = utilityService.getAuthUser(authorizationHeader);
+        boolean isTaskNeedToArchive = !Objects.equals(taskDTO.getArchived(), existedTask.getArchived());
+        boolean isUserSupervisor = Objects.equals(authUserDTO.getUserRole(), User.UserRole.Supervisor);
+        String existedTaskAssigneeFullName;
+        if (existedTask.getAssignee() != null) {
+            existedTaskAssigneeFullName = existedTask.getAssignee().getFirstName() + " " + existedTask.getAssignee().getLastName();
         } else {
-            throw new ForbiddenAccessException();
+            existedTaskAssigneeFullName = "N/A";
+        }
+        String inputTaskAssignee=taskDTO.getAssignee();
+        if(inputTaskAssignee==null)
+        {
+            inputTaskAssignee="N/A";
+        }
+
+        boolean isSameAssignee = inputTaskAssignee.equals(existedTaskAssigneeFullName);
+        if(isTaskNeedToArchive && existedTask.getAssignee()==null && taskDTO.getAssignee()==null)
+        {
+            log.error("Task is not assigned yet");
+            throw new BadRequestException("User is not able to validate the task");
+        }
+        else if (isTaskNeedToArchive && isSameAssignee) {
+            log.error("Already exists the same Assignee");
+            throw new BadRequestException("User is not able to validate the task");
+        }
+       else if (isTaskNeedToArchive && !isUserSupervisor && taskDTO.getAssignee()==null) {
+            log.error("Only supervisor can archive a task. User {} is not a supervisor", authUserDTO);
+            throw new ForbiddenAccessException("User is not able to validate the task");
+
         }
     }
 
@@ -364,7 +393,6 @@ public class TaskServiceImpl implements TaskService {
     {
         log.error("The employee {} dont have access to update it.",authUserDTO.getUsername());
         throw new ForbiddenAccessException("User is not able to validate the task");
-
     }
     }
 
@@ -375,7 +403,6 @@ public class TaskServiceImpl implements TaskService {
             log.error("The requesting user is not a Manager.");
             throw new ForbiddenAccessException("Only Manager can create a Task");
         }
-
     }
 
     @Override
@@ -384,7 +411,6 @@ public class TaskServiceImpl implements TaskService {
             validateLoggedInUserIsManager(header);
             Manager activeManager = utilityService.getActiveManager(header);
             storeTask(activeManager, task);
-
     }
 
 }

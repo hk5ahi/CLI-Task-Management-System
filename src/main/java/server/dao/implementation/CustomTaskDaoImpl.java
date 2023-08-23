@@ -1,12 +1,10 @@
 package server.dao.implementation;
-
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.TypedQuery;
-
 import org.springframework.stereotype.Repository;
 import server.dao.CustomTaskDao;
-import server.dao.TaskDao;
+
 import server.dao.UserDao;
 import server.domain.Task;
 import server.domain.User;
@@ -46,11 +44,6 @@ public class CustomTaskDaoImpl implements CustomTaskDao {
 
         User loggedInUser= utilityService.getUser(header);
 
-        if(queryParams.getUserName()==null)
-        {
-            jpql.append(" AND t.taskStatus IS NOT NULL");
-
-        }
         if (loggedInUser.getUserRole().equals(User.UserRole.Supervisor) && (requestedUser!=null && requestedUser.getUserRole().equals(User.UserRole.Employee)) ) {
             jpql.append(" AND t.assignee = :assignee");
         }
@@ -59,11 +52,8 @@ public class CustomTaskDaoImpl implements CustomTaskDao {
             jpql.append(" AND t.createdBy = :manager");
         }
 
-        if (loggedInUser.getUserRole().equals(User.UserRole.Supervisor) && (requestedUser!=null && authUserDTO.getUsername().equals(requestedUser.getUsername()) && requestedUser.getUserRole().equals(User.UserRole.Supervisor)) ) {
-            jpql.append(" AND t.taskStatus IS NOT NULL");
-        }
 
-        if(loggedInUser.getUserRole().equals(User.UserRole.Supervisor) && queryParams.getUserName()!=null && queryParams.getTaskStatus()!= Task.Status.CREATED && queryParams.getTaskStatus()!= Task.Status.IN_PROGRESS && queryParams.getTaskStatus()!= Task.Status.IN_REVIEW&& queryParams.getTaskStatus()!= Task.Status.COMPLETED)
+        if(loggedInUser.getUserRole().equals(User.UserRole.Supervisor) && queryParams.getUserName()!=null && queryParams.getTaskStatus()==null)
         {
               jpql.append(" AND t.taskStatus IS NOT NULL");
 
@@ -76,7 +66,6 @@ public class CustomTaskDaoImpl implements CustomTaskDao {
         if(loggedInUser.getUserRole().equals(User.UserRole.Manager) && queryParams.getTaskStatus()!=null)
         {
             jpql.append(" AND t.taskStatus = :task_status AND t.createdBy = :manager");
-
 
         }
 
@@ -102,21 +91,20 @@ public class CustomTaskDaoImpl implements CustomTaskDao {
             jpql.append(" AND t.assignee = :assignee");
 
         }
-        if(loggedInUser.getUserRole().equals(User.UserRole.Employee) && queryParams.getTaskStatus()!= Task.Status.CREATED && queryParams.getTaskStatus()!= Task.Status.IN_PROGRESS && queryParams.getTaskStatus()!= Task.Status.IN_REVIEW&& queryParams.getTaskStatus()!= Task.Status.COMPLETED)
+        if(loggedInUser.getUserRole().equals(User.UserRole.Employee) && queryParams.getTaskStatus()==null)
         {
             jpql.append(" AND t.assignee = :assignee ");
-
         }
 
-        if(loggedInUser.getUserRole().equals(User.UserRole.Manager) && queryParams.getTaskStatus()!= Task.Status.CREATED && queryParams.getTaskStatus()!= Task.Status.IN_PROGRESS && queryParams.getTaskStatus()!= Task.Status.IN_REVIEW && queryParams.getTaskStatus()!= Task.Status.COMPLETED &&  requestedUser==null)
+
+        if(loggedInUser.getUserRole().equals(User.UserRole.Manager) && queryParams.getTaskStatus()==null &&  requestedUser==null)
         {
             jpql.append(" AND t.createdBy = :manager");
 
         }
-        if(loggedInUser.getUserRole().equals(User.UserRole.Manager) && queryParams.getTaskStatus()!= Task.Status.CREATED && queryParams.getTaskStatus()!= Task.Status.IN_PROGRESS && queryParams.getTaskStatus()!= Task.Status.IN_REVIEW && queryParams.getTaskStatus()!= Task.Status.COMPLETED && (requestedUser!=null && requestedUser.getUserRole().equals(User.UserRole.Employee)))
+        if(loggedInUser.getUserRole().equals(User.UserRole.Manager) && queryParams.getTaskStatus()==null && (requestedUser!=null && requestedUser.getUserRole().equals(User.UserRole.Employee)))
         {
             jpql.append(" AND t.assignee = :assignee AND t.createdBy = :manager");
-
         }
 
         TypedQuery<Task> query = entityManager.createQuery(jpql.toString(), Task.class);

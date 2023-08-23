@@ -48,8 +48,9 @@ public class Task {
     @JoinColumn(name = "assignee")
     private User assignee;
 
-    @Column(name = "assigned",nullable = false)
-    private boolean assigned;
+    
+    @Column(name = "is_archived",nullable = false)
+    private boolean isArchived;
 
     @Column(name = "start_Time")
     private Instant startTime;

@@ -1,10 +1,8 @@
 package server.controller;
-import com.google.protobuf.Empty;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import server.domain.Task;
-import server.domain.User;
 import server.dto.*;
 import server.service.TaskService;
 import java.util.List;
@@ -44,10 +42,8 @@ public class TaskController {
     public ResponseEntity<String> update(
 
             @RequestHeader("Authorization") String authorizationHeader,
-            @RequestBody TaskDTO taskDTO
-    ) {
-
-        taskService.updateTasksByController(authorizationHeader, taskDTO);
+            @RequestBody TaskDTO taskDTO) {
+        taskService.updateTask(authorizationHeader, taskDTO);
         return ResponseEntity.status(HttpStatus.OK).build();
 
 
