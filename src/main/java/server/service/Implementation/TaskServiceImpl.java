@@ -179,10 +179,30 @@ public class TaskServiceImpl implements TaskService {
     @Transactional
     public void updateTask(String authorizationHeader, TaskDTO taskDTO) {
 
-        validateTaskArchive(authorizationHeader,taskDTO);
-        validateTaskStatus(authorizationHeader,taskDTO);
-        validateTaskAssign(authorizationHeader,taskDTO);
-        validateUpdateTime(authorizationHeader,taskDTO);
+        Task prevTask = taskDao
+                .findByTitle(taskDTO.getTitle())
+                .orElseThrow(NotFoundException::new);
+
+        validateIfUserCanArchiveTask(authorizationHeader,taskDTO,prevTask);
+        validateIfUserCanChangeStatus(authorizationHeader,taskDTO,prevTask);
+        validateIfUserCanAssignTask(authorizationHeader,taskDTO,prevTask);
+        validateUpdateTime(authorizationHeader,taskDTO,prevTask);
+        Task newtask=new Task();
+        BeanUtils.copyProperties(prevTask,newtask);
+        Task updatedTask = copyTask(prevTask,taskDTO);
+        checkAndCreateTaskHistory(newtask,updatedTask,authorizationHeader);
+        checkAndStartTime(newtask,updatedTask);
+        taskDao.save(updatedTask);
+    }
+    
+    private Task copyTask(Task prevTask,TaskDTO updateTask) {
+
+        prevTask.setTaskStatus(updateTask.getTaskStatus());
+        prevTask.setDescription(updateTask.getDescription());
+        prevTask.setTotal_time(updateTask.getTotal_time());
+        prevTask.setAssignee(utilityService.getAssigneeByName(updateTask.getAssignee()));
+        prevTask.setArchived(updateTask.getArchived());
+        return prevTask;
     }
     private void checkAndStartTime(Task prevTask, Task updatedtask)
     {
