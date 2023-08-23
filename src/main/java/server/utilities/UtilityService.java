@@ -127,6 +127,7 @@ public class UtilityService {
     }
 
     public boolean isAuthenticatedManager(String header) {
+        //this should throw auth exception when user not found
         User.UserRole authenticatedUserRole = getUserRole(header);
         return authenticatedUserRole.equals(User.UserRole.Manager);
     }

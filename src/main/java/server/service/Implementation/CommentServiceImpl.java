@@ -40,7 +40,7 @@ public class CommentServiceImpl implements CommentService {
             log.error("The requesting user is not valid");
             return new ForbiddenAccessException("Only Supervisor, Manager, and Employee can add comments to a Task");
         });
-
+        //why if, can we use same method and pass the user
         if (user instanceof Supervisor supervisor) {
             addComment(comment.getMessage(), supervisor, comment.getTitle());
         } else if (user instanceof Manager manager) {
@@ -93,6 +93,9 @@ public class CommentServiceImpl implements CommentService {
                 .orElseThrow(BadRequestException::new);
 
         String userName = person.getUsername();
+        //don't user N/A
+        //user Optional.empty()
+
         String assignee = task.getAssignee() != null ? task.getAssignee().getUsername() : "N/A";
         User.UserRole personRole = person.getUserRole();
 
@@ -134,6 +137,9 @@ public class CommentServiceImpl implements CommentService {
 
         CommentDTO commentDTO = new CommentDTO();
         commentDTO.setCreatedAt(comment.getCreatedAt());
+        //don't get user by its first ane last name (always get user by its username that should be unique)
+        //A user can have same full name
+
         commentDTO.setCreatedBy(comment.getCreatedBy().getFirstName() + " " + comment.getCreatedBy().getLastName());
         commentDTO.setMessage(comment.getBody());
         return commentDTO;
