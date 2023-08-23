@@ -4,7 +4,6 @@ import server.domain.User;
 public class UserDTO {
 
     private String firstName;
-
     public String getFirstName() {
         return firstName;
     }
@@ -28,7 +27,6 @@ public class UserDTO {
     public void setUserRole(User.UserRole userRole) {
         this.userRole = userRole;
     }
-
     private String lastName;
     private User.UserRole userRole;
 }

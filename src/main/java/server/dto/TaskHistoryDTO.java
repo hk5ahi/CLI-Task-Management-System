@@ -7,11 +7,9 @@ import java.time.Instant;
 public class TaskHistoryDTO {
 
     private Task.Status oldStatus;
-
     public Task.Status getOldStatus() {
         return oldStatus;
     }
-
     public void setOldStatus(Task.Status oldStatus) {
         this.oldStatus = oldStatus;
     }
@@ -39,7 +37,6 @@ public class TaskHistoryDTO {
     public void setMovedAt(Instant movedAt) {
         this.movedAt = movedAt;
     }
-
     private Task.Status newStatus;
 
     private String movedBy;

@@ -12,11 +12,9 @@ public class TaskHistoryController {
     private final TaskHistoryService taskHistoryService;
     public TaskHistoryController(TaskHistoryService taskHistoryService) {
         this.taskHistoryService = taskHistoryService;
-
     }
     @GetMapping()
     public ResponseEntity<List<TaskHistoryDTO>> getTaskHistory(@RequestHeader("Authorization") String authorizationHeader, @RequestParam("title") String title) {
-
         return ResponseEntity.status(HttpStatus.OK).body(taskHistoryService.getTaskHistory(title,authorizationHeader));
     }
 }

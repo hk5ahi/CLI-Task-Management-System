@@ -6,19 +6,15 @@ import java.util.List;
 @Entity
 @Table(name = "tasks")
 public class Task {
-
     public Task() {
 
     }
-
     public enum Status {
         CREATED,
         IN_PROGRESS,
         COMPLETED,
         IN_REVIEW
     }
-
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "task_Id")
@@ -27,7 +23,6 @@ public class Task {
     @Enumerated(EnumType.STRING)
     @Column(name = "task_status",nullable = false)
     private Status taskStatus;
-
     @Column(name = "title",nullable = false,length = 25,columnDefinition = "TEXT",unique = true)
     private String title;
 
@@ -47,20 +42,15 @@ public class Task {
     @ManyToOne
     @JoinColumn(name = "assignee")
     private User assignee;
-
-    
     @Column(name = "is_archived",nullable = false)
     private boolean isArchived;
 
     @Column(name = "start_Time")
     private Instant startTime;
 
-
     @OneToMany(cascade = CascadeType.ALL)
     @JoinColumn(name = "task_id")
     private List<TaskHistory> taskHistory = new ArrayList<>();
-
-
 
     public Task(String title, String description, double total_time) {
         this.setTaskStatus(Status.CREATED);

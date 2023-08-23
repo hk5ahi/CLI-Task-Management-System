@@ -18,7 +18,6 @@ public class TaskDTO {
 
         }
 
-
     public Task.Status getTaskStatus() {
         return taskStatus;
     }
@@ -77,7 +76,6 @@ public class TaskDTO {
 
     private Task.Status taskStatus;
     private String title;
-
     private String description;
     private Instant createdAt;
     private String createdBy;

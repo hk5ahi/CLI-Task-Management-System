@@ -7,17 +7,14 @@ import server.domain.User;
 import server.dto.UserDTO;
 import server.service.UserService;
 import java.util.List;
-
 @RestController
 @RequestMapping("/users")
 public class UserController {
-
     private final UserService userService;
 
     @Autowired
     public UserController(UserService userService) {
         this.userService = userService;
-
     }
     @PostMapping ("/init")
     public ResponseEntity<String> initialize() {

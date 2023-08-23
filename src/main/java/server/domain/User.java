@@ -42,7 +42,6 @@ public abstract class User {
         this.userRole = userRole;
         this.password = password;
     }
-
     public User() {
 
     }
@@ -88,7 +87,6 @@ public abstract class User {
     public String getPassword() {
         return password;
     }
-
     public void setPassword(String password) {
         this.password = password;
     }

@@ -23,7 +23,6 @@ public class UserServiceImpl implements UserService {
     private final UserDao userDao;
     private final UtilityService utilityService;
     private final Logger log = LoggerFactory.getLogger(UserServiceImpl.class);
-
     public UserServiceImpl(UserDao userDao, UtilityService utilityService) {
 
         this.userDao = userDao;
@@ -48,7 +47,6 @@ public class UserServiceImpl implements UserService {
             }
         }
     }
-
     @Override
     public List<UserDTO> getAllUsers(String header)
     {
@@ -59,7 +57,6 @@ public class UserServiceImpl implements UserService {
             log.error("The requesting user is not Supervisor.");
             throw new ForbiddenAccessException("Only Supervisor can view all users");
         }
-
     }
     @Override
     @Transactional
@@ -68,7 +65,6 @@ public class UserServiceImpl implements UserService {
             log.error("The requesting user is not Supervisor.");
             throw new ForbiddenAccessException("Only Supervisor can create a User");
         }
-
         storeUser(user);
     }
 
@@ -83,7 +79,6 @@ public class UserServiceImpl implements UserService {
             userDTO.setLastName(user.getLastName());
             userDTO.setUserRole(user.getUserRole());
             userDTOS.add(userDTO);
-
         }
         return userDTOS;
     }
@@ -104,7 +99,6 @@ public class UserServiceImpl implements UserService {
 
            Manager manager= new Manager(user.getFirstName(), user.getLastName(), user.getUsername(), user.getPassword(), user.getUserRole());
            userDao.save(manager);
-
         }
         else {
             log.error("The User of Type Employee and Manager can only be Created");

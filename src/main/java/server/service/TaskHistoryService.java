@@ -4,6 +4,5 @@ import java.util.List;
 
 
 public interface TaskHistoryService {
-
     List<TaskHistoryDTO> getTaskHistory(String title,String header);
 }

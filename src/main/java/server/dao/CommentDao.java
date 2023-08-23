@@ -1,5 +1,4 @@
 package server.dao;
-
 import org.springframework.data.jpa.repository.JpaRepository;
 import server.domain.Comment;
 import server.domain.Task;

@@ -1,0 +1,956 @@
+{
+	"info": {
+		"_postman_id": "dd55506d-b854-407d-b3cf-53c01b603a59",
+		"name": "Task Management System",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "29135019"
+	},
+	"item": [
+		{
+			"name": "Initialize the Users",
+			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": [
+						{
+							"key": "password",
+							"value": "Ts12",
+							"type": "string"
+						},
+						{
+							"key": "username",
+							"value": "m.asif",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"url": {
+					"raw": "localhost:8080/users/init",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"users",
+						"init"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create User",
+			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": [
+						{
+							"key": "password",
+							"value": "Ts12",
+							"type": "string"
+						},
+						{
+							"key": "username",
+							"value": "m.asif",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"user_type\": \"Employee\",\r\n    \"firstName\":\"Muhammad\",\r\n    \"lastName\":\"Umer\",\r\n    \"username\": \"m.umer\",\r\n    \"userRole\":\"Employee\",\r\n    \"password\": \"Ts12\"\r\n}\r\n"
+				},
+				"url": {
+					"raw": "localhost:8080/users",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"users"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "View All Users",
+			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": [
+						{
+							"key": "password",
+							"value": "Ts12",
+							"type": "string"
+						},
+						{
+							"key": "username",
+							"value": "m.asif",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "localhost:8080/users",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"users"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create Task",
+			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": [
+						{
+							"key": "username",
+							"value": "m.ali",
+							"type": "string"
+						},
+						{
+							"key": "password",
+							"value": "Ts12",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"title\": \"Task 2\",\r\n    \"description\": \"This is a sample task.\",\r\n    \"total_time\": 1\r\n}\r\n"
+				},
+				"url": {
+					"raw": "localhost:8080/tasks",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"tasks"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "View All Tasks by Supervisor Sorted by UserName",
+			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": [
+						{
+							"key": "username",
+							"value": "m.asif",
+							"type": "string"
+						},
+						{
+							"key": "password",
+							"value": "Ts12",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "localhost:8080/tasks?status=false&employeeRole=false&assigned=false&userRole=Supervisor&manager=false&no_criteria=true&task-status&employeeName=Muhammad Hanan",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"tasks"
+					],
+					"query": [
+						{
+							"key": "status",
+							"value": "false"
+						},
+						{
+							"key": "employeeRole",
+							"value": "false"
+						},
+						{
+							"key": "assigned",
+							"value": "false"
+						},
+						{
+							"key": "userRole",
+							"value": "Supervisor"
+						},
+						{
+							"key": "manager",
+							"value": "false"
+						},
+						{
+							"key": "no_criteria",
+							"value": "true"
+						},
+						{
+							"key": "task-status",
+							"value": null
+						},
+						{
+							"key": "employeeName",
+							"value": "Muhammad Hanan"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "View All Tasks by Supervisor Filtered by Status",
+			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": [
+						{
+							"key": "username",
+							"value": "m.asif",
+							"type": "string"
+						},
+						{
+							"key": "password",
+							"value": "Ts12",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "localhost:8080/tasks?task-status=CREATED&userName=",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"tasks"
+					],
+					"query": [
+						{
+							"key": "task-status",
+							"value": "CREATED"
+						},
+						{
+							"key": "userName",
+							"value": ""
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "View All Tasks by Supervisor Filtered by Status and UserNamee",
+			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": [
+						{
+							"key": "username",
+							"value": "m.asif",
+							"type": "string"
+						},
+						{
+							"key": "password",
+							"value": "Ts12",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "localhost:8080/tasks?task-status=CREATED&userName=m.umer",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"tasks"
+					],
+					"query": [
+						{
+							"key": "task-status",
+							"value": "CREATED"
+						},
+						{
+							"key": "userName",
+							"value": "m.umer"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "View All Tasks by Manager Sorted by Task Status",
+			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": [
+						{
+							"key": "username",
+							"value": "m.ubaid",
+							"type": "string"
+						},
+						{
+							"key": "password",
+							"value": "Ts12",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "localhost:8080/tasks?status=true&employeeRole=false&assigned=false&userRole=Manager&manager=true&no_criteria=false&task-status=CREATED&employeeName=Muhammad Hanan",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"tasks"
+					],
+					"query": [
+						{
+							"key": "status",
+							"value": "true"
+						},
+						{
+							"key": "employeeRole",
+							"value": "false"
+						},
+						{
+							"key": "assigned",
+							"value": "false"
+						},
+						{
+							"key": "userRole",
+							"value": "Manager"
+						},
+						{
+							"key": "manager",
+							"value": "true"
+						},
+						{
+							"key": "no_criteria",
+							"value": "false"
+						},
+						{
+							"key": "task-status",
+							"value": "CREATED"
+						},
+						{
+							"key": "employeeName",
+							"value": "Muhammad Hanan"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "View All Tasks by Manager Sorted by Username",
+			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": [
+						{
+							"key": "username",
+							"value": "m.ubaid",
+							"type": "string"
+						},
+						{
+							"key": "password",
+							"value": "Ts12",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "localhost:8080/tasks?status=false&employeeRole=true&assigned=false&userRole=Manager&manager=true&no_criteria=false&task-status=CREATED&employeeName=Muhammad Hanan",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"tasks"
+					],
+					"query": [
+						{
+							"key": "status",
+							"value": "false"
+						},
+						{
+							"key": "employeeRole",
+							"value": "true"
+						},
+						{
+							"key": "assigned",
+							"value": "false"
+						},
+						{
+							"key": "userRole",
+							"value": "Manager"
+						},
+						{
+							"key": "manager",
+							"value": "true"
+						},
+						{
+							"key": "no_criteria",
+							"value": "false"
+						},
+						{
+							"key": "task-status",
+							"value": "CREATED"
+						},
+						{
+							"key": "employeeName",
+							"value": "Muhammad Hanan"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "View All Tasks by Manager Sorted by Task Status and User Name",
+			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": [
+						{
+							"key": "username",
+							"value": "m.ubaid",
+							"type": "string"
+						},
+						{
+							"key": "password",
+							"value": "Ts12",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "localhost:8080/tasks?status=true&employeeRole=true&assigned=false&userRole=Manager&manager=true&no_criteria=false&task-status=CREATED&employeeName=Muhammad Hanan",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"tasks"
+					],
+					"query": [
+						{
+							"key": "status",
+							"value": "true"
+						},
+						{
+							"key": "employeeRole",
+							"value": "true"
+						},
+						{
+							"key": "assigned",
+							"value": "false"
+						},
+						{
+							"key": "userRole",
+							"value": "Manager"
+						},
+						{
+							"key": "manager",
+							"value": "true"
+						},
+						{
+							"key": "no_criteria",
+							"value": "false"
+						},
+						{
+							"key": "task-status",
+							"value": "CREATED"
+						},
+						{
+							"key": "employeeName",
+							"value": "Muhammad Hanan"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "View Assigned Tasks",
+			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": [
+						{
+							"key": "username",
+							"value": "m.hanan",
+							"type": "string"
+						},
+						{
+							"key": "password",
+							"value": "Ts12",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "localhost:8080/tasks?status=false&employeeRole=false&assigned=true&userRole=Employee&manager=true&no_criteria=false&task-status=CREATED&employeeName=Muhammad Hanan",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"tasks"
+					],
+					"query": [
+						{
+							"key": "status",
+							"value": "false"
+						},
+						{
+							"key": "employeeRole",
+							"value": "false"
+						},
+						{
+							"key": "assigned",
+							"value": "true"
+						},
+						{
+							"key": "userRole",
+							"value": "Employee"
+						},
+						{
+							"key": "manager",
+							"value": "true"
+						},
+						{
+							"key": "no_criteria",
+							"value": "false"
+						},
+						{
+							"key": "task-status",
+							"value": "CREATED"
+						},
+						{
+							"key": "employeeName",
+							"value": "Muhammad Hanan"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Archive Task",
+			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": [
+						{
+							"key": "username",
+							"value": "m.asif",
+							"type": "string"
+						},
+						{
+							"key": "password",
+							"value": "Ts12",
+							"type": "string"
+						}
+					]
+				},
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"taskStatus\": \"CREATED\",\r\n  \"title\": \"Task 1\",\r\n   \"description\": \"This is a sample task.\",\r\n    \"total_time\": \"1\",\r\n  \"createdBy\": \"Muhammad Ubaid\",\r\n  \"assignee\": null,\r\n  \"archived\": \"true\"\r\n\r\n}\r\n"
+				},
+				"url": {
+					"raw": "localhost:8080/tasks",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"tasks"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Change Task Status by Employee",
+			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": [
+						{
+							"key": "username",
+							"value": "m.hanan",
+							"type": "string"
+						},
+						{
+							"key": "password",
+							"value": "Ts12",
+							"type": "string"
+						}
+					]
+				},
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "\r\n{\r\n        \"taskStatus\": \"IN_PROGRESS\",\r\n        \"title\": \"Task 1\",\r\n        \"description\": \"This is a sample task.\",\r\n        \"createdBy\": \"Muhammad Ubaid\",\r\n        \"total_time\": \"1\",\r\n        \"assignee\": \"Muhammad Hanan\"\r\n    }"
+				},
+				"url": {
+					"raw": "localhost:8080/tasks?status=true&archive=false&assign=false&time=false",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"tasks"
+					],
+					"query": [
+						{
+							"key": "status",
+							"value": "true"
+						},
+						{
+							"key": "archive",
+							"value": "false"
+						},
+						{
+							"key": "assign",
+							"value": "false"
+						},
+						{
+							"key": "time",
+							"value": "false"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Change Task Status by Manager",
+			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": [
+						{
+							"key": "username",
+							"value": "m.ubaid",
+							"type": "string"
+						},
+						{
+							"key": "password",
+							"value": "Ts12",
+							"type": "string"
+						}
+					]
+				},
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "\r\n{\r\n        \"taskStatus\": \"COMPLETED\",\r\n        \"title\": \"Task 4\",\r\n        \"description\": \"This is a sample task.\",\r\n        \"createdBy\": \"Muhammad Ubaid\",\r\n        \"total_time\": \"0\",\r\n        \"assignee\": \"Muhammad Hanan\"\r\n    }"
+				},
+				"url": {
+					"raw": "localhost:8080/tasks?status=true&archive=false&assign=false&time=false",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"tasks"
+					],
+					"query": [
+						{
+							"key": "status",
+							"value": "true"
+						},
+						{
+							"key": "archive",
+							"value": "false"
+						},
+						{
+							"key": "assign",
+							"value": "false"
+						},
+						{
+							"key": "time",
+							"value": "false"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Assign Task",
+			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": [
+						{
+							"key": "username",
+							"value": "m.ubaid",
+							"type": "string"
+						},
+						{
+							"key": "password",
+							"value": "Ts12",
+							"type": "string"
+						}
+					]
+				},
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"taskStatus\": \"CREATED\",\r\n  \"title\": \"Task 3\",\r\n   \"description\": \"This is a sample task.\",\r\n    \"total_time\": \"2\",\r\n  \"createdBy\": \"Muhammad Ubaid\",\r\n  \"assignee\": \"Muhammad Hanan\",\r\n  \"archived\": \"false\"\r\n\r\n}\r\n"
+				},
+				"url": {
+					"raw": "localhost:8080/tasks",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"tasks"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Update Total Time",
+			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": [
+						{
+							"key": "username",
+							"value": "m.hanan",
+							"type": "string"
+						},
+						{
+							"key": "password",
+							"value": "Ts12",
+							"type": "string"
+						}
+					]
+				},
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"taskStatus\": \"CREATED\",\r\n  \"title\": \"Task 1\",\r\n   \"description\": \"This is a sample task.\",\r\n    \"total_time\": \"0.5\",\r\n  \"createdBy\": \"Muhammad Ubaid\",\r\n  \"assignee\": \"Muhammad Hanan\",\r\n  \"archived\": \"false\"\r\n\r\n}\r\n"
+				},
+				"url": {
+					"raw": "localhost:8080/tasks",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"tasks"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "View Task History",
+			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": [
+						{
+							"key": "username",
+							"value": "m.asif",
+							"type": "string"
+						},
+						{
+							"key": "password",
+							"value": "Ts12",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "localhost:8080/task-history?title=Task 1",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"task-history"
+					],
+					"query": [
+						{
+							"key": "title",
+							"value": "Task 1"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Add Comment",
+			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": [
+						{
+							"key": "username",
+							"value": "m.asif",
+							"type": "string"
+						},
+						{
+							"key": "password",
+							"value": "Ts12",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"message\": \"This is a comment message\",\r\n    \"title\": \"Task 1\"\r\n   \r\n}\r\n"
+				},
+				"url": {
+					"raw": "localhost:8080/comments",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"comments"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "View Comments",
+			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": [
+						{
+							"key": "username",
+							"value": "m.asif",
+							"type": "string"
+						},
+						{
+							"key": "password",
+							"value": "Ts12",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "localhost:8080/comments?title=Task 1",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"comments"
+					],
+					"query": [
+						{
+							"key": "title",
+							"value": "Task 1"
+						}
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

@@ -31,7 +31,6 @@ public class CommentServiceImpl implements CommentService {
 
         this.userDao = userDao;
     }
-
     @Transactional
     @Override
     public void addCommentByUser(CommentDTO comment, String header) {
@@ -87,7 +86,6 @@ public class CommentServiceImpl implements CommentService {
         }
     }
 
-
     private void addComment(String message, User person, String taskTitle) {
         Comment comment = new Comment();
 
@@ -114,14 +112,12 @@ public class CommentServiceImpl implements CommentService {
         commentDao.save(comment);
     }
 
-
     private List<CommentDTO> retrieveComment(String title) {
         Optional<Task> optionalTask = taskDao.findByTitle(title);
 
         if (optionalTask.isEmpty()) {
             return Collections.emptyList();
         }
-
         Task task = optionalTask.get();
         List<Comment> comments = commentDao.getCommentByTask(task);
         List<CommentDTO> viewCommentDTOList = new ArrayList<>();
@@ -140,7 +136,6 @@ public class CommentServiceImpl implements CommentService {
         commentDTO.setCreatedAt(comment.getCreatedAt());
         commentDTO.setCreatedBy(comment.getCreatedBy().getFirstName() + " " + comment.getCreatedBy().getLastName());
         commentDTO.setMessage(comment.getBody());
-
         return commentDTO;
     }
 

@@ -1,11 +1,9 @@
 package server.domain;
-
 import jakarta.persistence.*;
 import java.time.Instant;
 @Entity
 @Table(name = "task_history")
 public class TaskHistory {
-
     @Column(name = "timestamp")
     private Instant timestamp;
     @Enumerated(EnumType.STRING)
@@ -23,7 +21,6 @@ public class TaskHistory {
     @Column(name = "taskHistory_id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long taskHistoryId;
-
 
     public Task getTask() {
         return task;
@@ -64,7 +61,6 @@ public class TaskHistory {
     public User getMovedBy() {
         return movedBy;
     }
-
     public void setMovedBy(User movedBy) {
         this.movedBy = movedBy;
     }

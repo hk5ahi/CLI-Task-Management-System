@@ -29,8 +29,6 @@ public class TaskHistoryServiceImpl implements TaskHistoryService {
         this.taskHistoryDao = taskHistoryDao;
         this.utilityService = utilityService;
     }
-
-
     @Override
     public List<TaskHistoryDTO> getTaskHistory(String title, String header) {
         if (utilityService.isAuthenticatedSupervisor(header)) {
@@ -40,8 +38,6 @@ public class TaskHistoryServiceImpl implements TaskHistoryService {
             throw new ForbiddenAccessException("Only Supervisor can view Task History");
         }
     }
-
-
     private List<TaskHistoryDTO> retrieveTaskHistory(String title) {
         Optional<Task> optionalTask = taskDao.findByTitle(title);
 
@@ -57,7 +53,6 @@ public class TaskHistoryServiceImpl implements TaskHistoryService {
 
                 return taskHistoryDTOS;
             }
-
         return Collections.emptyList();
     }
 
@@ -66,7 +61,6 @@ public class TaskHistoryServiceImpl implements TaskHistoryService {
         String oldStatus = history.getOldStatus().toString();
         String newStatus = history.getNewStatus().toString();
         String movedBy = history.getMovedBy().getFirstName() + " " + history.getMovedBy().getLastName();
-
         TaskHistoryDTO taskHistoryDTO = new TaskHistoryDTO();
         taskHistoryDTO.setMovedBy(movedBy);
         taskHistoryDTO.setOldStatus(Task.Status.valueOf(oldStatus));

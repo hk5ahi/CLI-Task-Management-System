@@ -10,7 +10,6 @@ public class CustomExceptionHandler {
     public ResponseEntity<String> handleUserNotFoundException(NotFoundException ex) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
     }
-
     @ExceptionHandler(ForbiddenAccessException.class)
     public ResponseEntity<String> handleForbiddenAccessException(ForbiddenAccessException ex) {
         return ResponseEntity.status(HttpStatus.FORBIDDEN).build();

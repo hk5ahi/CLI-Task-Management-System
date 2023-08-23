@@ -95,9 +95,7 @@ public class TaskServiceImpl implements TaskService {
         {
             log.error("The User {} can not see other Manager Tasks", authUserDTO.getUsername());
             throw new ForbiddenAccessException("User is not able to see other Manager Tasks");
-
         }
-
     }
 
     private void validateIfEmployeeCanViewAllTasks(String header,QueryParameterDTO queryParameterDTO)
@@ -122,7 +120,6 @@ public class TaskServiceImpl implements TaskService {
         }
 
     }
-
     @Override
     public List<TaskDTO> getTasks(QueryParameterDTO queryParameterDTO, String header) {
 
@@ -134,25 +131,20 @@ public class TaskServiceImpl implements TaskService {
         return mapTaskToTaskDTO(filterTasks);
 
     }
-
     private void validateIfUserExistsByRequestedUserName(String username)
     {
-        if(!(username.equals("N/A")))
+        if(!Objects.equals(username, ""))
         {
             if(!userDao.existsByUsername(username))
             {
                 log.error("User Not Found of requested username.");
                 throw new NotFoundException("user Not Found");
-
             }
-
         }
-
     }
     private List<TaskDTO> mapTaskToTaskDTO(List<Task> tasks)
     {
         List<TaskDTO> taskDTOS=new ArrayList<>();
-
         for(Task task:tasks)
         {
             TaskDTO taskDTO=new TaskDTO();
@@ -169,13 +161,9 @@ public class TaskServiceImpl implements TaskService {
             taskDTO.setCreatedBy(task.getCreatedBy().getFirstName()+" "+task.getCreatedBy().getLastName());
             taskDTO.setTotal_time(task.getTotal_time());
             taskDTOS.add(taskDTO);
-
         }
-
         return taskDTOS;
-
     }
-
 
     @Override
     @Transactional
@@ -196,7 +184,6 @@ public class TaskServiceImpl implements TaskService {
         checkAndStartTime(newtask,updatedTask);
         taskDao.save(updatedTask);
     }
-    
     private Task copyTask(Task prevTask,TaskDTO updateTask) {
 
         prevTask.setTaskStatus(updateTask.getTaskStatus());
@@ -214,7 +201,6 @@ public class TaskServiceImpl implements TaskService {
             updatedtask.setStartTime(Instant.now());
             taskDao.save(updatedtask);
         }
-
     }
 
     private String getAssigneeFullName(Task existedTask) {
@@ -229,7 +215,6 @@ public class TaskServiceImpl implements TaskService {
         AuthUserDTO authUserDTO = utilityService.getAuthUser(authorizationHeader);
         if(taskDTO.getAssignee()!=null) {
             String[] nameParts = taskDTO.getAssignee().split(" ");
-
             String firstName = nameParts[0];
             String lastName = nameParts.length > 1 ? nameParts[1] : "";
             boolean isTaskNeedToAssign = !Objects.equals(taskDTO.getAssignee(), getAssigneeFullName(existedTask));
@@ -283,7 +268,6 @@ public class TaskServiceImpl implements TaskService {
         {
             inputTaskAssignee="N/A";
         }
-
         boolean isSameAssignee = inputTaskAssignee.equals(existedTaskAssigneeFullName);
         if(isTaskNeedToArchive && existedTask.getAssignee()==null && taskDTO.getAssignee()==null)
         {
@@ -367,11 +351,9 @@ public class TaskServiceImpl implements TaskService {
             }
         }
     }
-
     private void validateUpdateTime(String header,TaskDTO taskDTO,Task existedTask)
     {
     AuthUserDTO authUserDTO = utilityService.getAuthUser(header);
-
     boolean needToChangeTime=!(existedTask.getTotal_time()==taskDTO.getTotal_time());
     boolean isUserEmployee = Objects.equals(authUserDTO.getUserRole(), User.UserRole.Employee);
     String assigneeUserName;
@@ -395,7 +377,6 @@ public class TaskServiceImpl implements TaskService {
         throw new ForbiddenAccessException("User is not able to validate the task");
     }
     }
-
     private void validateLoggedInUserIsManager(String header)
     {
         if (!(utilityService.isAuthenticatedManager(header))) {

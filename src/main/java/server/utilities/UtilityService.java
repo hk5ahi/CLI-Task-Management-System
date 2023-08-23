@@ -102,17 +102,14 @@ public class UtilityService {
                 return managerOptional.get();
             }
         }
-
         log.error("Manager Not Found.");
         throw new NotFoundException("Manager Not Found");
     }
-
 
     public AuthUserDTO getAuthUser(String authorizationHeader) {
         Map<String,String> credentials=extractCredentials(authorizationHeader);
         if(!(credentials.isEmpty()))
         {
-
             User authenticatedUser = userDao
                     .getUserByUsernameAndPassword(credentials.get("username"), credentials.get("password"))
                     .orElseThrow(() -> new UnAuthorizedException("username/password not matched"));
@@ -124,7 +121,6 @@ public class UtilityService {
             throw new UnAuthorizedException("Auth Header is missing");
         }
     }
-
     public boolean isAuthenticatedSupervisor(String header) {
         User.UserRole authenticatedUserRole = getUserRole(header);
         return authenticatedUserRole.equals(User.UserRole.Supervisor);

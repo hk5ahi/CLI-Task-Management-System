@@ -13,9 +13,9 @@ import java.util.List;
 public class TaskController {
 
     private final TaskService taskService;
+
     public TaskController(TaskService taskService) {
         this.taskService = taskService;
-
     }
 
     @PostMapping()
@@ -24,20 +24,18 @@ public class TaskController {
         taskService.createTask(task, authorizationHeader);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
-
     @GetMapping()
     public ResponseEntity<List<TaskDTO>> getTasks(
-
-            @RequestParam(name = "task-status",required = false) Task.Status byTaskStatus,
-            @RequestParam(name = "userName",required = false,defaultValue = "N/A") String byUserName,
+            @RequestParam(name = "task-status", required = false) Task.Status byTaskStatus,
+            @RequestParam(name = "userName", required = false) String byUserName,
             @RequestHeader("Authorization") String authorizationHeader
     ) {
 
-        QueryParameterDTO queryParameterDTO=QueryParameterDTO.createObjectFromQueryParameters(byTaskStatus,byUserName);
+        QueryParameterDTO queryParameterDTO = QueryParameterDTO.createObjectFromQueryParameters(byTaskStatus, byUserName);
         List<TaskDTO> tasks = taskService.getTasks(queryParameterDTO, authorizationHeader);
-
         return ResponseEntity.ok(tasks);
     }
+
     @PutMapping()
     public ResponseEntity<String> update(
 
