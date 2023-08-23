@@ -1,4 +1,6 @@
 package server.utilities;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import server.dao.EmployeeDao;
 import server.dao.ManagerDao;
@@ -15,6 +17,7 @@ public class UtilityService {
     private final ManagerDao managerDao;
     private final EmployeeDao employeeDao;
     private final UserDao userDao;
+    private final Logger log = LoggerFactory.getLogger(UtilityService.class);
 
     public UtilityService( ManagerDao managerDao, EmployeeDao employeeDao, UserDao userDao) {
 
@@ -52,50 +55,57 @@ public class UtilityService {
         return Collections.emptyMap();
     }
 
-    public Optional<User> getUser(String authorizationHeader) {
+    public User getUser(String authorizationHeader) throws NotFoundException {
         Map<String, String> credentials = extractCredentials(authorizationHeader);
         return Optional.of(credentials)
-                .flatMap(cred -> userDao.getUserByUsernameAndPassword(cred.get("username"), cred.get("password")));
+                .flatMap(cred -> userDao.getUserByUsernameAndPassword(cred.get("username"), cred.get("password")))
+                .orElseThrow(NotFoundException::new);
     }
 
 
-    public Optional<User.UserRole> getUserRole(String authorizationHeader) {
-        Optional<User> authenticatedUser = getUser(authorizationHeader);
-        return authenticatedUser.map(User::getUserRole);
+
+    public User.UserRole getUserRole(String authorizationHeader) {
+        return getUser(authorizationHeader).getUserRole();
     }
 
     public Optional<Map<String, String>> getUsernamePassword(String authorizationHeader) {
         return Optional.of(extractCredentials(authorizationHeader));
     }
 
-    public Optional<Employee> getActiveEmployee(String authorizationHeader) {
+    public Employee getActiveEmployee(String authorizationHeader) throws NotFoundException {
         Optional<Map<String, String>> optionalMap = getUsernamePassword(authorizationHeader);
 
         if (optionalMap.isPresent()) {
             Map<String, String> usernamePassword = optionalMap.get();
             String username = usernamePassword.get("username");
             String password = usernamePassword.get("password");
-            return employeeDao.findEmployeeByUsernameAndPassword(username, password);
+            Optional<Employee> employeeOptional = employeeDao.findEmployeeByUsernameAndPassword(username, password);
+            if (employeeOptional.isPresent()) {
+                return employeeOptional.get();
+            }
         }
 
-        return Optional.empty();
+        log.error("Employee Not Found.");
+        throw new NotFoundException("Employee Not Found");
     }
 
-    public Optional<Manager> getActiveManager(String authorizationHeader) {
-
+    public Manager getActiveManager(String authorizationHeader) throws NotFoundException {
         Optional<Map<String, String>> optionalMap = getUsernamePassword(authorizationHeader);
 
         if (optionalMap.isPresent()) {
             Map<String, String> usernamePassword = optionalMap.get();
             String username = usernamePassword.get("username");
             String password = usernamePassword.get("password");
-            return managerDao.findManagerByUsernameAndPassword(username, password);
+            Optional<Manager> managerOptional = managerDao.findManagerByUsernameAndPassword(username, password);
+            if (managerOptional.isPresent()) {
+                return managerOptional.get();
+            }
         }
 
-        return Optional.empty();
-
-
+        log.error("Manager Not Found.");
+        throw new NotFoundException("Manager Not Found");
     }
+
 
     public boolean isAuthenticatedSupervisor(String header) {
         Optional<User.UserRole> authenticatedUserRole = getUserRole(header);
@@ -111,9 +121,9 @@ public class UtilityService {
     }
 
     public boolean isAuthenticatedEmployee(String header) {
-        Optional<User.UserRole> authenticatedUserRole = getUserRole(header);
+        User.UserRole authenticatedUserRole = getUserRole(header);
 
-        return authenticatedUserRole.stream().anyMatch(role -> role == User.UserRole.Employee);
+        return authenticatedUserRole.equals(User.UserRole.Employee);
     }
 
 }

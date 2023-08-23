@@ -6,8 +6,11 @@ import jakarta.persistence.TypedQuery;
 
 import org.springframework.stereotype.Repository;
 import server.dao.CustomTaskDao;
+import server.dao.TaskDao;
+import server.dao.UserDao;
 import server.domain.Task;
 import server.domain.User;
+import server.dto.AuthUserDTO;
 import server.dto.QueryParameterDTO;
 
 import server.utilities.UtilityService;
@@ -22,92 +25,162 @@ public class CustomTaskDaoImpl implements CustomTaskDao {
 
     private final UtilityService utilityService;
 
-    public CustomTaskDaoImpl(EntityManager entityManager, UtilityService utilityService) {
-        this.entityManager = entityManager;
+    private final UserDao userDao;
 
+    public CustomTaskDaoImpl(EntityManager entityManager, UtilityService utilityService, UserDao userDao) {
+        this.entityManager = entityManager;
         this.utilityService = utilityService;
+        this.userDao = userDao;
+
     }
     @Override
     public List<Task> filterTasksByQueryParameters(QueryParameterDTO queryParams,String header) {
         StringBuilder jpql = new StringBuilder("SELECT t FROM Task t WHERE 1 = 1");
-
-        Optional<User> optionalUser=utilityService.getUser(header);
-        User user=null;
-        if(optionalUser.isPresent())
-        {
-            user= optionalUser.get();
+        AuthUserDTO authUserDTO = utilityService.getAuthUser(header);
+        String userName= queryParams.getUserName();
+        Optional<User> optionalRequestedUser = userDao.getUserByUsername(userName);
+        User requestedUser = null;
+        if ((optionalRequestedUser.isPresent())) {
+                requestedUser = optionalRequestedUser.get();
         }
 
-        if (!(queryParams.getEmployeeName().equals("N/A")) && queryParams.getByUserRole().equals(User.UserRole.Supervisor)) {
+        User loggedInUser= utilityService.getUser(header);
+
+        if(queryParams.getUserName()==null)
+        {
+            jpql.append(" AND t.taskStatus IS NOT NULL");
+
+        }
+        if (loggedInUser.getUserRole().equals(User.UserRole.Supervisor) && (requestedUser!=null && requestedUser.getUserRole().equals(User.UserRole.Employee)) ) {
             jpql.append(" AND t.assignee = :assignee");
         }
 
-        if (queryParams.getTaskStatus()!=null && queryParams.getByUserRole().equals(User.UserRole.Supervisor)) {
-            jpql.append(" AND t.taskStatus=:task_status");
+        if (loggedInUser.getUserRole().equals(User.UserRole.Supervisor) && (requestedUser!=null && requestedUser.getUserRole().equals(User.UserRole.Manager)) ) {
+            jpql.append(" AND t.createdBy = :manager");
         }
 
-
-        if (queryParams.isByEmployeeRole()) {
-            jpql.append(" AND t.assignee is NOT NULL");
-        }
-
-        if (queryParams.isByManagerRole() || queryParams.isByStatus()) {
+        if (loggedInUser.getUserRole().equals(User.UserRole.Supervisor) && (requestedUser!=null && authUserDTO.getUsername().equals(requestedUser.getUsername()) && requestedUser.getUserRole().equals(User.UserRole.Supervisor)) ) {
             jpql.append(" AND t.taskStatus IS NOT NULL");
         }
 
-        if (queryParams.isByEmployeeRole()) {
-            jpql.append(" AND t.assignee is NOT NULL");
+        if(loggedInUser.getUserRole().equals(User.UserRole.Supervisor) && queryParams.getUserName()!=null && queryParams.getTaskStatus()!= Task.Status.CREATED && queryParams.getTaskStatus()!= Task.Status.IN_PROGRESS && queryParams.getTaskStatus()!= Task.Status.IN_REVIEW&& queryParams.getTaskStatus()!= Task.Status.COMPLETED)
+        {
+              jpql.append(" AND t.taskStatus IS NOT NULL");
+
         }
-        if(!(queryParams.getEmployeeName().equals("N/A"))  && queryParams.getByUserRole().equals(User.UserRole.Manager))
+
+        if (queryParams.getTaskStatus()!=null && loggedInUser.getUserRole().equals(User.UserRole.Supervisor)) {
+            jpql.append(" AND t.taskStatus=:task_status");
+        }
+
+        if(loggedInUser.getUserRole().equals(User.UserRole.Manager) && queryParams.getTaskStatus()!=null)
+        {
+            jpql.append(" AND t.taskStatus = :task_status AND t.createdBy = :manager");
+
+
+        }
+
+        if(loggedInUser.getUserRole().equals(User.UserRole.Manager) && (requestedUser!=null && requestedUser.getUserRole().equals(User.UserRole.Employee)))
+        {
+            jpql.append(" AND t.assignee = :assignee AND t.createdBy = :manager");
+
+        }
+        if(loggedInUser.getUserRole().equals(User.UserRole.Manager) && (requestedUser!=null && requestedUser.getUserRole().equals(User.UserRole.Employee)) && queryParams.getTaskStatus()!=null)
+        {
+            jpql.append(" AND t.assignee = :assignee AND t.createdBy = :manager AND t.taskStatus = :task_status");
+
+        }
+
+        if(loggedInUser.getUserRole().equals(User.UserRole.Employee) && queryParams.getTaskStatus()!=null)
+        {
+            jpql.append(" AND t.assignee = :assignee  AND t.taskStatus = :task_status");
+
+        }
+
+        if(loggedInUser.getUserRole().equals(User.UserRole.Employee) && queryParams.getTaskStatus()!=null && requestedUser==null)
+        {
+            jpql.append(" AND t.assignee = :assignee");
+
+        }
+        if(loggedInUser.getUserRole().equals(User.UserRole.Employee) && queryParams.getTaskStatus()!= Task.Status.CREATED && queryParams.getTaskStatus()!= Task.Status.IN_PROGRESS && queryParams.getTaskStatus()!= Task.Status.IN_REVIEW&& queryParams.getTaskStatus()!= Task.Status.COMPLETED)
+        {
+            jpql.append(" AND t.assignee = :assignee ");
+
+        }
+
+        if(loggedInUser.getUserRole().equals(User.UserRole.Manager) && queryParams.getTaskStatus()!= Task.Status.CREATED && queryParams.getTaskStatus()!= Task.Status.IN_PROGRESS && queryParams.getTaskStatus()!= Task.Status.IN_REVIEW && queryParams.getTaskStatus()!= Task.Status.COMPLETED &&  requestedUser==null)
+        {
+            jpql.append(" AND t.createdBy = :manager");
+
+        }
+        if(loggedInUser.getUserRole().equals(User.UserRole.Manager) && queryParams.getTaskStatus()!= Task.Status.CREATED && queryParams.getTaskStatus()!= Task.Status.IN_PROGRESS && queryParams.getTaskStatus()!= Task.Status.IN_REVIEW && queryParams.getTaskStatus()!= Task.Status.COMPLETED && (requestedUser!=null && requestedUser.getUserRole().equals(User.UserRole.Employee)))
         {
             jpql.append(" AND t.assignee = :assignee AND t.createdBy = :manager");
 
         }
 
-        if(queryParams.getTaskStatus()!=null  && queryParams.getByUserRole().equals(User.UserRole.Manager))
-        {
-            jpql.append(" AND t.taskStatus = :task_status AND t.createdBy = :manager");
-
-        }
-
-        if(queryParams.getTaskStatus()!=null  && queryParams.getByUserRole().equals(User.UserRole.Manager) && !(queryParams.getEmployeeName().equals("N/A")))
-        {
-            jpql.append(" AND t.taskStatus = :task_status AND t.createdBy = :manager AND t.assignee = :assignee");
-
-        }
-
-
-        if (queryParams.isByAssigned() &&  queryParams.getByUserRole().equals(User.UserRole.Employee)) {
-            jpql.append(" AND t.assignee =:assignee");
-        }
-
         TypedQuery<Task> query = entityManager.createQuery(jpql.toString(), Task.class);
 
-        if (!(queryParams.getEmployeeName().equals("N/A"))) {
-            query.setParameter("assignee", utilityService.getAssigneeByName(queryParams.getEmployeeName()));
+        if (loggedInUser.getUserRole().equals(User.UserRole.Supervisor) && requestedUser!=null && requestedUser.getUserRole().equals(User.UserRole.Employee)) {
+            query.setParameter("assignee", requestedUser);
         }
-        if (queryParams.getTaskStatus()!=null && queryParams.getByUserRole().equals(User.UserRole.Supervisor)) {
+
+        if (authUserDTO!=null && authUserDTO.getUserRole().equals(User.UserRole.Supervisor) && (requestedUser!=null && requestedUser.getUserRole().equals(User.UserRole.Manager)) ) {
+            query.setParameter("manager", requestedUser);
+        }
+        if (queryParams.getTaskStatus()!=null && loggedInUser.getUserRole().equals(User.UserRole.Supervisor)) {
             query.setParameter("task_status", queryParams.getTaskStatus());
         }
 
-        if (queryParams.getTaskStatus()!=null  && queryParams.getByUserRole().equals(User.UserRole.Manager)) {
+        if(loggedInUser.getUserRole().equals(User.UserRole.Employee) && queryParams.getTaskStatus()!=null)
+        {
             query.setParameter("task_status", queryParams.getTaskStatus());
-            query.setParameter("manager", user);
+            query.setParameter("assignee", requestedUser);
+
+        }
+        if(loggedInUser.getUserRole().equals(User.UserRole.Manager) && queryParams.getTaskStatus()!=null)
+        {
+            query.setParameter("task_status", queryParams.getTaskStatus());
+            query.setParameter("manager", loggedInUser);
         }
 
-        if (!(queryParams.getEmployeeName().equals("N/A"))  && queryParams.getByUserRole().equals(User.UserRole.Manager)) {
-            query.setParameter("assignee",  utilityService.getAssigneeByName(queryParams.getEmployeeName()));
-            query.setParameter("manager", user);
+        if(loggedInUser.getUserRole().equals(User.UserRole.Manager) && (requestedUser!=null && requestedUser.getUserRole().equals(User.UserRole.Employee)))
+        {
+            query.setParameter("assignee", requestedUser);
+            query.setParameter("manager", loggedInUser);
         }
 
-        if (!(queryParams.getEmployeeName().equals("N/A"))  && queryParams.getByUserRole().equals(User.UserRole.Manager) && queryParams.getTaskStatus()!=null) {
-            query.setParameter("assignee",  utilityService.getAssigneeByName(queryParams.getEmployeeName()));
-            query.setParameter("manager", user);
+        if(loggedInUser.getUserRole().equals(User.UserRole.Manager) && (requestedUser!=null && requestedUser.getUserRole().equals(User.UserRole.Employee)) && queryParams.getTaskStatus()!=null)
+        {
+            query.setParameter("assignee", requestedUser);
+            query.setParameter("manager", loggedInUser);
+            query.setParameter("task_status", queryParams.getTaskStatus());
+        }
+        if(loggedInUser.getUserRole().equals(User.UserRole.Employee) && queryParams.getTaskStatus()!=null && queryParams.getUserName()==null && loggedInUser!=null)
+        {
+            query.setParameter("assignee", loggedInUser);
             query.setParameter("task_status", queryParams.getTaskStatus());
         }
 
-        if (queryParams.isByAssigned() &&  queryParams.getByUserRole().equals(User.UserRole.Employee)) {
-            query.setParameter("assignee", user);
+        if(loggedInUser.getUserRole().equals(User.UserRole.Employee) && queryParams.getTaskStatus()!= Task.Status.CREATED && queryParams.getTaskStatus()!= Task.Status.IN_PROGRESS && queryParams.getTaskStatus()!= Task.Status.IN_REVIEW&& queryParams.getTaskStatus()!= Task.Status.COMPLETED)
+        {
+            query.setParameter("assignee", loggedInUser);
+        }
+
+        if(loggedInUser.getUserRole().equals(User.UserRole.Employee) && queryParams.getTaskStatus()!=null && requestedUser==null)
+        {
+            query.setParameter("assignee", loggedInUser);
+
+        }
+
+        if(loggedInUser.getUserRole().equals(User.UserRole.Manager) && queryParams.getTaskStatus()!= Task.Status.CREATED && queryParams.getTaskStatus()!= Task.Status.IN_PROGRESS && queryParams.getTaskStatus()!= Task.Status.IN_REVIEW && queryParams.getTaskStatus()!= Task.Status.COMPLETED && requestedUser==null)
+        {
+            query.setParameter("manager", loggedInUser);
+        }
+        if(loggedInUser.getUserRole().equals(User.UserRole.Manager) && queryParams.getTaskStatus()!= Task.Status.CREATED && queryParams.getTaskStatus()!= Task.Status.IN_PROGRESS && queryParams.getTaskStatus()!= Task.Status.IN_REVIEW && queryParams.getTaskStatus()!= Task.Status.COMPLETED && requestedUser!=null && requestedUser.getUserRole().equals(User.UserRole.Employee))
+        {
+            query.setParameter("assignee", requestedUser);
+            query.setParameter("manager", loggedInUser);
         }
 
         return query.getResultList();

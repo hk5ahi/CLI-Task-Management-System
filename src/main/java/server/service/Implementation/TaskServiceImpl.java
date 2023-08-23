@@ -42,7 +42,7 @@ public class TaskServiceImpl implements TaskService {
         if (taskDao.existsByTitle(task.getTitle())) {
 
             log.error("The task already exists with same title {}",task.getTitle());
-            throw new ForbiddenAccessException("The task can not be created");
+            throw new BadRequestException("The task can not be created");
         } else {
             taskDao.save(task);
 
@@ -53,10 +53,20 @@ public class TaskServiceImpl implements TaskService {
     {
         AuthUserDTO authUserDTO = utilityService.getAuthUser(header);
         boolean isUserSupervisor = Objects.equals(authUserDTO.getUserRole(), User.UserRole.Supervisor);
-        boolean allTasksBySupervisor=queryParameterDTO.getByUserRole().equals(User.UserRole.Supervisor);
-        if(allTasksBySupervisor &&!isUserSupervisor)
+        String userName="N/A";
+        if(queryParameterDTO.getUserName()!=null)
         {
-            log.error("The User {} is not a Supervisor", authUserDTO.getUsername());
+            userName=queryParameterDTO.getUserName();
+        }
+        Optional<User> optionalRequestedUser = userDao.getUserByUsername(userName);
+        User requestedUser = null;
+        if ((optionalRequestedUser.isPresent())) {
+            requestedUser = optionalRequestedUser.get();
+        }
+        boolean seeOtherSupervisorTasks=requestedUser!=null && requestedUser.getUserRole().equals(User.UserRole.Supervisor) && !authUserDTO.getUsername().equals(requestedUser.getUsername());
+        if(seeOtherSupervisorTasks &&isUserSupervisor)
+        {
+            log.error("The User {} can not access other Supervisor Tasks", authUserDTO.getUsername());
             throw new ForbiddenAccessException("User is not able to validate the task");
         }
 
@@ -67,12 +77,24 @@ public class TaskServiceImpl implements TaskService {
     {
         AuthUserDTO authUserDTO = utilityService.getAuthUser(header);
         boolean isUserManager = Objects.equals(authUserDTO.getUserRole(), User.UserRole.Manager);
-        boolean allTasksByManager=queryParameterDTO.getByUserRole().equals(User.UserRole.Manager);
-        if(allTasksByManager &&!isUserManager)
+        String userName="N/A";
+        if(queryParameterDTO.getUserName()!=null)
         {
-            log.error("The User {} is not a Manager", authUserDTO.getUsername());
-            throw new ForbiddenAccessException("User is not able to validate the task");
+            userName=queryParameterDTO.getUserName();
         }
+        Optional<User> optionalRequestedUser = userDao.getUserByUsername(userName);
+        User requestedUser = null;
+        if ((optionalRequestedUser.isPresent())) {
+            requestedUser = optionalRequestedUser.get();
+        }
+        boolean viewOtherManagerOrSupervisorTasks=requestedUser!=null &&(requestedUser.getUserRole().equals(User.UserRole.Supervisor) || requestedUser.getUserRole().equals(User.UserRole.Manager));
+        if(isUserManager && viewOtherManagerOrSupervisorTasks)
+        {
+            log.error("The User {} can not see other Manager Tasks", authUserDTO.getUsername());
+            throw new ForbiddenAccessException("User is not able to see other Manager Tasks");
+
+        }
+
 
     }
 
@@ -80,10 +102,20 @@ public class TaskServiceImpl implements TaskService {
     {
         AuthUserDTO authUserDTO = utilityService.getAuthUser(header);
         boolean isUserEmployee = Objects.equals(authUserDTO.getUserRole(), User.UserRole.Employee);
-        boolean allTasksByEmployee=queryParameterDTO.getByUserRole().equals(User.UserRole.Employee);
-        if(allTasksByEmployee &&!isUserEmployee)
+        String userName="N/A";
+        if(queryParameterDTO.getUserName()!=null)
         {
-            log.error("The User {} is not a Employee", authUserDTO.getUsername());
+            userName=queryParameterDTO.getUserName();
+        }
+        Optional<User> optionalRequestedUser = userDao.getUserByUsername(userName);
+        User requestedUser = null;
+        if ((optionalRequestedUser.isPresent())) {
+            requestedUser = optionalRequestedUser.get();
+        }
+        boolean seeOtherEmployeeTasks=requestedUser!=null && !requestedUser.getUsername().equals(authUserDTO.getUsername());
+        if(seeOtherEmployeeTasks && isUserEmployee)
+        {
+            log.error("The User {} can not see other Employee Assigned Tasks", authUserDTO.getUsername());
             throw new ForbiddenAccessException("User is not able to validate the task");
         }
 
@@ -95,11 +127,26 @@ public class TaskServiceImpl implements TaskService {
         validateIfSupervisorCanViewAllTasks(header,queryParameterDTO);
         validateIfManagerCanViewAllTasks(header,queryParameterDTO);
         validateIfEmployeeCanViewAllTasks(header,queryParameterDTO);
+        validateIfUserExistsByRequestedUserName(queryParameterDTO.getUserName());
         List<Task> filterTasks=taskDao.filterTasksByQueryParameters(queryParameterDTO,header);
         return mapTaskToTaskDTO(filterTasks);
 
     }
 
+    private void validateIfUserExistsByRequestedUserName(String username)
+    {
+        if(!(username.equals("N/A")))
+        {
+            if(!userDao.existsByUsername(username))
+            {
+                log.error("User Not Found of requested username.");
+                throw new NotFoundException("user Not Found");
+
+            }
+
+        }
+
+    }
     private List<TaskDTO> mapTaskToTaskDTO(List<Task> tasks)
     {
         List<TaskDTO> taskDTOS=new ArrayList<>();
@@ -244,7 +291,7 @@ public class TaskServiceImpl implements TaskService {
         }
             else if (isTaskNeedToChangeStatus && isUserManager && toBeUpdatedStatus.equals(Task.Status.COMPLETED) && currentStatus.equals(Task.Status.IN_PROGRESS)) {
                 log.error("The direct shift of status is not allowed from progress to review.");
-                throw new ForbiddenAccessException("Can not change Status");
+                throw new ForbiddenAccessException("");
 
         } else if (isTaskNeedToChangeStatus && isUserEmployee && toBeUpdatedStatus.equals(Task.Status.COMPLETED)) {
             log.error("Only Manager can update Task Status from IN_REVIEW to COMPLETED. User {} is not a Manager", authUserDTO);
@@ -301,18 +348,23 @@ public class TaskServiceImpl implements TaskService {
     }
     }
 
-    @Override
-    @Transactional
-    public void createTask(TaskDTO task, String header) {
-        if (utilityService.isAuthenticatedManager(header)) {
-            Manager activeManager = utilityService.getActiveManager(header)
-                    .orElseThrow(ForbiddenAccessException::new);
+    private void validateLoggedInUserIsManager(String header)
+    {
+        if (!(utilityService.isAuthenticatedManager(header))) {
 
-            storeTask(activeManager, task);
-        } else {
             log.error("The requesting user is not a Manager.");
             throw new ForbiddenAccessException("Only Manager can create a Task");
         }
+
+    }
+
+    @Override
+    @Transactional
+    public void createTask(TaskDTO task, String header) {
+            validateLoggedInUserIsManager(header);
+            Manager activeManager = utilityService.getActiveManager(header);
+            storeTask(activeManager, task);
+
     }
 
 }

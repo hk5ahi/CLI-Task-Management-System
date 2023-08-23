@@ -57,14 +57,16 @@ public class CommentServiceImpl implements CommentService {
             return optionalSupervisor;
         }
 
-        Optional<Manager> optionalManager = utilityService.getActiveManager(header);
-        if (utilityService.isAuthenticatedManager(header) && optionalManager.isPresent()) {
-            return Optional.of(optionalManager.get());
+        if (utilityService.isAuthenticatedManager(header) ) {
+            Manager manager = utilityService.getActiveManager(header);
+            return Optional.of(manager);
         }
 
-        Optional<Employee> optionalEmployee = utilityService.getActiveEmployee(header);
-        if (utilityService.isAuthenticatedEmployee(header) && optionalEmployee.isPresent()) {
-            return Optional.of(optionalEmployee.get());
+
+        if (utilityService.isAuthenticatedEmployee(header) )
+        {
+            Employee employee = utilityService.getActiveEmployee(header);
+            return Optional.of(employee);
         }
 
         return Optional.empty();
