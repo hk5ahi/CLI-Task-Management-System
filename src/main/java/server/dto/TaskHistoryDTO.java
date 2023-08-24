@@ -38,7 +38,6 @@ public class TaskHistoryDTO {
         this.movedAt = movedAt;
     }
     private Task.Status newStatus;
-
     private String movedBy;
     private Instant movedAt;
 }

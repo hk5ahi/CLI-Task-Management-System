@@ -27,18 +27,6 @@ public class UtilityService {
         this.userDao = userDao;
     }
 
-    public Employee getAssigneeByName(String fullName) {
-        if(fullName!=null) {
-            String[] nameParts = fullName.split(" ");
-            String firstName = nameParts[0];
-            String lastName = nameParts.length > 1 ? nameParts[1] : "";
-            Optional<Employee> optionalEmployee = employeeDao.getEmployeeByFirstNameAndLastName(firstName, lastName);
-            return optionalEmployee.orElseThrow(NotFoundException::new);
-        }
-        else {
-            return null;
-        }
-    }
     private Map<String, String> extractCredentials(String authorizationHeader) {
         if (authorizationHeader != null && authorizationHeader.startsWith("Basic ")) {
             String encodedCredentials = authorizationHeader.substring("Basic ".length());
@@ -63,8 +51,6 @@ public class UtilityService {
                 .orElseThrow(NotFoundException::new);
     }
 
-
-
     public User.UserRole getUserRole(String authorizationHeader) {
         return getUser(authorizationHeader).getUserRole();
     }
@@ -72,7 +58,6 @@ public class UtilityService {
     public Optional<Map<String, String>> getUsernamePassword(String authorizationHeader) {
         return Optional.of(extractCredentials(authorizationHeader));
     }
-
     public Employee getActiveEmployee(String authorizationHeader) throws NotFoundException {
         Optional<Map<String, String>> optionalMap = getUsernamePassword(authorizationHeader);
 
@@ -85,7 +70,6 @@ public class UtilityService {
                 return employeeOptional.get();
             }
         }
-
         log.error("Employee Not Found.");
         throw new NotFoundException("Employee Not Found");
     }
@@ -115,7 +99,6 @@ public class UtilityService {
                     .orElseThrow(() -> new UnAuthorizedException("username/password not matched"));
             
             return new AuthUserDTO(authenticatedUser.getUserRole(), authenticatedUser.getUsername());
-            
         }
         else {
             throw new UnAuthorizedException("Auth Header is missing");
@@ -127,14 +110,13 @@ public class UtilityService {
     }
 
     public boolean isAuthenticatedManager(String header) {
-        //this should throw auth exception when user not found
+
         User.UserRole authenticatedUserRole = getUserRole(header);
         return authenticatedUserRole.equals(User.UserRole.Manager);
     }
 
     public boolean isAuthenticatedEmployee(String header) {
         User.UserRole authenticatedUserRole = getUserRole(header);
-
         return authenticatedUserRole.equals(User.UserRole.Employee);
     }
 

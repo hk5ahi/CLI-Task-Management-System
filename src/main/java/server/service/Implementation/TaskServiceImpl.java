@@ -43,58 +43,39 @@ public class TaskServiceImpl implements TaskService {
         Instant currentInstant = Instant.now();
         task.setCreatedAt(currentInstant);
         if (taskDao.existsByTitle(task.getTitle())) {
-
             log.error("The task already exists with same title {}",task.getTitle());
             throw new BadRequestException("The task can not be created");
         } else {
             taskDao.save(task);
-
         }
     }
 
-    private void validateIfSupervisorCanViewAllTasks(String header,QueryParameterDTO queryParameterDTO)
-    {
+    private void validateIfSupervisorCanViewAllTasks(String header, QueryParameterDTO queryParameterDTO) {
         AuthUserDTO authUserDTO = utilityService.getAuthUser(header);
-        boolean isUserSupervisor = Objects.equals(authUserDTO.getUserRole(), User.UserRole.Supervisor);
-        //don't user N/A
-        //user Optional.empty()
-        String userName="N/A";
-        if(queryParameterDTO.getUserName()!=null)
-        {
-            userName=queryParameterDTO.getUserName();
-        }
-        Optional<User> optionalRequestedUser = userDao.getUserByUsername(userName);
-        User requestedUser = null;
-        if ((optionalRequestedUser.isPresent())) {
-            requestedUser = optionalRequestedUser.get();
-        }
-        boolean seeOtherSupervisorTasks=requestedUser!=null && requestedUser.getUserRole().equals(User.UserRole.Supervisor) && !authUserDTO.getUsername().equals(requestedUser.getUsername());
-        if(seeOtherSupervisorTasks &&isUserSupervisor)
-        {
-            log.error("The User {} can not access other Supervisor Tasks", authUserDTO.getUsername());
+        boolean isUserSupervisor = authUserDTO.getUserRole() == User.UserRole.Supervisor;
+        Optional<String> userName = Optional.ofNullable(queryParameterDTO.getUserName());
+        Optional<User> optionalRequestedUser = userName.flatMap(userDao::getUserByUsername);
+        User requestedUser = optionalRequestedUser.orElse(null);
+
+        boolean seeOtherSupervisorTasks = requestedUser != null &&
+                requestedUser.getUserRole() == User.UserRole.Supervisor &&
+                !authUserDTO.getUsername().equals(requestedUser.getUsername());
+
+        if (seeOtherSupervisorTasks && isUserSupervisor) {
+            log.error("The User {} cannot access other Supervisor Tasks", authUserDTO.getUsername());
             throw new ForbiddenAccessException("User is not able to validate the task");
         }
-
     }
-
 
     private void validateIfManagerCanViewAllTasks(String header,QueryParameterDTO queryParameterDTO)
     {
         AuthUserDTO authUserDTO = utilityService.getAuthUser(header);
         boolean isUserManager = Objects.equals(authUserDTO.getUserRole(), User.UserRole.Manager);
-        //don't user N/A
-        //user Optional.empty()
 
-        String userName="N/A";
-        if(queryParameterDTO.getUserName()!=null)
-        {
-            userName=queryParameterDTO.getUserName();
-        }
-        Optional<User> optionalRequestedUser = userDao.getUserByUsername(userName);
-        User requestedUser = null;
-        if ((optionalRequestedUser.isPresent())) {
-            requestedUser = optionalRequestedUser.get();
-        }
+        Optional<String> userName = Optional.ofNullable(queryParameterDTO.getUserName());
+        Optional<User> optionalRequestedUser = userName.flatMap(userDao::getUserByUsername);
+        User requestedUser = optionalRequestedUser.orElse(null);
+
         boolean viewOtherManagerOrSupervisorTasks=requestedUser!=null &&(requestedUser.getUserRole().equals(User.UserRole.Supervisor) || requestedUser.getUserRole().equals(User.UserRole.Manager));
         if(isUserManager && viewOtherManagerOrSupervisorTasks)
         {
@@ -107,16 +88,11 @@ public class TaskServiceImpl implements TaskService {
     {
         AuthUserDTO authUserDTO = utilityService.getAuthUser(header);
         boolean isUserEmployee = Objects.equals(authUserDTO.getUserRole(), User.UserRole.Employee);
-        String userName="N/A";
-        if(queryParameterDTO.getUserName()!=null)
-        {
-            userName=queryParameterDTO.getUserName();
-        }
-        Optional<User> optionalRequestedUser = userDao.getUserByUsername(userName);
-        User requestedUser = null;
-        if ((optionalRequestedUser.isPresent())) {
-            requestedUser = optionalRequestedUser.get();
-        }
+
+        Optional<String> userName = Optional.ofNullable(queryParameterDTO.getUserName());
+        Optional<User> optionalRequestedUser = userName.flatMap(userDao::getUserByUsername);
+        User requestedUser = optionalRequestedUser.orElse(null);
+
         boolean seeOtherEmployeeTasks=requestedUser!=null && !requestedUser.getUsername().equals(authUserDTO.getUsername());
         if(seeOtherEmployeeTasks && isUserEmployee)
         {
@@ -156,19 +132,11 @@ public class TaskServiceImpl implements TaskService {
             taskDTO.setTitle(task.getTitle());
             taskDTO.setDescription(task.getDescription());
             taskDTO.setTaskStatus(task.getTaskStatus());
-            if(task.getAssignee()!=null) {
-                //don't get user by its first ane last name (always get user by its username that should be unique)
-                //A user can have same full name
-
-                taskDTO.setAssignee(task.getAssignee().getFirstName() + " " + task.getAssignee().getLastName());
-            }
-            else {
-                //don't user N/A
-                //user Optional.empty() or null
-                taskDTO.setAssignee("N/A");
-            }
+            taskDTO.setAssignee(
+                    Objects.isNull(task.getAssignee()) ? null : task.getAssignee().getUsername()
+            );
             taskDTO.setCreatedAt(task.getCreatedAt());
-            taskDTO.setCreatedBy(task.getCreatedBy().getFirstName()+" "+task.getCreatedBy().getLastName());
+            taskDTO.setCreatedBy(task.getCreatedBy().getUsername());
             taskDTO.setTotal_time(task.getTotal_time());
             taskDTOS.add(taskDTO);
         }
@@ -199,7 +167,14 @@ public class TaskServiceImpl implements TaskService {
         prevTask.setTaskStatus(updateTask.getTaskStatus());
         prevTask.setDescription(updateTask.getDescription());
         prevTask.setTotal_time(updateTask.getTotal_time());
-        prevTask.setAssignee(utilityService.getAssigneeByName(updateTask.getAssignee()));
+        if(updateTask.getArchived())
+        {
+            prevTask.setAssignee(null);
+        }
+        else{
+            prevTask.setAssignee(userDao.getUserByUsername(updateTask.getAssignee())
+                    .orElseThrow(() -> new NotFoundException("User not found")));
+        }
         prevTask.setArchived(updateTask.getArchived());
         return prevTask;
     }
@@ -213,31 +188,23 @@ public class TaskServiceImpl implements TaskService {
         }
     }
 
-    private String getAssigneeFullName(Task existedTask) {
-    if (existedTask.getAssignee() != null) {
-        //don't get user by its first ane last name (always get user by its username that should be unique)
-        //A user can have same full name
+    private String getAssigneeUserName(Task existedTask) {
+        if (existedTask.getAssignee() != null) {
+            return existedTask.getAssignee().getUsername();
+        } else {
 
-        return existedTask.getAssignee().getFirstName() + " " + existedTask.getAssignee().getLastName();
-    } else {
-        //don't user N/A
-        //user Optional.empty()
-        return "N/A";
+            return Optional.empty().toString();
+        }
     }
-}
     private void validateIfUserCanAssignTask(String authorizationHeader, TaskDTO taskDTO,Task existedTask)
     {
         AuthUserDTO authUserDTO = utilityService.getAuthUser(authorizationHeader);
         if(taskDTO.getAssignee()!=null) {
-            String[] nameParts = taskDTO.getAssignee().split(" ");
-            String firstName = nameParts[0];
-            String lastName = nameParts.length > 1 ? nameParts[1] : "";
-            boolean isTaskNeedToAssign = !Objects.equals(taskDTO.getAssignee(), getAssigneeFullName(existedTask));
+            boolean isTaskNeedToAssign = !Objects.equals(taskDTO.getAssignee(), getAssigneeUserName(existedTask));
             boolean isUserManager = Objects.equals(authUserDTO.getUserRole(), User.UserRole.Manager);
             String assignerUserName = authUserDTO.getUsername();
             String createdByUserName = existedTask.getCreatedBy().getUsername();
-            //always use username (username remains unique) while full name may be same
-            boolean assigneeExist = userDao.existsByFirstNameAndLastName(firstName, lastName);
+            boolean assigneeExist = userDao.existsByUsername(taskDTO.getAssignee());
             boolean accessToAssign = assignerUserName.equals(createdByUserName);
 
             if (isTaskNeedToAssign && taskDTO.getArchived()) {
@@ -264,53 +231,16 @@ public class TaskServiceImpl implements TaskService {
                 throw new ForbiddenAccessException("User is not able to validate the task");
             }
         }
-
     }
-
-
     
     private void validateIfUserCanArchiveTask(String authorizationHeader, TaskDTO taskDTO,Task existedTask) {
         AuthUserDTO authUserDTO = utilityService.getAuthUser(authorizationHeader);
         boolean isTaskNeedToArchive = !Objects.equals(taskDTO.getArchived(), existedTask.getArchived());
         boolean isUserSupervisor = Objects.equals(authUserDTO.getUserRole(), User.UserRole.Supervisor);
 
-        // isn't following block enough
-//        if (isTaskNeedToArchive && !isUserSupervisor) {
-//            log.error("Only supervisor can archive task");
-//            throw new BadRequestException("Only supervisor can archive task");
-//        }
-        
-        String existedTaskAssigneeFullName;
-        if (existedTask.getAssignee() != null) {
-            //don't get user by its first ane last name (always get user by its username that should be unique)
-            //A user can have same full name
-            existedTaskAssigneeFullName = existedTask.getAssignee().getFirstName() + " " + existedTask.getAssignee().getLastName();
-        } else {
-            //don't user N/A
-            //user Optional.empty()
-            existedTaskAssigneeFullName = "N/A";
-        }
-        String inputTaskAssignee=taskDTO.getAssignee();
-        if(inputTaskAssignee==null)
-        {
-            //don't user N/A
-            //user Optional.empty()
-
-            inputTaskAssignee="N/A";
-        }
-        boolean isSameAssignee = inputTaskAssignee.equals(existedTaskAssigneeFullName);
-        if(isTaskNeedToArchive && existedTask.getAssignee()==null && taskDTO.getAssignee()==null)
-        {
-            log.error("Task is not assigned yet");
-            throw new BadRequestException("User is not able to validate the task");
-        }
-        else if (isTaskNeedToArchive && isSameAssignee) {
-            log.error("Already exists the same Assignee");
-            throw new BadRequestException("User is not able to validate the task");
-        }
-       else if (isTaskNeedToArchive && !isUserSupervisor && taskDTO.getAssignee()==null) {
+       if (isTaskNeedToArchive && !isUserSupervisor && existedTask.getAssignee()!=null)   {
             log.error("Only supervisor can archive a task. User {} is not a supervisor", authUserDTO);
-            throw new ForbiddenAccessException("User is not able to validate the task");
+            throw new BadRequestException("Only supervisor can archive task");
 
         }
     }
@@ -392,10 +322,8 @@ public class TaskServiceImpl implements TaskService {
         assigneeUserName= existedTask.getAssignee().getUsername();
     }
     else {
-        //don't user N/A
-        //user Optional.empty()
 
-        assigneeUserName="N/A";
+        assigneeUserName=Optional.empty().toString();
     }
     boolean accessToUpdate=assigneeUserName.equals(authUserDTO.getUsername());
 
@@ -418,7 +346,6 @@ public class TaskServiceImpl implements TaskService {
             throw new ForbiddenAccessException("Only Manager can create a Task");
         }
     }
-
     @Override
     @Transactional
     public void createTask(TaskDTO task, String header) {

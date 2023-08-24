@@ -35,7 +35,6 @@ public class TaskController {
         List<TaskDTO> tasks = taskService.getTasks(queryParameterDTO, authorizationHeader);
         return ResponseEntity.ok(tasks);
     }
-
     @PutMapping()
     public ResponseEntity<String> update(
             @RequestHeader("Authorization") String authorizationHeader,

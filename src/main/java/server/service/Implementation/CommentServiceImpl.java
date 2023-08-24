@@ -28,26 +28,17 @@ public class CommentServiceImpl implements CommentService {
         this.commentDao = commentDao;
         this.utilityService = utilityService;
         this.taskDao = taskDao;
-
         this.userDao = userDao;
     }
     @Transactional
     @Override
     public void addCommentByUser(CommentDTO comment, String header) {
         Optional<User> optionalUser = getUserFromHeader(header);
-
         User user = optionalUser.orElseThrow(() -> {
             log.error("The requesting user is not valid");
             return new ForbiddenAccessException("Only Supervisor, Manager, and Employee can add comments to a Task");
         });
-        //why if, can we use same method and pass the user
-        if (user instanceof Supervisor supervisor) {
-            addComment(comment.getMessage(), supervisor, comment.getTitle());
-        } else if (user instanceof Manager manager) {
-            addComment(comment.getMessage(), manager, comment.getTitle());
-        } else if (user instanceof Employee employee) {
-            addComment(comment.getMessage(), employee, comment.getTitle());
-        }
+        addComment(comment.getMessage(),user, comment.getTitle());
     }
 
     private Optional<User> getUserFromHeader(String header) {
@@ -55,19 +46,15 @@ public class CommentServiceImpl implements CommentService {
         if (utilityService.isAuthenticatedSupervisor(header) && optionalSupervisor.isPresent()) {
             return optionalSupervisor;
         }
-
         if (utilityService.isAuthenticatedManager(header) ) {
             Manager manager = utilityService.getActiveManager(header);
             return Optional.of(manager);
         }
-
-
         if (utilityService.isAuthenticatedEmployee(header) )
         {
             Employee employee = utilityService.getActiveEmployee(header);
             return Optional.of(employee);
         }
-
         return Optional.empty();
     }
 
@@ -88,17 +75,12 @@ public class CommentServiceImpl implements CommentService {
 
     private void addComment(String message, User person, String taskTitle) {
         Comment comment = new Comment();
-
         Task task = taskDao.findByTitle(taskTitle)
                 .orElseThrow(BadRequestException::new);
-
         String userName = person.getUsername();
-        //don't user N/A
-        //user Optional.empty()
-
-        String assignee = task.getAssignee() != null ? task.getAssignee().getUsername() : "N/A";
+        Optional<String> assignee = Optional.ofNullable(task.getAssignee())
+                .map(User::getUsername);
         User.UserRole personRole = person.getUserRole();
-
         if (!personRole.equals(User.UserRole.Supervisor)) {
             if (personRole.equals(User.UserRole.Manager) && !task.getCreatedBy().getUsername().equals(userName)) {
                 log.error("The manager {} have not permission to add comments for this task",person.getUsername());
@@ -114,7 +96,6 @@ public class CommentServiceImpl implements CommentService {
         comment.addTaskForComment(task);
         commentDao.save(comment);
     }
-
     private List<CommentDTO> retrieveComment(String title) {
         Optional<Task> optionalTask = taskDao.findByTitle(title);
 
@@ -137,10 +118,7 @@ public class CommentServiceImpl implements CommentService {
 
         CommentDTO commentDTO = new CommentDTO();
         commentDTO.setCreatedAt(comment.getCreatedAt());
-        //don't get user by its first ane last name (always get user by its username that should be unique)
-        //A user can have same full name
-
-        commentDTO.setCreatedBy(comment.getCreatedBy().getFirstName() + " " + comment.getCreatedBy().getLastName());
+        commentDTO.setCreatedBy(comment.getCreatedBy().getUsername());
         commentDTO.setMessage(comment.getBody());
         return commentDTO;
     }

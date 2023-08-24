@@ -21,7 +21,6 @@ public class TaskHistory {
     @Column(name = "taskHistory_id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long taskHistoryId;
-
     public Task getTask() {
         return task;
     }
@@ -29,7 +28,6 @@ public class TaskHistory {
     public void setTask(Task task) {
         this.task = task;
     }
-
     @ManyToOne
     @JoinColumn(name = "task_id")
     private Task task;

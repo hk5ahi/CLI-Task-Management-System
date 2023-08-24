@@ -50,7 +50,6 @@ public class TaskHistoryServiceImpl implements TaskHistoryService {
                     TaskHistoryDTO taskHistoryDTO = createTaskHistoryDTOFromHistory(history);
                     taskHistoryDTOS.add(taskHistoryDTO);
                 }
-
                 return taskHistoryDTOS;
             }
         return Collections.emptyList();
@@ -60,16 +59,12 @@ public class TaskHistoryServiceImpl implements TaskHistoryService {
         Instant timestamp = history.getTimestamp();
         String oldStatus = history.getOldStatus().toString();
         String newStatus = history.getNewStatus().toString();
-        //don't get user by its first ane last name (always get user by its username that should be unique)
-        //A user can have same full name
-
-        String movedBy = history.getMovedBy().getFirstName() + " " + history.getMovedBy().getLastName();
+        String movedBy = history.getMovedBy().getUsername();
         TaskHistoryDTO taskHistoryDTO = new TaskHistoryDTO();
         taskHistoryDTO.setMovedBy(movedBy);
         taskHistoryDTO.setOldStatus(Task.Status.valueOf(oldStatus));
         taskHistoryDTO.setNewStatus(Task.Status.valueOf(newStatus));
         taskHistoryDTO.setMovedAt(timestamp);
-
         return taskHistoryDTO;
     }
 

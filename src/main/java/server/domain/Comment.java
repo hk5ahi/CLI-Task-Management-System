@@ -41,7 +41,6 @@ public class Comment {
     public Task getTasks() {
         return task;
     }
-
     public void addTaskForComment(Task task) {
         this.task = task;
     }
