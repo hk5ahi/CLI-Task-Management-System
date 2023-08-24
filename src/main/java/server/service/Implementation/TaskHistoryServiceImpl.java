@@ -60,6 +60,9 @@ public class TaskHistoryServiceImpl implements TaskHistoryService {
         Instant timestamp = history.getTimestamp();
         String oldStatus = history.getOldStatus().toString();
         String newStatus = history.getNewStatus().toString();
+        //don't get user by its first ane last name (always get user by its username that should be unique)
+        //A user can have same full name
+
         String movedBy = history.getMovedBy().getFirstName() + " " + history.getMovedBy().getLastName();
         TaskHistoryDTO taskHistoryDTO = new TaskHistoryDTO();
         taskHistoryDTO.setMovedBy(movedBy);

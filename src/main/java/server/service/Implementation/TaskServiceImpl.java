@@ -56,6 +56,8 @@ public class TaskServiceImpl implements TaskService {
     {
         AuthUserDTO authUserDTO = utilityService.getAuthUser(header);
         boolean isUserSupervisor = Objects.equals(authUserDTO.getUserRole(), User.UserRole.Supervisor);
+        //don't user N/A
+        //user Optional.empty()
         String userName="N/A";
         if(queryParameterDTO.getUserName()!=null)
         {
@@ -80,6 +82,9 @@ public class TaskServiceImpl implements TaskService {
     {
         AuthUserDTO authUserDTO = utilityService.getAuthUser(header);
         boolean isUserManager = Objects.equals(authUserDTO.getUserRole(), User.UserRole.Manager);
+        //don't user N/A
+        //user Optional.empty()
+
         String userName="N/A";
         if(queryParameterDTO.getUserName()!=null)
         {
@@ -152,9 +157,14 @@ public class TaskServiceImpl implements TaskService {
             taskDTO.setDescription(task.getDescription());
             taskDTO.setTaskStatus(task.getTaskStatus());
             if(task.getAssignee()!=null) {
+                //don't get user by its first ane last name (always get user by its username that should be unique)
+                //A user can have same full name
+
                 taskDTO.setAssignee(task.getAssignee().getFirstName() + " " + task.getAssignee().getLastName());
             }
             else {
+                //don't user N/A
+                //user Optional.empty() or null
                 taskDTO.setAssignee("N/A");
             }
             taskDTO.setCreatedAt(task.getCreatedAt());
@@ -205,8 +215,13 @@ public class TaskServiceImpl implements TaskService {
 
     private String getAssigneeFullName(Task existedTask) {
     if (existedTask.getAssignee() != null) {
+        //don't get user by its first ane last name (always get user by its username that should be unique)
+        //A user can have same full name
+
         return existedTask.getAssignee().getFirstName() + " " + existedTask.getAssignee().getLastName();
     } else {
+        //don't user N/A
+        //user Optional.empty()
         return "N/A";
     }
 }
@@ -221,6 +236,7 @@ public class TaskServiceImpl implements TaskService {
             boolean isUserManager = Objects.equals(authUserDTO.getUserRole(), User.UserRole.Manager);
             String assignerUserName = authUserDTO.getUsername();
             String createdByUserName = existedTask.getCreatedBy().getUsername();
+            //always use username (username remains unique) while full name may be same
             boolean assigneeExist = userDao.existsByFirstNameAndLastName(firstName, lastName);
             boolean accessToAssign = assignerUserName.equals(createdByUserName);
 
@@ -250,19 +266,36 @@ public class TaskServiceImpl implements TaskService {
         }
 
     }
+
+
+    
     private void validateIfUserCanArchiveTask(String authorizationHeader, TaskDTO taskDTO,Task existedTask) {
         AuthUserDTO authUserDTO = utilityService.getAuthUser(authorizationHeader);
         boolean isTaskNeedToArchive = !Objects.equals(taskDTO.getArchived(), existedTask.getArchived());
         boolean isUserSupervisor = Objects.equals(authUserDTO.getUserRole(), User.UserRole.Supervisor);
+
+        // isn't following block enough
+//        if (isTaskNeedToArchive && !isUserSupervisor) {
+//            log.error("Only supervisor can archive task");
+//            throw new BadRequestException("Only supervisor can archive task");
+//        }
+        
         String existedTaskAssigneeFullName;
         if (existedTask.getAssignee() != null) {
+            //don't get user by its first ane last name (always get user by its username that should be unique)
+            //A user can have same full name
             existedTaskAssigneeFullName = existedTask.getAssignee().getFirstName() + " " + existedTask.getAssignee().getLastName();
         } else {
+            //don't user N/A
+            //user Optional.empty()
             existedTaskAssigneeFullName = "N/A";
         }
         String inputTaskAssignee=taskDTO.getAssignee();
         if(inputTaskAssignee==null)
         {
+            //don't user N/A
+            //user Optional.empty()
+
             inputTaskAssignee="N/A";
         }
         boolean isSameAssignee = inputTaskAssignee.equals(existedTaskAssigneeFullName);
@@ -359,6 +392,9 @@ public class TaskServiceImpl implements TaskService {
         assigneeUserName= existedTask.getAssignee().getUsername();
     }
     else {
+        //don't user N/A
+        //user Optional.empty()
+
         assigneeUserName="N/A";
     }
     boolean accessToUpdate=assigneeUserName.equals(authUserDTO.getUsername());
